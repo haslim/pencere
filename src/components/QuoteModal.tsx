@@ -83,7 +83,7 @@ export const QuoteModal: React.FC<QuoteModalProps> = ({
             <div>
               <span className="text-xs text-slate-500 block">Bölme Sayısı</span>
               <span className="font-semibold text-white">
-                {item.mullionsCount + 1} Bölme
+                {item.divisions.length} Bölme
               </span>
             </div>
           </div>

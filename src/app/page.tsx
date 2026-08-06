@@ -7,56 +7,64 @@ import {
   calculateWindowDimensions,
   optimizeCutList,
 } from "@/lib/pencereEngine";
+import { DEFAULT_SETTINGS, AppSettings, SettingsModal } from "@/components/SettingsModal";
 import { WindowCanvas } from "@/components/WindowCanvas";
 import { CutListModal } from "@/components/CutListModal";
 import { QuoteModal } from "@/components/QuoteModal";
 
 export default function SaaSWindowDashboard() {
+  // Fabrika Parametre Ayarları State
+  const [settings, setSettings] = useState<AppSettings>(DEFAULT_SETTINGS);
+
   // Seçili / Aktif Doğrama State
   const [item, setItem] = useState<WindowItem>({
     id: "pencere-1",
     name: "Örnek Çift Açılım Pencere Pozu",
-    width: 1400,
+    width: 1500,
     height: 1400,
     color: PROFILE_COLORS[0], // Standart Beyaz
-    mullionsCount: 1, // 2 Bölmeli
+    verticalMullionsCount: 1, // Kasa Dikey Orta Kayıt
+    horizontalMullionsCount: 0, // Kasa Yatay Orta Kayıt
     divisions: [
-      { id: "div-1", type: "sabit", ratio: 0.5 },
-      { id: "div-2", type: "cift-acilim", ratio: 0.5 },
+      { id: "div-1", type: "sabit", sashVerticalMullions: 0, sashHorizontalMullions: 0 },
+      { id: "div-2", type: "cift-acilim", sashVerticalMullions: 0, sashHorizontalMullions: 0 },
     ],
   });
 
   // Modal Durumları
+  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
   const [isCutModalOpen, setIsCutModalOpen] = useState(false);
   const [isQuoteModalOpen, setIsQuoteModalOpen] = useState(false);
 
-  // Anlık Hesaplama Motoru Çıktısı
+  // Anlık Hesaplama Motoru Çıktısı (Ayarlar entegreli)
   const calcResult = useMemo(() => {
-    return calculateWindowDimensions(item);
-  }, [item]);
+    return calculateWindowDimensions(item, settings);
+  }, [item, settings]);
 
   // 1D Profil Kesim Optimizasyonu Çıktısı
   const optimizedBars = useMemo(() => {
-    return optimizeCutList(calcResult.cutPieces, 6000, 5);
-  }, [calcResult]);
+    return optimizeCutList(calcResult.cutPieces, settings.stockBarLength, settings.sawKerf);
+  }, [calcResult, settings]);
 
-  // Bölme Sayısı (Orta Kayıt) Güncelleme
-  const handleMullionChange = (count: number) => {
-    const newDivCount = count + 1;
-    const newDivisions = Array.from({ length: newDivCount }).map((_, idx) => ({
+  // Kasa Geneli Dikey & Yatay Orta Kayıt Güncelleme
+  const handleGridMullionsChange = (vCount: number, hCount: number) => {
+    const totalDivs = (vCount + 1) * (hCount + 1);
+    const newDivisions = Array.from({ length: totalDivs }).map((_, idx) => ({
       id: `div-${idx + 1}`,
       type: (item.divisions[idx]?.type || "sabit") as any,
-      ratio: 1 / newDivCount,
+      sashVerticalMullions: item.divisions[idx]?.sashVerticalMullions || 0,
+      sashHorizontalMullions: item.divisions[idx]?.sashHorizontalMullions || 0,
     }));
 
     setItem({
       ...item,
-      mullionsCount: count,
+      verticalMullionsCount: vCount,
+      horizontalMullionsCount: hCount,
       divisions: newDivisions,
     });
   };
 
-  // Bölme Tipi Güncelleme (Sabit / Tek Açılım / Çift Açılım / Vasistas)
+  // Bölme Tipi Güncelleme
   const handleUpdateDivisionType = (
     index: number,
     type: "sabit" | "tek-acilim" | "cift-acilim" | "vasistas"
@@ -64,6 +72,20 @@ export default function SaaSWindowDashboard() {
     const updated = [...item.divisions];
     if (updated[index]) {
       updated[index].type = type;
+      setItem({ ...item, divisions: updated });
+    }
+  };
+
+  // Kanat İçi Özel Dikey/Yatay Orta Kayıt Güncelleme
+  const handleUpdateSashMullions = (
+    index: number,
+    vMullions: number,
+    hMullions: number
+  ) => {
+    const updated = [...item.divisions];
+    if (updated[index]) {
+      updated[index].sashVerticalMullions = vMullions;
+      updated[index].sashHorizontalMullions = hMullions;
       setItem({ ...item, divisions: updated });
     }
   };
@@ -78,7 +100,7 @@ export default function SaaSWindowDashboard() {
           </div>
           <div>
             <h1 className="text-lg font-bold tracking-tight text-white flex items-center gap-2">
-              ERCOM SaaS <span className="text-xs font-semibold px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">Cloud V1.0</span>
+              ERCOM SaaS <span className="text-xs font-semibold px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">Cloud V1.2</span>
             </h1>
             <p className="text-xs text-slate-400">PVC & Alüminyum Bulut Tabanlı Çizim ve İmalat Otomasyonu</p>
           </div>
@@ -86,10 +108,16 @@ export default function SaaSWindowDashboard() {
 
         <div className="flex items-center gap-3">
           <button
+            onClick={() => setIsSettingsModalOpen(true)}
+            className="px-3.5 py-2 bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 rounded-lg text-sm font-semibold transition flex items-center gap-2"
+          >
+            ⚙️ Ayarlar
+          </button>
+          <button
             onClick={() => setIsCutModalOpen(true)}
             className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-cyan-300 border border-cyan-500/30 rounded-lg text-sm font-semibold transition flex items-center gap-2"
           >
-            ✂️ 1D Kesim Listesi & Optimizasyon
+            ✂️ 1D Kesim & Optimizasyon
           </button>
           <button
             onClick={() => setIsQuoteModalOpen(true)}
@@ -149,6 +177,53 @@ export default function SaaSWindowDashboard() {
                 </div>
               </div>
 
+              {/* Kasa Geneli Dikey & Yatay Orta Kayıtlar */}
+              <div className="bg-slate-950/60 p-3 rounded-xl border border-slate-800/80 space-y-3">
+                <span className="text-xs font-bold text-slate-300 block">
+                  🪟 Kasa Geneli Orta Kayıt Düzeni
+                </span>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-[11px] text-slate-400 block mb-1">Dikey Kayıt Sayısı</label>
+                    <div className="flex gap-1">
+                      {[0, 1, 2, 3].map((v) => (
+                        <button
+                          key={`v-${v}`}
+                          onClick={() => handleGridMullionsChange(v, item.horizontalMullionsCount)}
+                          className={`flex-1 py-1 rounded text-xs font-bold transition border ${
+                            item.verticalMullionsCount === v
+                              ? "bg-cyan-600 text-white border-cyan-500"
+                              : "bg-slate-900 border-slate-800 text-slate-400 hover:border-slate-700"
+                          }`}
+                        >
+                          {v}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="text-[11px] text-slate-400 block mb-1">Yatay Kayıt Sayısı</label>
+                    <div className="flex gap-1">
+                      {[0, 1, 2, 3].map((h) => (
+                        <button
+                          key={`h-${h}`}
+                          onClick={() => handleGridMullionsChange(item.verticalMullionsCount, h)}
+                          className={`flex-1 py-1 rounded text-xs font-bold transition border ${
+                            item.horizontalMullionsCount === h
+                              ? "bg-cyan-600 text-white border-cyan-500"
+                              : "bg-slate-900 border-slate-800 text-slate-400 hover:border-slate-700"
+                          }`}
+                        >
+                          {h}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               {/* Profil Lamine Rengi */}
               <div>
                 <label className="text-xs font-semibold text-slate-400 block mb-1.5">Profil ve Kaplama Rengi</label>
@@ -175,28 +250,6 @@ export default function SaaSWindowDashboard() {
                           +{Math.round((c.priceMultiplier - 1) * 100)}% Lamine
                         </span>
                       )}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Orta Kayıt / Bölme Sayısı */}
-              <div>
-                <label className="text-xs font-semibold text-slate-400 block mb-1.5">
-                  Düşey Orta Kayıt (Mullion) Sayısı
-                </label>
-                <div className="grid grid-cols-4 gap-2">
-                  {[0, 1, 2, 3].map((num) => (
-                    <button
-                      key={num}
-                      onClick={() => handleMullionChange(num)}
-                      className={`py-2 rounded-lg text-xs font-bold transition border ${
-                        item.mullionsCount === num
-                          ? "bg-cyan-600 text-white border-cyan-500"
-                          : "bg-slate-950 border-slate-800 text-slate-400 hover:border-slate-700"
-                      }`}
-                    >
-                      {num === 0 ? "Tek Göz" : `${num + 1} Bölme`}
                     </button>
                   ))}
                 </div>
@@ -235,13 +288,17 @@ export default function SaaSWindowDashboard() {
         {/* Sağ İnteraktif Tuval & İmalat Listeleri */}
         <div className="lg:col-span-8 flex flex-col gap-6">
           {/* Çizim Tuval Alanı */}
-          <div className="bg-slate-900/70 border border-slate-800/80 rounded-2xl p-6 flex flex-col items-center justify-center min-h-[440px] shadow-xl relative backdrop-blur-sm">
+          <div className="bg-slate-900/70 border border-slate-800/80 rounded-2xl p-6 flex flex-col items-center justify-center min-h-[460px] shadow-xl relative backdrop-blur-sm">
             <div className="absolute top-4 left-4 text-xs font-semibold text-slate-400 flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              İnteraktif 2D CAD Tuvali (Açılımları Tıklayarak Değiştirin)
+              İnteraktif CAD Tuvali (Kanat içlerine tıklayarak dikey/yatay kayıt ekleyebilirsiniz)
             </div>
 
-            <WindowCanvas item={item} onUpdateDivisionType={handleUpdateDivisionType} />
+            <WindowCanvas
+              item={item}
+              onUpdateDivisionType={handleUpdateDivisionType}
+              onUpdateSashMullions={handleUpdateSashMullions}
+            />
           </div>
 
           {/* İmalat & Kesim Tablosu Önizlemesi */}
@@ -270,7 +327,7 @@ export default function SaaSWindowDashboard() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-800 bg-slate-950/40">
-                  {calcResult.cutPieces.slice(0, 5).map((p) => (
+                  {calcResult.cutPieces.map((p) => (
                     <tr key={p.id}>
                       <td className="px-3 py-2 font-medium text-white">{p.label}</td>
                       <td className="px-3 py-2">
@@ -291,6 +348,13 @@ export default function SaaSWindowDashboard() {
       </main>
 
       {/* Modal Dialoglar */}
+      <SettingsModal
+        isOpen={isSettingsModalOpen}
+        onClose={() => setIsSettingsModalOpen(false)}
+        settings={settings}
+        onSave={(newSet) => setSettings(newSet)}
+      />
+
       <CutListModal
         isOpen={isCutModalOpen}
         onClose={() => setIsCutModalOpen(false)}

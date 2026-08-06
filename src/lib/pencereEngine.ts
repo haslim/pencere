@@ -1,3 +1,5 @@
+import { AppSettings, DEFAULT_SETTINGS } from "@/components/SettingsModal";
+
 export interface ProfileColor {
   id: string;
   name: string;
@@ -13,10 +15,12 @@ export const PROFILE_COLORS: ProfileColor[] = [
   { id: "winchester", name: "Winchester Lamine", hex: "#6F432A", priceMultiplier: 1.4 },
 ];
 
-export interface WindowDivision {
+export interface DivisionItem {
   id: string;
   type: "sabit" | "tek-acilim" | "cift-acilim" | "vasistas" | "surme";
-  ratio: number; // 0..1 (e.g. 0.5 for equal split)
+  // Kanat içi orta kayıt sayıları
+  sashVerticalMullions: number; // Kanat içi dikey kayıt
+  sashHorizontalMullions: number; // Kanat içi yatay kayıt
 }
 
 export interface WindowItem {
@@ -25,8 +29,9 @@ export interface WindowItem {
   width: number; // mm (dış kasa eni)
   height: number; // mm (dış kasa boyu)
   color: ProfileColor;
-  divisions: WindowDivision[];
-  mullionsCount: number; // Orta kayıt sayısı (0: tek göz, 1: 2 bölme, 2: 3 bölme)
+  verticalMullionsCount: number; // Kasa geneli Dikey Orta Kayıt sayısı
+  horizontalMullionsCount: number; // Kasa geneli Yatay Orta Kayıt sayısı
+  divisions: DivisionItem[];
 }
 
 export interface CutPiece {
@@ -57,28 +62,43 @@ export interface CalculationResult {
 }
 
 export interface OptimizationStock {
-  barLength: number; // mm (e.g., 6000mm)
+  barLength: number; // mm (6000mm)
   usedLength: number;
   cuts: { pieceLabel: string; length: number }[];
   wasteLength: number;
 }
 
-// Ercom Hesaplama Standartları & Düşüm Algoritması
-export function calculateWindowDimensions(item: WindowItem): CalculationResult {
-  const { width, height, color, mullionsCount, divisions } = item;
-  
-  // Parametre Standartları (mm)
-  const WELD_ALLOWANCE = 3; // Her kaynak köşesinden 3mm erime payı (Kasa ve Kanat +6mm kesim boyu)
-  const SASH_OVERLAP = 12; // Kanat binme & çalışması payı (Kasa iç ölçüsünden kanata düşüm)
-  const GLASS_TOLERANCE = 22.5; // Isıcam genleşme ve takoz boşluğu düşümü
-  const STEEL_SHORTAGE = 12; // Destek sacının profilden daha kısa kesilme payı
+// Ercom Gelişmiş İmalat & Düşüm Hesaplama Motoru (Ayarlar destekli)
+export function calculateWindowDimensions(
+  item: WindowItem,
+  settings: AppSettings = DEFAULT_SETTINGS
+): CalculationResult {
+  const {
+    width,
+    height,
+    color,
+    verticalMullionsCount,
+    horizontalMullionsCount,
+    divisions,
+  } = item;
+
+  const {
+    weldAllowance,
+    sashOverlap,
+    glassTolerance,
+    steelShortage,
+    profilePricePerMeter,
+    steelPricePerMeter,
+    glassPricePerSqM,
+    fittingSetPrice,
+  } = settings;
 
   const cutPieces: CutPiece[] = [];
   const glasses: GlassCut[] = [];
 
   // 1. Kasa Profil Kesimleri (45° / 45°)
-  const kasaEnLength = width + (WELD_ALLOWANCE * 2);
-  const kasaBoyLength = height + (WELD_ALLOWANCE * 2);
+  const kasaEnLength = width + weldAllowance * 2;
+  const kasaBoyLength = height + weldAllowance * 2;
 
   cutPieces.push({
     id: "kasa-en",
@@ -100,12 +120,12 @@ export function calculateWindowDimensions(item: WindowItem): CalculationResult {
     colorName: color.name,
   });
 
-  // Kasa Destek Sacları (90° / 90°)
+  // Kasa Destek Sacları
   cutPieces.push({
     id: "kasa-en-sac",
     label: "Kasa En Destek Sacı",
     type: "DESTEK_SACI",
-    length: Math.round(width - STEEL_SHORTAGE),
+    length: Math.round(width - steelShortage),
     quantity: 2,
     angle: "90-90",
     colorName: "Galvaniz Sac",
@@ -114,74 +134,107 @@ export function calculateWindowDimensions(item: WindowItem): CalculationResult {
     id: "kasa-boy-sac",
     label: "Kasa Boy Destek Sacı",
     type: "DESTEK_SACI",
-    length: Math.round(height - STEEL_SHORTAGE),
+    length: Math.round(height - steelShortage),
     quantity: 2,
     angle: "90-90",
     colorName: "Galvaniz Sac",
   });
 
-  // Bölme Alanları Hesaplama (Orta Kayıt Varsa)
-  const divisionCount = mullionsCount + 1;
-  const KASA_PROFIL_GENISLIGI = 60; // 60mm profil
+  // 2. Kasa Geneli Dikey & Yatay Orta Kayıtlar (90° / 90°)
+  const KASA_GENISLIGI = 60;
   const ORTA_KAYIT_GENISLIGI = 60;
 
-  // Net İç Genişlik ve Boy
-  const netInternalWidth = width - (KASA_PROFIL_GENISLIGI * 2);
-  const netInternalHeight = height - (KASA_PROFIL_GENISLIGI * 2);
+  const netInternalW = width - KASA_GENISLIGI * 2;
+  const netInternalH = height - KASA_GENISLIGI * 2;
 
-  // Orta Kayıt Profilleri (90° / 90°)
-  if (mullionsCount > 0) {
-    const ortaKayitBoy = netInternalHeight + 4; // Takoz zımba geçme payı
+  // Dikey Orta Kayıtlar
+  if (verticalMullionsCount > 0) {
+    const dikeyBoy = netInternalH + 4;
     cutPieces.push({
-      id: "orta-kayit",
-      label: "Orta Kayıt (Mullion) Profili",
+      id: "dikey-orta-kayit",
+      label: "Kasa Dikey Orta Kayıt",
       type: "ORTA_KAYIT",
-      length: Math.round(ortaKayitBoy),
-      quantity: mullionsCount,
+      length: Math.round(dikeyBoy),
+      quantity: verticalMullionsCount,
       angle: "90-90",
       colorName: color.name,
     });
-
     cutPieces.push({
-      id: "orta-kayit-sac",
-      label: "Orta Kayıt Destek Sacı",
+      id: "dikey-orta-kayit-sac",
+      label: "Dikey Kayıt Destek Sacı",
       type: "DESTEK_SACI",
-      length: Math.round(ortaKayitBoy - STEEL_SHORTAGE),
-      quantity: mullionsCount,
+      length: Math.round(dikeyBoy - steelShortage),
+      quantity: verticalMullionsCount,
       angle: "90-90",
       colorName: "Galvaniz Sac",
     });
   }
 
-  // Bölme başı net genişlik
-  const usableWidth = netInternalWidth - (mullionsCount * ORTA_KAYIT_GENISLIGI);
-  const sectionWidth = usableWidth / divisionCount;
+  // Yatay Orta Kayıtlar
+  if (horizontalMullionsCount > 0) {
+    const usableWPerCol =
+      (netInternalW - verticalMullionsCount * ORTA_KAYIT_GENISLIGI) /
+      (verticalMullionsCount + 1);
+    const yatayEn = usableWPerCol + 4;
+    const totalYatayAdet = horizontalMullionsCount * (verticalMullionsCount + 1);
 
-  // Her Bölme İçin Kanat / Sabit ve Cam Hesaplama
-  for (let i = 0; i < divisionCount; i++) {
-    const divType = divisions[i]?.type || "sabit";
+    cutPieces.push({
+      id: "yatay-orta-kayit",
+      label: "Kasa Yatay Orta Kayıt",
+      type: "ORTA_KAYIT",
+      length: Math.round(yatayEn),
+      quantity: totalYatayAdet,
+      angle: "90-90",
+      colorName: color.name,
+    });
+    cutPieces.push({
+      id: "yatay-orta-kayit-sac",
+      label: "Yatay Kayıt Destek Sacı",
+      type: "DESTEK_SACI",
+      length: Math.round(yatayEn - steelShortage),
+      quantity: totalYatayAdet,
+      angle: "90-90",
+      colorName: "Galvaniz Sac",
+    });
+  }
 
-    if (divType === "sabit") {
-      // Sabit Cam Ölçüsü
-      const gWidth = sectionWidth + 12 - GLASS_TOLERANCE;
-      const gHeight = netInternalHeight + 12 - GLASS_TOLERANCE;
-      const sqM = (gWidth * gHeight) / 1000000;
+  // 3. Bölme ve Kanat İçi Hesaplamalar
+  const colCount = verticalMullionsCount + 1;
+  const rowCount = horizontalMullionsCount + 1;
+  const totalDivisions = colCount * rowCount;
 
+  const sectionW =
+    (netInternalW - verticalMullionsCount * ORTA_KAYIT_GENISLIGI) / colCount;
+  const sectionH =
+    (netInternalH - horizontalMullionsCount * ORTA_KAYIT_GENISLIGI) / rowCount;
+
+  for (let i = 0; i < totalDivisions; i++) {
+    const div = divisions[i] || {
+      id: `div-${i}`,
+      type: "sabit",
+      sashVerticalMullions: 0,
+      sashHorizontalMullions: 0,
+    };
+
+    if (div.type === "sabit") {
+      const gW = sectionW + 12 - glassTolerance;
+      const gH = sectionH + 12 - glassTolerance;
+      const sqM = (gW * gH) / 1000000;
       glasses.push({
-        width: Math.round(gWidth),
-        height: Math.round(gHeight),
+        width: Math.round(gW),
+        height: Math.round(gH),
         areaSqM: Number(sqM.toFixed(3)),
         quantity: 1,
-        type: "4+16+4 Isıcam Çift Cam",
+        type: "4+16+4 Isıcam Çift Cam (Sabit)",
       });
     } else {
-      // Açılır Kanat Var (Kanat Kesimleri 45°/45°)
-      const kanatEn = sectionWidth + SASH_OVERLAP + (WELD_ALLOWANCE * 2);
-      const kanatBoy = netInternalHeight + SASH_OVERLAP + (WELD_ALLOWANCE * 2);
+      // Açılır Kanat
+      const kanatEn = sectionW + sashOverlap + weldAllowance * 2;
+      const kanatBoy = sectionH + sashOverlap + weldAllowance * 2;
 
       cutPieces.push({
         id: `kanat-en-${i}`,
-        label: `Bölme ${i + 1} Kanat En Profili (${divType})`,
+        label: `Bölme ${i + 1} Kanat En Profili (${div.type})`,
         type: "KANAT",
         length: Math.round(kanatEn),
         quantity: 2,
@@ -191,7 +244,7 @@ export function calculateWindowDimensions(item: WindowItem): CalculationResult {
 
       cutPieces.push({
         id: `kanat-boy-${i}`,
-        label: `Bölme ${i + 1} Kanat Boy Profili (${divType})`,
+        label: `Bölme ${i + 1} Kanat Boy Profili (${div.type})`,
         type: "KANAT",
         length: Math.round(kanatBoy),
         quantity: 2,
@@ -199,55 +252,84 @@ export function calculateWindowDimensions(item: WindowItem): CalculationResult {
         colorName: color.name,
       });
 
-      // Kanat İçi Cam Ölçüsü
-      const gWidth = sectionWidth - SASH_OVERLAP - GLASS_TOLERANCE;
-      const gHeight = netInternalHeight - SASH_OVERLAP - GLASS_TOLERANCE;
-      const sqM = (gWidth * gHeight) / 1000000;
+      // 🪟 Kanat İçi Özel Orta Kayıtlar
+      const sashInnerW = sectionW - sashOverlap;
+      const sashInnerH = sectionH - sashOverlap;
+
+      const sVert = div.sashVerticalMullions || 0;
+      const sHoriz = div.sashHorizontalMullions || 0;
+
+      if (sVert > 0) {
+        cutPieces.push({
+          id: `kanat-ici-dikey-${i}`,
+          label: `Bölme ${i + 1} Kanat İçi Dikey Kayıt`,
+          type: "ORTA_KAYIT",
+          length: Math.round(sashInnerH + 4),
+          quantity: sVert,
+          angle: "90-90",
+          colorName: color.name,
+        });
+      }
+
+      if (sHoriz > 0) {
+        const kanatYatayBoy =
+          (sashInnerW - sVert * ORTA_KAYIT_GENISLIGI) / (sVert + 1) + 4;
+        cutPieces.push({
+          id: `kanat-ici-yatay-${i}`,
+          label: `Bölme ${i + 1} Kanat İçi Yatay Kayıt`,
+          type: "ORTA_KAYIT",
+          length: Math.round(kanatYatayBoy),
+          quantity: sHoriz * (sVert + 1),
+          angle: "90-90",
+          colorName: color.name,
+        });
+      }
+
+      // Kanat İçi Bölünmüş Camlar
+      const gCols = sVert + 1;
+      const gRows = sHoriz + 1;
+      const glassW =
+        (sashInnerW - sVert * ORTA_KAYIT_GENISLIGI) / gCols - glassTolerance;
+      const glassH =
+        (sashInnerH - sHoriz * ORTA_KAYIT_GENISLIGI) / gRows - glassTolerance;
+      const sqM = (glassW * glassH) / 1000000;
 
       glasses.push({
-        width: Math.round(gWidth),
-        height: Math.round(gHeight),
+        width: Math.round(glassW),
+        height: Math.round(glassH),
         areaSqM: Number(sqM.toFixed(3)),
-        quantity: 1,
-        type: "4+16+4 Isıcam Çift Cam (Açılır)",
+        quantity: gCols * gRows,
+        type: "4+16+4 Isıcam Çift Cam (Kanat İçi)",
       });
     }
   }
 
   // Toplam Metrajlar
   const totalProfileMeters = Number(
-    (
-      cutPieces
-        .filter((p) => p.type !== "DESTEK_SACI")
-        .reduce((sum, p) => sum + (p.length * p.quantity) / 1000, 0)
-    ).toFixed(2)
+    cutPieces
+      .filter((p) => p.type !== "DESTEK_SACI")
+      .reduce((sum, p) => sum + (p.length * p.quantity) / 1000, 0)
+      .toFixed(2)
   );
 
   const totalSteelMeters = Number(
-    (
-      cutPieces
-        .filter((p) => p.type === "DESTEK_SACI")
-        .reduce((sum, p) => sum + (p.length * p.quantity) / 1000, 0)
-    ).toFixed(2)
+    cutPieces
+      .filter((p) => p.type === "DESTEK_SACI")
+      .reduce((sum, p) => sum + (p.length * p.quantity) / 1000, 0)
+      .toFixed(2)
   );
 
   const totalGlassSqM = Number(
     glasses.reduce((sum, g) => sum + g.areaSqM * g.quantity, 0).toFixed(2)
   );
 
-  // Birim Fiyat Tahmini (TL)
-  const PROFILE_PRICE_PER_METER = 180 * color.priceMultiplier; // TL/m
-  const STEEL_PRICE_PER_METER = 65; // TL/m
-  const GLASS_PRICE_PER_SQM = 950; // TL/m²
-  const FITTING_SET_PRICE = 450; // İspanyolet mekanizma set fiyatı
-
   const acilirSayisi = divisions.filter((d) => d.type !== "sabit").length;
 
   const estimatedPriceTL = Math.round(
-    totalProfileMeters * PROFILE_PRICE_PER_METER +
-      totalSteelMeters * STEEL_PRICE_PER_METER +
-      totalGlassSqM * GLASS_PRICE_PER_SQM +
-      acilirSayisi * FITTING_SET_PRICE
+    totalProfileMeters * (profilePricePerMeter * color.priceMultiplier) +
+      totalSteelMeters * steelPricePerMeter +
+      totalGlassSqM * glassPricePerSqM +
+      acilirSayisi * fittingSetPrice
   );
 
   return {
@@ -264,9 +346,8 @@ export function calculateWindowDimensions(item: WindowItem): CalculationResult {
 export function optimizeCutList(
   pieces: CutPiece[],
   stockBarLength = 6000,
-  sawKerf = 5 // Testere bıçak kalınlığı fire payı (5mm)
+  sawKerf = 5
 ): OptimizationStock[] {
-  // Tüm parçaları tekil listeye aç ve uzundan kısaya sırala
   const allPieces: { label: string; length: number }[] = [];
   pieces.forEach((p) => {
     for (let i = 0; i < p.quantity; i++) {
@@ -292,7 +373,6 @@ export function optimizeCutList(
     }
 
     if (!placed) {
-      // Yeni 6m profil boyu aç
       stockBars.push({
         barLength: stockBarLength,
         usedLength: piece.length + sawKerf,
