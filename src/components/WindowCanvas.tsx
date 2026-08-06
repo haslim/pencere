@@ -1,19 +1,37 @@
 "use client";
 
-import React from "react";
-import { WindowItem } from "@/lib/pencereEngine";
+import React, { useState } from "react";
+import {
+  WindowItem,
+  DivisionType,
+  SashProfileType,
+  KasaProfileType,
+} from "@/lib/pencereEngine";
+
+export type ErcomToolMode =
+  | "select"
+  | "v_mullion"
+  | "h_mullion"
+  | "tek_acilim"
+  | "cift_acilim"
+  | "kapi_kanadi"
+  | "surme_kanat"
+  | "vasistas"
+  | "sabit";
 
 interface WindowCanvasProps {
   item: WindowItem;
   onUpdateDivisionType?: (
     index: number,
-    type: "sabit" | "tek-acilim" | "cift-acilim" | "vasistas"
+    type: DivisionType,
+    sashProfileType?: SashProfileType
   ) => void;
   onUpdateSashMullions?: (
     index: number,
     vMullions: number,
     hMullions: number
   ) => void;
+  onAddMullion?: (direction: "v" | "h") => void;
   isDark?: boolean;
 }
 
@@ -21,6 +39,7 @@ export const WindowCanvas: React.FC<WindowCanvasProps> = ({
   item,
   onUpdateDivisionType,
   onUpdateSashMullions,
+  onAddMullion,
   isDark = false,
 }) => {
   const {
@@ -30,10 +49,16 @@ export const WindowCanvas: React.FC<WindowCanvasProps> = ({
     verticalMullionsCount,
     horizontalMullionsCount,
     divisions,
+    systemType = "STANDART_DOGRAMA",
+    kasaProfileType = "L_KASA",
   } = item;
 
-  const [maxCanvasW, setMaxCanvasW] = React.useState<number>(540);
-  const [maxCanvasH, setMaxCanvasH] = React.useState<number>(400);
+  // Active ERCOM Tool Mode
+  const [activeTool, setActiveTool] = useState<ErcomToolMode>("select");
+  const [selectedCellIndex, setSelectedCellIndex] = useState<number | null>(null);
+
+  const [maxCanvasW, setMaxCanvasW] = useState<number>(540);
+  const [maxCanvasH, setMaxCanvasH] = useState<number>(400);
 
   React.useEffect(() => {
     const handleResize = () => {
@@ -70,14 +95,168 @@ export const WindowCanvas: React.FC<WindowCanvasProps> = ({
   const sectionH =
     (innerCanvasH - horizontalMullionsCount * PROFILE_THICKNESS) / rowCount;
 
+  // Cell Click Handler (ERCOM Style Tıklayıp Ekleme / Uygulama)
+  const handleCellClick = (divIdx: number) => {
+    setSelectedCellIndex(divIdx);
+
+    if (activeTool === "tek_acilim" && onUpdateDivisionType) {
+      onUpdateDivisionType(divIdx, "tek-acilim", "PENCERE_KANADI");
+    } else if (activeTool === "cift_acilim" && onUpdateDivisionType) {
+      onUpdateDivisionType(divIdx, "cift-acilim", "PENCERE_KANADI");
+    } else if (activeTool === "kapi_kanadi" && onUpdateDivisionType) {
+      onUpdateDivisionType(divIdx, "kapi-ic", "KAPI_KANADI");
+    } else if (activeTool === "surme_kanat" && onUpdateDivisionType) {
+      onUpdateDivisionType(divIdx, "surme-sol", "SURME_KANAD");
+    } else if (activeTool === "vasistas" && onUpdateDivisionType) {
+      onUpdateDivisionType(divIdx, "vasistas", "VASISTAS");
+    } else if (activeTool === "sabit" && onUpdateDivisionType) {
+      onUpdateDivisionType(divIdx, "sabit", "PENCERE_KANADI");
+    } else if (activeTool === "v_mullion" && onAddMullion) {
+      onAddMullion("v");
+    } else if (activeTool === "h_mullion" && onAddMullion) {
+      onAddMullion("h");
+    }
+  };
+
   return (
     <div
-      className={`flex flex-col items-center justify-center p-6 rounded-2xl border transition-all select-none relative w-full ${
+      className={`flex flex-col items-center justify-center p-4 sm:p-6 rounded-2xl border transition-all select-none relative w-full ${
         isDark
           ? "bg-slate-950 border-slate-800 shadow-2xl"
           : "bg-slate-50/90 border-slate-200/80 shadow-md"
       }`}
     >
+      {/* 🛠️ ERCOM CAD ÇİZİM ARAÇ ÇUBUĞU (MODE RIBBON TOOLBAR) */}
+      <div
+        className={`w-full mb-4 p-2 rounded-xl border flex items-center justify-between gap-2 overflow-x-auto ${
+          isDark
+            ? "bg-slate-900 border-slate-800 text-slate-200"
+            : "bg-white border-slate-200 shadow-sm text-slate-800"
+        }`}
+      >
+        <div className="flex items-center gap-1 overflow-x-auto">
+          <span className="text-[11px] font-bold text-slate-400 px-2 whitespace-nowrap">
+            🛠️ ERCOM Çizim Araçları:
+          </span>
+
+          <button
+            onClick={() => setActiveTool("select")}
+            className={`px-2.5 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1 whitespace-nowrap border ${
+              activeTool === "select"
+                ? "bg-blue-600 text-white border-blue-600 shadow"
+                : isDark
+                ? "bg-slate-950 border-slate-800 hover:bg-slate-800"
+                : "bg-slate-50 border-slate-200 hover:bg-slate-100"
+            }`}
+          >
+            🎯 Seç & Düzenle
+          </button>
+
+          <button
+            onClick={() => {
+              setActiveTool("v_mullion");
+              if (onAddMullion) onAddMullion("v");
+            }}
+            className={`px-2.5 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1 whitespace-nowrap border ${
+              activeTool === "v_mullion"
+                ? "bg-blue-600 text-white border-blue-600 shadow"
+                : isDark
+                ? "bg-slate-950 border-slate-800 hover:bg-slate-800 text-cyan-400"
+                : "bg-slate-50 border-slate-200 hover:bg-slate-100 text-blue-700"
+            }`}
+          >
+            ╍ +Dikey Kayıt
+          </button>
+
+          <button
+            onClick={() => {
+              setActiveTool("h_mullion");
+              if (onAddMullion) onAddMullion("h");
+            }}
+            className={`px-2.5 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1 whitespace-nowrap border ${
+              activeTool === "h_mullion"
+                ? "bg-blue-600 text-white border-blue-600 shadow"
+                : isDark
+                ? "bg-slate-950 border-slate-800 hover:bg-slate-800 text-cyan-400"
+                : "bg-slate-50 border-slate-200 hover:bg-slate-100 text-blue-700"
+            }`}
+          >
+            ➖ +Yatay Kayıt
+          </button>
+
+          <button
+            onClick={() => setActiveTool("tek_acilim")}
+            className={`px-2.5 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1 whitespace-nowrap border ${
+              activeTool === "tek_acilim"
+                ? "bg-blue-600 text-white border-blue-600 shadow"
+                : isDark
+                ? "bg-slate-950 border-slate-800 hover:bg-slate-800"
+                : "bg-slate-50 border-slate-200 hover:bg-slate-100"
+            }`}
+          >
+            🪟 Pencere Kanadı
+          </button>
+
+          <button
+            onClick={() => setActiveTool("cift_acilim")}
+            className={`px-2.5 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1 whitespace-nowrap border ${
+              activeTool === "cift_acilim"
+                ? "bg-blue-600 text-white border-blue-600 shadow"
+                : isDark
+                ? "bg-slate-950 border-slate-800 hover:bg-slate-800"
+                : "bg-slate-50 border-slate-200 hover:bg-slate-100"
+            }`}
+          >
+            🔄 Çift Açılım
+          </button>
+
+          <button
+            onClick={() => setActiveTool("kapi_kanadi")}
+            className={`px-2.5 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1 whitespace-nowrap border ${
+              activeTool === "kapi_kanadi"
+                ? "bg-emerald-600 text-white border-emerald-600 shadow"
+                : isDark
+                ? "bg-slate-950 border-slate-800 hover:bg-slate-800 text-emerald-400"
+                : "bg-slate-50 border-slate-200 hover:bg-slate-100 text-emerald-700"
+            }`}
+          >
+            🚪 Kapı Kanadı
+          </button>
+
+          <button
+            onClick={() => setActiveTool("surme_kanat")}
+            className={`px-2.5 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1 whitespace-nowrap border ${
+              activeTool === "surme_kanat"
+                ? "bg-indigo-600 text-white border-indigo-600 shadow"
+                : isDark
+                ? "bg-slate-950 border-slate-800 hover:bg-slate-800 text-indigo-400"
+                : "bg-slate-50 border-slate-200 hover:bg-slate-100 text-indigo-700"
+            }`}
+          >
+            ↔️ Sürme Kanat
+          </button>
+
+          <button
+            onClick={() => setActiveTool("sabit")}
+            className={`px-2.5 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1 whitespace-nowrap border ${
+              activeTool === "sabit"
+                ? "bg-slate-700 text-white border-slate-700 shadow"
+                : isDark
+                ? "bg-slate-950 border-slate-800 hover:bg-slate-800"
+                : "bg-slate-50 border-slate-200 hover:bg-slate-100"
+            }`}
+          >
+            🔒 Sabit Cam
+          </button>
+        </div>
+
+        <div className="hidden md:flex items-center gap-2">
+          <span className="text-[10px] bg-blue-500/10 text-blue-600 font-mono font-bold px-2 py-0.5 rounded border border-blue-200">
+            Kasa: {kasaProfileType.replace("_", " ")}
+          </span>
+        </div>
+      </div>
+
       {/* Üst Ölçü Ok Çizgisi (Genişlik) */}
       <div
         className={`w-full flex items-center justify-between text-xs font-mono mb-2 px-2 ${
@@ -137,22 +316,60 @@ export const WindowCanvas: React.FC<WindowCanvasProps> = ({
           }`}
         >
           <svg width={canvasW} height={canvasH} className="w-full h-full">
-            {/* Dış Kasa Çerçevesi */}
+            {/* Dış Kasa Çerçevesi (L / T / Z / Sürme Kasa Görünümü) */}
             <rect
               x={0}
               y={0}
               width={canvasW}
               height={canvasH}
               fill={color.hex}
-              stroke={isDark ? "#000" : "#475569"}
-              strokeWidth="2"
+              stroke={isDark ? "#000" : "#334155"}
+              strokeWidth={kasaProfileType === "Z_KASA" ? "4" : "2"}
             />
+
+            {/* Alüminyum Eşikli Kapı Kasası ise Alt Eşik Çizimi */}
+            {kasaProfileType === "ESIKLI_KASA" && (
+              <rect
+                x={0}
+                y={canvasH - PROFILE_THICKNESS}
+                width={canvasW}
+                height={PROFILE_THICKNESS}
+                fill="#94a3b8"
+                stroke="#475569"
+                strokeWidth="1.5"
+              />
+            )}
+
+            {/* Sürme Kasa Ray Çizgileri */}
+            {(kasaProfileType === "SURME_KASA_2" || kasaProfileType === "SURME_KASA_3") && (
+              <>
+                <line
+                  x1={0}
+                  y1={PROFILE_THICKNESS / 2}
+                  x2={canvasW}
+                  y2={PROFILE_THICKNESS / 2}
+                  stroke="#94a3b8"
+                  strokeWidth="2"
+                  strokeDasharray="4 2"
+                />
+                <line
+                  x1={0}
+                  y1={canvasH - PROFILE_THICKNESS / 2}
+                  x2={canvasW}
+                  y2={canvasH - PROFILE_THICKNESS / 2}
+                  stroke="#94a3b8"
+                  strokeWidth="2"
+                  strokeDasharray="4 2"
+                />
+              </>
+            )}
+
             {/* Kasa İç Boşluğu (Cam Arkası Fon Rengi) */}
             <rect
               x={PROFILE_THICKNESS}
               y={PROFILE_THICKNESS}
               width={innerCanvasW}
-              height={innerCanvasH}
+              height={innerCanvasH - (kasaProfileType === "ESIKLI_KASA" ? 4 : 0)}
               fill={isDark ? "#061826" : "#e0f2fe"}
             />
 
@@ -198,17 +415,22 @@ export const WindowCanvas: React.FC<WindowCanvasProps> = ({
                 const divIdx = rIdx * colCount + cIdx;
                 const div = divisions[divIdx] || {
                   type: "sabit",
+                  sashProfileType: "PENCERE_KANADI",
                   sashVerticalMullions: 0,
                   sashHorizontalMullions: 0,
                 };
                 const divType = div.type;
+                const sashProf = div.sashProfileType || (divType.includes("kapi") ? "KAPI_KANADI" : divType.includes("surme") ? "SURME_KANAD" : "PENCERE_KANADI");
 
                 const startX =
                   PROFILE_THICKNESS + cIdx * (sectionW + PROFILE_THICKNESS);
                 const startY =
                   PROFILE_THICKNESS + rIdx * (sectionH + PROFILE_THICKNESS);
 
-                const SASH_MARGIN = divType === "sabit" ? 4 : 12;
+                const isDoor = sashProf === "KAPI_KANADI" || divType.includes("kapi");
+                const isSliding = sashProf === "SURME_KANAD" || divType.includes("surme");
+
+                const SASH_MARGIN = divType === "sabit" ? 4 : isDoor ? 14 : 10;
 
                 const sVert = div.sashVerticalMullions || 0;
                 const sHoriz = div.sashHorizontalMullions || 0;
@@ -217,19 +439,28 @@ export const WindowCanvas: React.FC<WindowCanvasProps> = ({
                 const glassBoxH = sectionH - SASH_MARGIN * 2;
 
                 return (
-                  <g key={`div-${divIdx}`}>
+                  <g key={`div-${divIdx}`} onClick={() => handleCellClick(divIdx)} className="cursor-pointer">
                     {/* Kanat Çerçevesi (Açılırsa) */}
                     {divType !== "sabit" && (
                       <rect
-                        x={startX + 4}
-                        y={startY + 4}
-                        width={sectionW - 8}
-                        height={sectionH - 8}
+                        x={startX + (isDoor ? 3 : 4)}
+                        y={startY + (isDoor ? 3 : 4)}
+                        width={sectionW - (isDoor ? 6 : 8)}
+                        height={sectionH - (isDoor ? 6 : 8)}
                         fill={color.hex}
-                        stroke={isDark ? "#0f172a" : "#334155"}
-                        strokeWidth="1.5"
+                        stroke={isDoor ? "#0f172a" : isDark ? "#0f172a" : "#334155"}
+                        strokeWidth={isDoor ? "3" : "1.5"}
                         rx="2"
                       />
+                    )}
+
+                    {/* Kapı Kolu / Kilit Simgesi Görseli (Kapı Kanatlarında) */}
+                    {isDoor && (
+                      <g transform={`translate(${startX + sectionW - 20}, ${startY + sectionH / 2 - 10})`}>
+                        <rect x={0} y={0} width={8} height={20} fill="#64748b" rx="2" />
+                        <circle cx={4} cy={5} r={2} fill="#e2e8f0" />
+                        <line x1={4} y1={5} x2={-8} y2={5} stroke="#cbd5e1" strokeWidth="2.5" strokeLinecap="round" />
+                      </g>
                     )}
 
                     {/* Isıcam Cam Alanı */}
@@ -279,7 +510,7 @@ export const WindowCanvas: React.FC<WindowCanvasProps> = ({
                     })}
 
                     {/* Açılım Yönü Çizgileri */}
-                    {divType === "tek-acilim" && (
+                    {(divType === "tek-acilim" || divType === "kapi-ic" || divType === "kapi-dis") && (
                       <path
                         d={`M ${startX + SASH_MARGIN} ${startY + SASH_MARGIN} L ${
                           startX + sectionW - SASH_MARGIN
@@ -287,7 +518,7 @@ export const WindowCanvas: React.FC<WindowCanvasProps> = ({
                           startY + sectionH - SASH_MARGIN
                         }`}
                         fill="none"
-                        stroke="#f59e0b"
+                        stroke={isDoor ? "#10b981" : "#f59e0b"}
                         strokeWidth="2"
                         strokeDasharray="4 3"
                       />
@@ -333,6 +564,15 @@ export const WindowCanvas: React.FC<WindowCanvasProps> = ({
                         strokeDasharray="4 3"
                       />
                     )}
+
+                    {/* Sürme Kayma Ok Çizgisi */}
+                    {(isSliding || divType.includes("surme")) && (
+                      <g transform={`translate(${startX + sectionW / 2 - 16}, ${startY + sectionH / 2 - 8})`}>
+                        <rect x={0} y={0} width={32} height={16} rx={8} fill="#6366f1" opacity="0.9" />
+                        <path d="M 6 8 L 12 4 L 12 12 Z" fill="#ffffff" />
+                        <line x1="12" y1="8" x2="26" y2="8" stroke="#ffffff" strokeWidth="2" />
+                      </g>
+                    )}
                   </g>
                 );
               })
@@ -374,6 +614,7 @@ export const WindowCanvas: React.FC<WindowCanvasProps> = ({
                 const divIdx = rIdx * colCount + cIdx;
                 const div = divisions[divIdx] || {
                   type: "sabit",
+                  sashProfileType: "PENCERE_KANADI",
                   sashVerticalMullions: 0,
                   sashHorizontalMullions: 0,
                 };
@@ -382,27 +623,34 @@ export const WindowCanvas: React.FC<WindowCanvasProps> = ({
                 return (
                   <div
                     key={`ctrl-${divIdx}`}
-                    className="pointer-events-auto flex flex-col items-center justify-center gap-1.5 p-1"
+                    onClick={() => handleCellClick(divIdx)}
+                    className={`pointer-events-auto flex flex-col items-center justify-center gap-1.5 p-1 transition rounded-lg ${
+                      selectedCellIndex === divIdx ? "ring-2 ring-blue-500 bg-blue-500/10" : ""
+                    }`}
                   >
                     <select
                       value={divType}
                       onChange={(e) =>
                         onUpdateDivisionType &&
-                        onUpdateDivisionType(divIdx, e.target.value as any)
+                        onUpdateDivisionType(divIdx, e.target.value as any, div.sashProfileType)
                       }
-                      className={`text-[11px] font-semibold border rounded px-1.5 py-0.5 shadow-md focus:outline-none transition ${
+                      className={`text-[10px] sm:text-[11px] font-semibold border rounded px-1.5 py-0.5 shadow-md focus:outline-none transition ${
                         isDark
-                          ? "bg-slate-900/90 text-slate-200 border-slate-700 hover:border-cyan-500"
+                          ? "bg-slate-900/95 text-slate-200 border-slate-700 hover:border-cyan-500"
                           : "bg-white/95 text-slate-800 border-slate-300 hover:border-blue-500 shadow-slate-300/50"
                       }`}
                     >
                       <option value="sabit">🔒 Sabit</option>
-                      <option value="tek-acilim">🪟 Tek Açılım</option>
-                      <option value="cift-acilim">🔄 Çift Açılım</option>
+                      <option value="tek-acilim">🪟 Pencere Tek Açılım</option>
+                      <option value="cift-acilim">🔄 Pencere Çift Açılım</option>
                       <option value="vasistas">⬆️ Vasistas</option>
+                      <option value="kapi-ic">🚪 Kapı (İçe Açılır)</option>
+                      <option value="kapi-dis">🚪 Kapı (Dışa Açılır)</option>
+                      <option value="surme-sol">↔️ Sürme (Sol Açılır)</option>
+                      <option value="surme-sag">↔️ Sürme (Sağ Açılır)</option>
                     </select>
 
-                    {/* Kanat İçi Orta Kayıt Ekleme Butonları */}
+                    {/* Kanat İçi Orta Kayıt Butonları */}
                     {divType !== "sabit" && (
                       <div
                         className={`flex items-center gap-1 border rounded px-1 py-0.5 text-[9px] font-mono shadow ${
@@ -413,14 +661,15 @@ export const WindowCanvas: React.FC<WindowCanvasProps> = ({
                       >
                         <button
                           title="Kanat İçi Dikey Kayıt Arttır"
-                          onClick={() =>
+                          onClick={(e) => {
+                            e.stopPropagation();
                             onUpdateSashMullions &&
-                            onUpdateSashMullions(
-                              divIdx,
-                              (div.sashVerticalMullions || 0) + 1,
-                              div.sashHorizontalMullions || 0
-                            )
-                          }
+                              onUpdateSashMullions(
+                                divIdx,
+                                (div.sashVerticalMullions || 0) + 1,
+                                div.sashHorizontalMullions || 0
+                              );
+                          }}
                           className="hover:text-blue-600 font-bold"
                         >
                           +D ({div.sashVerticalMullions || 0})
@@ -428,31 +677,19 @@ export const WindowCanvas: React.FC<WindowCanvasProps> = ({
                         <span>|</span>
                         <button
                           title="Kanat İçi Yatay Kayıt Arttır"
-                          onClick={() =>
+                          onClick={(e) => {
+                            e.stopPropagation();
                             onUpdateSashMullions &&
-                            onUpdateSashMullions(
-                              divIdx,
-                              div.sashVerticalMullions || 0,
-                              (div.sashHorizontalMullions || 0) + 1
-                            )
-                          }
+                              onUpdateSashMullions(
+                                divIdx,
+                                div.sashVerticalMullions || 0,
+                                (div.sashHorizontalMullions || 0) + 1
+                              );
+                          }}
                           className="hover:text-blue-600 font-bold"
                         >
                           +Y ({div.sashHorizontalMullions || 0})
                         </button>
-                        {(div.sashVerticalMullions > 0 ||
-                          div.sashHorizontalMullions > 0) && (
-                          <button
-                            title="Sıfırla"
-                            onClick={() =>
-                              onUpdateSashMullions &&
-                              onUpdateSashMullions(divIdx, 0, 0)
-                            }
-                            className="text-amber-600 font-bold ml-0.5"
-                          >
-                            ✕
-                          </button>
-                        )}
                       </div>
                     )}
                   </div>

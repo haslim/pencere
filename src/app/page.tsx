@@ -5,6 +5,8 @@ import {
   PROFILE_COLORS,
   WindowItem,
   Customer,
+  DivisionType,
+  SashProfileType,
   calculateWindowDimensions,
   calculateOrderSummary,
   optimizeCutList,
@@ -181,15 +183,34 @@ export default function SaaSWindowDashboard() {
     });
   };
 
-  // Bölme Tipi Güncelleme
+  // Bölme Tipi & Kanat Profili Güncelleme
   const handleUpdateDivisionType = (
     index: number,
-    type: "sabit" | "tek-acilim" | "cift-acilim" | "vasistas"
+    type: DivisionType,
+    sashProfileType?: SashProfileType
   ) => {
     const updated = [...activeItem.divisions];
     if (updated[index]) {
       updated[index].type = type;
+      if (sashProfileType) {
+        updated[index].sashProfileType = sashProfileType;
+      }
       updateActiveItem({ ...activeItem, divisions: updated });
+    }
+  };
+
+  // ERCOM CAD Butonundan Hızlı Dikey/Yatay Kayıt Ekleme
+  const handleAddMullion = (direction: "v" | "h") => {
+    if (direction === "v") {
+      handleGridMullionsChange(
+        activeItem.verticalMullionsCount + 1,
+        activeItem.horizontalMullionsCount
+      );
+    } else {
+      handleGridMullionsChange(
+        activeItem.verticalMullionsCount,
+        activeItem.horizontalMullionsCount + 1
+      );
     }
   };
 
@@ -435,6 +456,63 @@ export default function SaaSWindowDashboard() {
                         : "bg-slate-50 border-slate-200 text-blue-700 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                     }`}
                   />
+                </div>
+              </div>
+
+              {/* ERCOM Sistem Tipi & Kasa Profil Seçimi */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label
+                    className={`text-xs font-semibold block mb-1 ${
+                      isDark ? "text-slate-400" : "text-slate-600"
+                    }`}
+                  >
+                    İmalat Sistem Tipi
+                  </label>
+                  <select
+                    value={activeItem.systemType || "STANDART_DOGRAMA"}
+                    onChange={(e) =>
+                      updateActiveItem({ ...activeItem, systemType: e.target.value as any })
+                    }
+                    className={`w-full border rounded-lg px-2.5 py-1.5 text-xs font-bold focus:outline-none transition ${
+                      isDark
+                        ? "bg-slate-950 border-slate-800 text-white"
+                        : "bg-slate-50 border-slate-200 text-slate-900"
+                    }`}
+                  >
+                    <option value="STANDART_DOGRAMA">🪟 Standart Pencere/Kapı</option>
+                    <option value="KAPI_SISTEMI">🚪 Kapı Sistemi (Ağır Seri)</option>
+                    <option value="SURME_SISTEM">↔️ Sürme Sistem (Sliding)</option>
+                    <option value="HEBESCHIEBE">🔄 Hebeschiebe (Kaldırmalı)</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label
+                    className={`text-xs font-semibold block mb-1 ${
+                      isDark ? "text-slate-400" : "text-slate-600"
+                    }`}
+                  >
+                    Kasa Profil Kesiti
+                  </label>
+                  <select
+                    value={activeItem.kasaProfileType || "L_KASA"}
+                    onChange={(e) =>
+                      updateActiveItem({ ...activeItem, kasaProfileType: e.target.value as any })
+                    }
+                    className={`w-full border rounded-lg px-2.5 py-1.5 text-xs font-bold focus:outline-none transition ${
+                      isDark
+                        ? "bg-slate-950 border-slate-800 text-white"
+                        : "bg-slate-50 border-slate-200 text-slate-900"
+                    }`}
+                  >
+                    <option value="L_KASA">🧱 L Kasa (Dış Kasa)</option>
+                    <option value="T_KASA">🧱 T Kasa (Kayıtlı Kasa)</option>
+                    <option value="Z_KASA">🧱 Z Kasa (Pervazlı Kasa)</option>
+                    <option value="ESIKLI_KASA">🚪 Alüminyum Eşikli Kasa</option>
+                    <option value="SURME_KASA_2">↔️ 2'li Sürme Kasa</option>
+                    <option value="SURME_KASA_3">↔️ 3'lü Sürme Kasa</option>
+                  </select>
                 </div>
               </div>
 
@@ -722,6 +800,7 @@ export default function SaaSWindowDashboard() {
               item={activeItem}
               onUpdateDivisionType={handleUpdateDivisionType}
               onUpdateSashMullions={handleUpdateSashMullions}
+              onAddMullion={handleAddMullion}
               isDark={isDark}
             />
           </div>
