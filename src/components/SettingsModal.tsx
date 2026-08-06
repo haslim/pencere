@@ -56,21 +56,21 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl w-full max-w-2xl shadow-2xl overflow-hidden">
+    <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
+      <div className="bg-white border border-slate-200/80 rounded-2xl w-full max-w-2xl shadow-2xl overflow-hidden">
         {/* Header */}
-        <div className="p-6 border-b border-slate-800 flex items-center justify-between bg-slate-950">
+        <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/80">
           <div>
-            <h2 className="text-xl font-bold text-white flex items-center gap-2">
+            <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2">
               ⚙️ Fabrika & Üretim Parametre Ayarları
             </h2>
-            <p className="text-sm text-slate-400 mt-1">
+            <p className="text-sm text-slate-500 mt-1">
               İmalat düşüm toleranslarını ve birim maliyet fiyatlarını özelleştirin
             </p>
           </div>
           <button
             onClick={onClose}
-            className="text-slate-400 hover:text-white bg-slate-800 hover:bg-slate-700 w-8 h-8 rounded-full flex items-center justify-center transition"
+            className="text-slate-400 hover:text-slate-700 bg-slate-100 hover:bg-slate-200 w-8 h-8 rounded-full flex items-center justify-center transition"
           >
             ✕
           </button>
@@ -80,12 +80,12 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
           {/* 🛠️ İmalat Düşüm Toleransları */}
           <div>
-            <h3 className="text-sm font-bold text-cyan-400 uppercase tracking-wider mb-3">
+            <h3 className="text-xs font-bold text-blue-600 uppercase tracking-wider mb-3">
               📐 İmalat & Kesim Toleransları (mm)
             </h3>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="text-xs text-slate-400 block mb-1">
+                <label className="text-xs text-slate-600 font-medium block mb-1">
                   Kaynak Eritme Payı (Köşe Başı mm)
                 </label>
                 <input
@@ -95,12 +95,12 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   onChange={(e) =>
                     setFormData({ ...formData, weldAllowance: Number(e.target.value) })
                   }
-                  className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-white focus:border-cyan-500 focus:outline-none"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-900 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none transition"
                 />
               </div>
 
               <div>
-                <label className="text-xs text-slate-400 block mb-1">
+                <label className="text-xs text-slate-600 font-medium block mb-1">
                   Kanat Binme / Çalışma Düşümü (mm)
                 </label>
                 <input
@@ -110,12 +110,12 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   onChange={(e) =>
                     setFormData({ ...formData, sashOverlap: Number(e.target.value) })
                   }
-                  className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-white focus:border-cyan-500 focus:outline-none"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-900 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none transition"
                 />
               </div>
 
               <div>
-                <label className="text-xs text-slate-400 block mb-1">
+                <label className="text-xs text-slate-600 font-medium block mb-1">
                   Isıcam Genleşme Boşluk Düşümü (mm)
                 </label>
                 <input
@@ -125,12 +125,12 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   onChange={(e) =>
                     setFormData({ ...formData, glassTolerance: Number(e.target.value) })
                   }
-                  className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-white focus:border-cyan-500 focus:outline-none"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-900 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none transition"
                 />
               </div>
 
               <div>
-                <label className="text-xs text-slate-400 block mb-1">
+                <label className="text-xs text-slate-600 font-medium block mb-1">
                   Destek Sacı Kısa Kesim Payı (mm)
                 </label>
                 <input
@@ -140,7 +140,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   onChange={(e) =>
                     setFormData({ ...formData, steelShortage: Number(e.target.value) })
                   }
-                  className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-white focus:border-cyan-500 focus:outline-none"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-900 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none transition"
                 />
               </div>
             </div>
@@ -148,12 +148,12 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
           {/* 💰 Birim Fiyatlar */}
           <div>
-            <h3 className="text-sm font-bold text-cyan-400 uppercase tracking-wider mb-3">
+            <h3 className="text-xs font-bold text-blue-600 uppercase tracking-wider mb-3">
               💰 Birim Maliyet Fiyatları
             </h3>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="text-xs text-slate-400 block mb-1">
+                <label className="text-xs text-slate-600 font-medium block mb-1">
                   Profil Metre Fiyatı (TL/m)
                 </label>
                 <input
@@ -165,12 +165,12 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                       profilePricePerMeter: Number(e.target.value),
                     })
                   }
-                  className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-white focus:border-cyan-500 focus:outline-none"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-900 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none transition"
                 />
               </div>
 
               <div>
-                <label className="text-xs text-slate-400 block mb-1">
+                <label className="text-xs text-slate-600 font-medium block mb-1">
                   Destek Sacı Fiyatı (TL/m)
                 </label>
                 <input
@@ -182,12 +182,12 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                       steelPricePerMeter: Number(e.target.value),
                     })
                   }
-                  className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-white focus:border-cyan-500 focus:outline-none"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-900 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none transition"
                 />
               </div>
 
               <div>
-                <label className="text-xs text-slate-400 block mb-1">
+                <label className="text-xs text-slate-600 font-medium block mb-1">
                   Isıcam m² Fiyatı (TL/m²)
                 </label>
                 <input
@@ -199,12 +199,12 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                       glassPricePerSqM: Number(e.target.value),
                     })
                   }
-                  className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-white focus:border-cyan-500 focus:outline-none"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-900 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none transition"
                 />
               </div>
 
               <div>
-                <label className="text-xs text-slate-400 block mb-1">
+                <label className="text-xs text-slate-600 font-medium block mb-1">
                   Açılım Mekanizma Set Fiyatı (TL/Set)
                 </label>
                 <input
@@ -216,18 +216,18 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                       fittingSetPrice: Number(e.target.value),
                     })
                   }
-                  className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-white focus:border-cyan-500 focus:outline-none"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-900 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100 focus:outline-none transition"
                 />
               </div>
             </div>
           </div>
 
           {/* Footer Actions */}
-          <div className="pt-4 border-t border-slate-800 flex items-center justify-between">
+          <div className="pt-4 border-t border-slate-100 flex items-center justify-between">
             <button
               type="button"
               onClick={() => setFormData(DEFAULT_SETTINGS)}
-              className="text-xs text-amber-400 hover:underline"
+              className="text-xs text-amber-600 font-semibold hover:underline"
             >
               Varsayılan Ayarlara Dön
             </button>
@@ -235,13 +235,13 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               <button
                 type="button"
                 onClick={onClose}
-                className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-sm transition"
+                className="px-4 py-2 bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 rounded-lg text-sm transition"
               >
                 İptal
               </button>
               <button
                 type="submit"
-                className="px-5 py-2 bg-cyan-600 hover:bg-cyan-500 text-white font-semibold rounded-lg text-sm transition shadow-lg shadow-cyan-500/25"
+                className="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg text-sm transition shadow-md shadow-blue-500/20"
               >
                 💾 Ayarları Kaydet
               </button>

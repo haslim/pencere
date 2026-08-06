@@ -52,6 +52,34 @@ export interface GlassCut {
   type: string;
 }
 
+export interface Customer {
+  id: string;
+  code: string;
+  name: string;
+  phone: string;
+  email?: string;
+  address?: string;
+}
+
+export interface Order {
+  id: string;
+  customerId: string;
+  orderNo: string;
+  title: string;
+  items: WindowItem[];
+  createdAt: string;
+}
+
+export interface OrderCalculationResult {
+  itemResults: { item: WindowItem; calc: CalculationResult }[];
+  allCutPieces: CutPiece[];
+  allGlasses: GlassCut[];
+  totalProfileMeters: number;
+  totalSteelMeters: number;
+  totalGlassSqM: number;
+  totalPriceTL: number;
+}
+
 export interface CalculationResult {
   cutPieces: CutPiece[];
   glasses: GlassCut[];
@@ -68,7 +96,7 @@ export interface OptimizationStock {
   wasteLength: number;
 }
 
-// Ercom Gelişmiş İmalat & Düşüm Hesaplama Motoru (Ayarlar destekli)
+// Sistem SaaS Gelişmiş İmalat & Düşüm Hesaplama Motoru (Ayarlar destekli)
 export function calculateWindowDimensions(
   item: WindowItem,
   settings: AppSettings = DEFAULT_SETTINGS
@@ -383,4 +411,53 @@ export function optimizeCutList(
   }
 
   return stockBars;
+}
+
+// Sipariş Geneli (Çoklu Poz) Toplam Hesaplama
+export function calculateOrderSummary(
+  items: WindowItem[],
+  settings: AppSettings = DEFAULT_SETTINGS
+): OrderCalculationResult {
+  const itemResults = items.map((item) => ({
+    item,
+    calc: calculateWindowDimensions(item, settings),
+  }));
+
+  const allCutPieces: CutPiece[] = [];
+  itemResults.forEach(({ item, calc }) => {
+    calc.cutPieces.forEach((piece) => {
+      allCutPieces.push({
+        ...piece,
+        label: `${piece.label} (${item.name})`,
+      });
+    });
+  });
+
+  const allGlasses: GlassCut[] = [];
+  itemResults.forEach(({ calc }) => {
+    allGlasses.push(...calc.glasses);
+  });
+
+  const totalProfileMeters = Number(
+    itemResults.reduce((acc, curr) => acc + curr.calc.totalProfileMeters, 0).toFixed(2)
+  );
+  const totalSteelMeters = Number(
+    itemResults.reduce((acc, curr) => acc + curr.calc.totalSteelMeters, 0).toFixed(2)
+  );
+  const totalGlassSqM = Number(
+    itemResults.reduce((acc, curr) => acc + curr.calc.totalGlassSqM, 0).toFixed(2)
+  );
+  const totalPriceTL = Math.round(
+    itemResults.reduce((acc, curr) => acc + curr.calc.estimatedPriceTL, 0)
+  );
+
+  return {
+    itemResults,
+    allCutPieces,
+    allGlasses,
+    totalProfileMeters,
+    totalSteelMeters,
+    totalGlassSqM,
+    totalPriceTL,
+  };
 }
