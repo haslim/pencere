@@ -14,12 +14,14 @@ interface WindowCanvasProps {
     vMullions: number,
     hMullions: number
   ) => void;
+  isDark?: boolean;
 }
 
 export const WindowCanvas: React.FC<WindowCanvasProps> = ({
   item,
   onUpdateDivisionType,
   onUpdateSashMullions,
+  isDark = false,
 }) => {
   const {
     width,
@@ -30,8 +32,26 @@ export const WindowCanvas: React.FC<WindowCanvasProps> = ({
     divisions,
   } = item;
 
-  const maxCanvasW = 540;
-  const maxCanvasH = 400;
+  const [maxCanvasW, setMaxCanvasW] = React.useState<number>(540);
+  const [maxCanvasH, setMaxCanvasH] = React.useState<number>(400);
+
+  React.useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 640) {
+        setMaxCanvasW(Math.min(330, window.innerWidth - 64));
+        setMaxCanvasH(300);
+      } else if (window.innerWidth < 1024) {
+        setMaxCanvasW(440);
+        setMaxCanvasH(360);
+      } else {
+        setMaxCanvasW(540);
+        setMaxCanvasH(400);
+      }
+    };
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   const scale = Math.min(maxCanvasW / width, maxCanvasH / height);
   const canvasW = Math.round(width * scale);
@@ -51,34 +71,70 @@ export const WindowCanvas: React.FC<WindowCanvasProps> = ({
     (innerCanvasH - horizontalMullionsCount * PROFILE_THICKNESS) / rowCount;
 
   return (
-    <div className="flex flex-col items-center justify-center p-6 bg-slate-950 rounded-xl border border-slate-800 shadow-2xl relative select-none">
+    <div
+      className={`flex flex-col items-center justify-center p-6 rounded-2xl border transition-all select-none relative w-full ${
+        isDark
+          ? "bg-slate-950 border-slate-800 shadow-2xl"
+          : "bg-slate-50/90 border-slate-200/80 shadow-md"
+      }`}
+    >
       {/* Üst Ölçü Ok Çizgisi (Genişlik) */}
-      <div className="w-full flex items-center justify-between text-xs font-mono text-cyan-400 mb-2 px-2">
-        <div className="h-2 w-px bg-cyan-500" />
-        <div className="flex-1 h-px bg-cyan-500/50 flex items-center justify-center">
-          <span className="bg-slate-900 px-2 py-0.5 rounded border border-cyan-500/30 text-cyan-300 font-bold">
+      <div
+        className={`w-full flex items-center justify-between text-xs font-mono mb-2 px-2 ${
+          isDark ? "text-cyan-400" : "text-blue-600"
+        }`}
+      >
+        <div className={`h-2 w-px ${isDark ? "bg-cyan-500" : "bg-blue-500"}`} />
+        <div
+          className={`flex-1 h-px flex items-center justify-center ${
+            isDark ? "bg-cyan-500/50" : "bg-blue-500/40"
+          }`}
+        >
+          <span
+            className={`px-2 py-0.5 rounded border text-xs font-bold shadow-sm ${
+              isDark
+                ? "bg-slate-900 border-cyan-500/30 text-cyan-300"
+                : "bg-white border-blue-200 text-blue-800 font-bold"
+            }`}
+          >
             W: {width} mm
           </span>
         </div>
-        <div className="h-2 w-px bg-cyan-500" />
+        <div className={`h-2 w-px ${isDark ? "bg-cyan-500" : "bg-blue-500"}`} />
       </div>
 
       <div className="flex items-center">
         {/* Sol Ölçü Ok Çizgisi (Yükseklik) */}
-        <div className="h-full flex flex-col items-center justify-between text-xs font-mono text-cyan-400 mr-2 py-2">
-          <div className="w-2 h-px bg-cyan-500" />
-          <div className="flex-1 w-px bg-cyan-500/50 flex items-center justify-center">
-            <span className="bg-slate-900 px-1 py-1 rounded border border-cyan-500/30 text-cyan-300 font-bold -rotate-90 whitespace-nowrap">
+        <div
+          className={`h-full flex flex-col items-center justify-between text-xs font-mono mr-2 py-2 ${
+            isDark ? "text-cyan-400" : "text-blue-600"
+          }`}
+        >
+          <div className={`w-2 h-px ${isDark ? "bg-cyan-500" : "bg-blue-500"}`} />
+          <div
+            className={`flex-1 w-px flex items-center justify-center ${
+              isDark ? "bg-cyan-500/50" : "bg-blue-500/40"
+            }`}
+          >
+            <span
+              className={`px-1.5 py-1 rounded border text-xs font-bold -rotate-90 whitespace-nowrap shadow-sm ${
+                isDark
+                  ? "bg-slate-900 border-cyan-500/30 text-cyan-300"
+                  : "bg-white border-blue-200 text-blue-800 font-bold"
+              }`}
+            >
               H: {height} mm
             </span>
           </div>
-          <div className="w-2 h-px bg-cyan-500" />
+          <div className={`w-2 h-px ${isDark ? "bg-cyan-500" : "bg-blue-500"}`} />
         </div>
 
         {/* Dynamic SVG Window Canvas */}
         <div
           style={{ width: canvasW, height: canvasH }}
-          className="relative rounded shadow-inner overflow-hidden border border-slate-700/60"
+          className={`relative rounded-lg overflow-hidden border shadow-lg transition-all ${
+            isDark ? "border-slate-700/60 shadow-slate-950/80" : "border-slate-300 shadow-slate-300/40"
+          }`}
         >
           <svg width={canvasW} height={canvasH} className="w-full h-full">
             {/* Dış Kasa Çerçevesi */}
@@ -88,16 +144,16 @@ export const WindowCanvas: React.FC<WindowCanvasProps> = ({
               width={canvasW}
               height={canvasH}
               fill={color.hex}
-              stroke="#000"
+              stroke={isDark ? "#000" : "#475569"}
               strokeWidth="2"
             />
-            {/* Kasa İç Boşluğu */}
+            {/* Kasa İç Boşluğu (Cam Arkası Fon Rengi) */}
             <rect
               x={PROFILE_THICKNESS}
               y={PROFILE_THICKNESS}
               width={innerCanvasW}
               height={innerCanvasH}
-              fill="#061826"
+              fill={isDark ? "#061826" : "#e0f2fe"}
             />
 
             {/* Kasa Geneli Dikey Orta Kayıtlar */}
@@ -112,7 +168,7 @@ export const WindowCanvas: React.FC<WindowCanvasProps> = ({
                   width={PROFILE_THICKNESS}
                   height={innerCanvasH}
                   fill={color.hex}
-                  stroke="#1e293b"
+                  stroke={isDark ? "#1e293b" : "#475569"}
                   strokeWidth="1"
                 />
               );
@@ -130,7 +186,7 @@ export const WindowCanvas: React.FC<WindowCanvasProps> = ({
                   width={innerCanvasW}
                   height={PROFILE_THICKNESS}
                   fill={color.hex}
-                  stroke="#1e293b"
+                  stroke={isDark ? "#1e293b" : "#475569"}
                   strokeWidth="1"
                 />
               );
@@ -170,7 +226,7 @@ export const WindowCanvas: React.FC<WindowCanvasProps> = ({
                         width={sectionW - 8}
                         height={sectionH - 8}
                         fill={color.hex}
-                        stroke="#0f172a"
+                        stroke={isDark ? "#0f172a" : "#334155"}
                         strokeWidth="1.5"
                         rx="2"
                       />
@@ -183,9 +239,9 @@ export const WindowCanvas: React.FC<WindowCanvasProps> = ({
                       width={glassBoxW}
                       height={glassBoxH}
                       fill="url(#glassGradient)"
-                      stroke="#38bdf8"
+                      stroke={isDark ? "#38bdf8" : "#0284c7"}
                       strokeWidth="1"
-                      opacity="0.85"
+                      opacity={isDark ? "0.85" : "0.9"}
                     />
 
                     {/* 🪟 Kanat İçi Dikey Kayıtlar */}
@@ -199,7 +255,7 @@ export const WindowCanvas: React.FC<WindowCanvasProps> = ({
                           width={8}
                           height={glassBoxH}
                           fill={color.hex}
-                          stroke="#1e293b"
+                          stroke={isDark ? "#1e293b" : "#475569"}
                           strokeWidth="0.5"
                         />
                       );
@@ -216,7 +272,7 @@ export const WindowCanvas: React.FC<WindowCanvasProps> = ({
                           width={glassBoxW}
                           height={8}
                           fill={color.hex}
-                          stroke="#1e293b"
+                          stroke={isDark ? "#1e293b" : "#475569"}
                           strokeWidth="0.5"
                         />
                       );
@@ -272,7 +328,7 @@ export const WindowCanvas: React.FC<WindowCanvasProps> = ({
                           startX + sectionW - SASH_MARGIN
                         } ${startY + SASH_MARGIN}`}
                         fill="none"
-                        stroke="#3b82f6"
+                        stroke="#2563eb"
                         strokeWidth="2"
                         strokeDasharray="4 3"
                       />
@@ -285,9 +341,21 @@ export const WindowCanvas: React.FC<WindowCanvasProps> = ({
             {/* Isıcam Yansıma Gradyanı */}
             <defs>
               <linearGradient id="glassGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#38bdf8" stopOpacity="0.4" />
-                <stop offset="50%" stopColor="#0284c7" stopOpacity="0.2" />
-                <stop offset="100%" stopColor="#0369a1" stopOpacity="0.5" />
+                <stop
+                  offset="0%"
+                  stopColor={isDark ? "#38bdf8" : "#bae6fd"}
+                  stopOpacity={isDark ? "0.4" : "0.7"}
+                />
+                <stop
+                  offset="50%"
+                  stopColor={isDark ? "#0284c7" : "#7dd3fc"}
+                  stopOpacity={isDark ? "0.2" : "0.5"}
+                />
+                <stop
+                  offset="100%"
+                  stopColor={isDark ? "#0369a1" : "#38bdf8"}
+                  stopOpacity={isDark ? "0.5" : "0.8"}
+                />
               </linearGradient>
             </defs>
           </svg>
@@ -322,7 +390,11 @@ export const WindowCanvas: React.FC<WindowCanvasProps> = ({
                         onUpdateDivisionType &&
                         onUpdateDivisionType(divIdx, e.target.value as any)
                       }
-                      className="bg-slate-900/90 text-[11px] font-semibold text-slate-200 border border-slate-700 rounded px-1.5 py-0.5 shadow-lg hover:border-cyan-500 focus:outline-none"
+                      className={`text-[11px] font-semibold border rounded px-1.5 py-0.5 shadow-md focus:outline-none transition ${
+                        isDark
+                          ? "bg-slate-900/90 text-slate-200 border-slate-700 hover:border-cyan-500"
+                          : "bg-white/95 text-slate-800 border-slate-300 hover:border-blue-500 shadow-slate-300/50"
+                      }`}
                     >
                       <option value="sabit">🔒 Sabit</option>
                       <option value="tek-acilim">🪟 Tek Açılım</option>
@@ -332,7 +404,13 @@ export const WindowCanvas: React.FC<WindowCanvasProps> = ({
 
                     {/* Kanat İçi Orta Kayıt Ekleme Butonları */}
                     {divType !== "sabit" && (
-                      <div className="flex items-center gap-1 bg-slate-900/90 border border-slate-800 rounded px-1 py-0.5 text-[9px] font-mono text-slate-300 shadow">
+                      <div
+                        className={`flex items-center gap-1 border rounded px-1 py-0.5 text-[9px] font-mono shadow ${
+                          isDark
+                            ? "bg-slate-900/90 border-slate-800 text-slate-300"
+                            : "bg-white/95 border-slate-300 text-slate-800 shadow-slate-200"
+                        }`}
+                      >
                         <button
                           title="Kanat İçi Dikey Kayıt Arttır"
                           onClick={() =>
@@ -343,7 +421,7 @@ export const WindowCanvas: React.FC<WindowCanvasProps> = ({
                               div.sashHorizontalMullions || 0
                             )
                           }
-                          className="hover:text-cyan-400 font-bold"
+                          className="hover:text-blue-600 font-bold"
                         >
                           +D ({div.sashVerticalMullions || 0})
                         </button>
@@ -358,7 +436,7 @@ export const WindowCanvas: React.FC<WindowCanvasProps> = ({
                               (div.sashHorizontalMullions || 0) + 1
                             )
                           }
-                          className="hover:text-cyan-400 font-bold"
+                          className="hover:text-blue-600 font-bold"
                         >
                           +Y ({div.sashHorizontalMullions || 0})
                         </button>
@@ -370,7 +448,7 @@ export const WindowCanvas: React.FC<WindowCanvasProps> = ({
                               onUpdateSashMullions &&
                               onUpdateSashMullions(divIdx, 0, 0)
                             }
-                            className="text-amber-400 font-bold ml-0.5"
+                            className="text-amber-600 font-bold ml-0.5"
                           >
                             ✕
                           </button>

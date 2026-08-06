@@ -77,7 +77,9 @@ export interface OrderCalculationResult {
   totalProfileMeters: number;
   totalSteelMeters: number;
   totalGlassSqM: number;
+  costPriceTL: number;
   totalPriceTL: number;
+  profitTL: number;
 }
 
 export interface CalculationResult {
@@ -86,7 +88,9 @@ export interface CalculationResult {
   totalProfileMeters: number;
   totalSteelMeters: number;
   totalGlassSqM: number;
+  costPriceTL: number;
   estimatedPriceTL: number;
+  profitTL: number;
 }
 
 export interface OptimizationStock {
@@ -115,10 +119,6 @@ export function calculateWindowDimensions(
     sashOverlap,
     glassTolerance,
     steelShortage,
-    profilePricePerMeter,
-    steelPricePerMeter,
-    glassPricePerSqM,
-    fittingSetPrice,
   } = settings;
 
   const cutPieces: CutPiece[] = [];
@@ -353,12 +353,39 @@ export function calculateWindowDimensions(
 
   const acilirSayisi = divisions.filter((d) => d.type !== "sabit").length;
 
-  const estimatedPriceTL = Math.round(
+  const {
+    profilePricePerMeter = 180,
+    steelPricePerMeter = 65,
+    glassPricePerSqM = 950,
+    fittingSetPrice = 450,
+    profileSalePricePerMeter,
+    steelSalePricePerMeter,
+    glassSalePricePerSqM,
+    fittingSalePrice,
+    profitMarginPercent = 0,
+  } = settings;
+
+  // 1. Net Üretim Maliyeti
+  const costPriceTL = Math.round(
     totalProfileMeters * (profilePricePerMeter * color.priceMultiplier) +
       totalSteelMeters * steelPricePerMeter +
       totalGlassSqM * glassPricePerSqM +
       acilirSayisi * fittingSetPrice
   );
+
+  // 2. Müşteri Satış Fiyatı (Özel Satış Fiyatları Veya Kar Marjı İle)
+  const baseSalesPrice = Math.round(
+    totalProfileMeters * ((profileSalePricePerMeter || profilePricePerMeter * 1.3) * color.priceMultiplier) +
+      totalSteelMeters * (steelSalePricePerMeter || steelPricePerMeter * 1.3) +
+      totalGlassSqM * (glassSalePricePerSqM || glassPricePerSqM * 1.3) +
+      acilirSayisi * (fittingSalePrice || fittingSetPrice * 1.3)
+  );
+
+  const estimatedPriceTL = Math.round(
+    profitMarginPercent > 0 ? costPriceTL * (1 + profitMarginPercent / 100) : baseSalesPrice
+  );
+
+  const profitTL = Math.max(0, estimatedPriceTL - costPriceTL);
 
   return {
     cutPieces,
@@ -366,14 +393,16 @@ export function calculateWindowDimensions(
     totalProfileMeters,
     totalSteelMeters,
     totalGlassSqM,
+    costPriceTL,
     estimatedPriceTL,
+    profitTL,
   };
 }
 
-// 1D Optimizasyon Algoritması (First Fit Decreasing / FFD)
+// 1D Optimizasyon Algoritması (First Fit Decreasing / FFD) - Çoklu / Özel Stok Boyu Destekli
 export function optimizeCutList(
   pieces: CutPiece[],
-  stockBarLength = 6000,
+  stockBarLength: number | number[] = 6000,
   sawKerf = 5
 ): OptimizationStock[] {
   const allPieces: { label: string; length: number }[] = [];
@@ -386,10 +415,16 @@ export function optimizeCutList(
   allPieces.sort((a, b) => b.length - a.length);
 
   const stockBars: OptimizationStock[] = [];
+  const availableLengths = Array.isArray(stockBarLength)
+    ? stockBarLength.length > 0
+      ? stockBarLength
+      : [6000]
+    : [stockBarLength];
 
   for (const piece of allPieces) {
     let placed = false;
 
+    // 1. Mevcut açılmış çubuklardan birine sığıyor mu bak
     for (const bar of stockBars) {
       if (bar.barLength - bar.usedLength >= piece.length + sawKerf) {
         bar.cuts.push({ pieceLabel: piece.label, length: piece.length });
@@ -400,12 +435,22 @@ export function optimizeCutList(
       }
     }
 
+    // 2. Sığmıyorsa yeni bir stok boy çubuk aç
     if (!placed) {
+      // Parça için uygun olan en optimum stok boyunu seç
+      const suitableLengths = availableLengths.filter(
+        (l) => l >= piece.length + sawKerf
+      );
+      const chosenLength =
+        suitableLengths.length > 0
+          ? Math.min(...suitableLengths)
+          : Math.max(...availableLengths, piece.length + sawKerf + 100);
+
       stockBars.push({
-        barLength: stockBarLength,
+        barLength: chosenLength,
         usedLength: piece.length + sawKerf,
         cuts: [{ pieceLabel: piece.label, length: piece.length }],
-        wasteLength: stockBarLength - (piece.length + sawKerf),
+        wasteLength: chosenLength - (piece.length + sawKerf),
       });
     }
   }
@@ -447,9 +492,14 @@ export function calculateOrderSummary(
   const totalGlassSqM = Number(
     itemResults.reduce((acc, curr) => acc + curr.calc.totalGlassSqM, 0).toFixed(2)
   );
+
+  const costPriceTL = Math.round(
+    itemResults.reduce((acc, curr) => acc + curr.calc.costPriceTL, 0)
+  );
   const totalPriceTL = Math.round(
     itemResults.reduce((acc, curr) => acc + curr.calc.estimatedPriceTL, 0)
   );
+  const profitTL = Math.max(0, totalPriceTL - costPriceTL);
 
   return {
     itemResults,
@@ -458,6 +508,8 @@ export function calculateOrderSummary(
     totalProfileMeters,
     totalSteelMeters,
     totalGlassSqM,
+    costPriceTL,
     totalPriceTL,
+    profitTL,
   };
 }

@@ -2,6 +2,7 @@
 
 import React from "react";
 import { Customer, OrderCalculationResult, WindowItem } from "@/lib/pencereEngine";
+import { CompanyInfo } from "@/components/SettingsModal";
 
 interface QuoteModalProps {
   isOpen: boolean;
@@ -9,6 +10,7 @@ interface QuoteModalProps {
   customer: Customer;
   items: WindowItem[];
   orderSummary: OrderCalculationResult;
+  companyInfo?: CompanyInfo;
 }
 
 export const QuoteModal: React.FC<QuoteModalProps> = ({
@@ -17,6 +19,7 @@ export const QuoteModal: React.FC<QuoteModalProps> = ({
   customer,
   items,
   orderSummary,
+  companyInfo,
 }) => {
   if (!isOpen) return null;
 
@@ -45,18 +48,28 @@ export const QuoteModal: React.FC<QuoteModalProps> = ({
 
         {/* Printable Area */}
         <div id="quote-print-area" className="p-8 space-y-6 overflow-y-auto bg-white text-slate-800">
-          {/* Antet & Müşteri Bilgisi */}
+          {/* Antet & Firma Bilgisi */}
           <div className="flex justify-between items-start border-b border-slate-200 pb-6">
-            <div>
-              <h1 className="text-2xl font-extrabold text-blue-700">
-                SİSTEM YAPI ELEMANLARI
-              </h1>
-              <p className="text-sm text-slate-600 mt-1 font-medium">
-                PVC Kapı & Pencere Doğrama Sistemleri
-              </p>
-              <p className="text-xs text-slate-400 mt-0.5">
-                Tel: +90 332 812 39 95 | Web: www.aslimlarpencere.com
-              </p>
+            <div className="flex items-center gap-4">
+              {companyInfo?.logoUrl && (
+                <img
+                  src={companyInfo.logoUrl}
+                  alt={companyInfo.name}
+                  className="max-h-16 max-w-[140px] object-contain rounded-lg border bg-white p-1 shadow-sm"
+                />
+              )}
+              <div>
+                <h1 className="text-2xl font-extrabold text-blue-700 uppercase tracking-tight">
+                  {companyInfo?.name || "SİSTEM YAPI ELEMANLARI"}
+                </h1>
+                <p className="text-sm text-slate-600 font-medium mt-0.5">
+                  {companyInfo?.subtitle || "PVC Kapı & Pencere Doğrama Sistemleri"}
+                </p>
+                <p className="text-xs text-slate-400 mt-1">
+                  Tel: {companyInfo?.phone || "+90 332 812 39 95"} | Web: {companyInfo?.website || "www.aslimlarpencere.com"}
+                  {companyInfo?.email ? ` | E-Posta: ${companyInfo.email}` : ""}
+                </p>
+              </div>
             </div>
             <div className="text-right">
               <span className="bg-blue-50 text-blue-700 text-xs px-3 py-1 rounded-full border border-blue-200 font-mono font-bold">
