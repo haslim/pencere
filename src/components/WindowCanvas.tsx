@@ -163,14 +163,14 @@ export const WindowCanvas: React.FC<WindowCanvasProps> = ({
     >
       {/* 🛠️ ERCOM CAD ÇİZİM ARAÇ ÇUBUĞU (MODE RIBBON TOOLBAR) */}
       <div
-        className={`w-full mb-4 p-2 rounded-xl border flex items-center justify-between gap-2 overflow-x-auto ${
+        className={`w-full mb-4 p-2.5 rounded-xl border flex flex-wrap items-center justify-between gap-2 shadow-sm transition-colors ${
           isDark
             ? "bg-slate-900 border-slate-800 text-slate-200"
-            : "bg-white border-slate-200 shadow-sm text-slate-800"
+            : "bg-white border-slate-200 text-slate-800"
         }`}
       >
-        <div className="flex items-center gap-1 overflow-x-auto">
-          <span className="text-[11px] font-bold text-slate-400 px-2 whitespace-nowrap">
+        <div className="flex flex-wrap items-center gap-1.5">
+          <span className="text-[11px] font-bold text-slate-400 px-1 whitespace-nowrap">
             🛠️ ERCOM Çizim Araçları:
           </span>
 
@@ -575,7 +575,7 @@ export const WindowCanvas: React.FC<WindowCanvasProps> = ({
 
           {/* İnteraktif Bölme ve Kanat İçi Kayıt Kontrol Panelleri */}
           <div
-            className="absolute inset-0 pointer-events-none p-4"
+            className="absolute inset-0 pointer-events-none"
           >
             {Array.from({ length: rowCount }).map((_, rIdx) =>
               Array.from({ length: colCount }).map((_, cIdx) => {

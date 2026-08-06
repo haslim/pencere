@@ -817,21 +817,30 @@ export default function SaaSWindowDashboard() {
 
           {/* Çizim Tuval Alanı */}
           <div
-            className={`border rounded-2xl p-4 sm:p-6 flex flex-col items-center justify-center min-h-[440px] shadow-xl relative backdrop-blur-sm transition-colors ${
+            className={`border rounded-2xl p-4 sm:p-6 flex flex-col items-center justify-center min-h-[460px] shadow-xl relative backdrop-blur-sm transition-colors ${
               isDark
                 ? "bg-slate-900/80 border-slate-800 shadow-slate-950/50"
                 : "bg-white/90 border-slate-200/80 shadow-slate-200/50"
             }`}
           >
-            <div
-              className={`absolute top-4 left-4 text-xs font-semibold flex items-center gap-1.5 ${
-                isDark ? "text-slate-400" : "text-slate-600"
-              }`}
-            >
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              Aktif Çizim:{" "}
-              <span className={`font-bold ${isDark ? "text-white" : "text-slate-900"}`}>
-                {activeItem.name}
+            <div className="w-full flex items-center justify-between mb-3 pb-2.5 border-b border-slate-200/60">
+              <div
+                className={`text-xs sm:text-sm font-bold flex items-center gap-2 ${
+                  isDark ? "text-slate-300" : "text-slate-700"
+                }`}
+              >
+                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+                Aktif Çizim:{" "}
+                <span className={`font-extrabold ${isDark ? "text-cyan-400" : "text-blue-700"}`}>
+                  {activeItem.name}
+                </span>
+              </div>
+              <span
+                className={`text-xs font-mono font-bold px-2.5 py-0.5 rounded-lg border ${
+                  isDark ? "bg-slate-950 text-cyan-400 border-slate-800" : "bg-blue-50 text-blue-800 border-blue-200"
+                }`}
+              >
+                {activeItem.width} x {activeItem.height} mm
               </span>
             </div>
 
