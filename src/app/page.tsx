@@ -179,7 +179,61 @@ export default function SaaSWindowDashboard() {
       ...activeItem,
       verticalMullionsCount: vCount,
       horizontalMullionsCount: hCount,
+      customVerticalMullions: undefined,
+      customHorizontalMullions: undefined,
       divisions: newDivisions,
+    });
+  };
+
+  // Özel Konumlu Kayıt Ekleme (Offset mm: + Soldan/Üstten, - Sağdan/Alttan)
+  const handleAddCustomMullion = (direction: "v" | "h", offset: number) => {
+    if (direction === "v") {
+      const vCount = activeItem.verticalMullionsCount + 1;
+      const currentCustom = activeItem.customVerticalMullions || [];
+      const newCustom = [...currentCustom, offset];
+
+      const totalDivs = (vCount + 1) * (activeItem.horizontalMullionsCount + 1);
+      const newDivisions = Array.from({ length: totalDivs }).map((_, idx) => ({
+        id: `div-${idx + 1}`,
+        type: (activeItem.divisions[idx]?.type || "sabit") as any,
+        sashVerticalMullions: activeItem.divisions[idx]?.sashVerticalMullions || 0,
+        sashHorizontalMullions: activeItem.divisions[idx]?.sashHorizontalMullions || 0,
+      }));
+
+      updateActiveItem({
+        ...activeItem,
+        verticalMullionsCount: vCount,
+        customVerticalMullions: newCustom,
+        divisions: newDivisions,
+      });
+    } else {
+      const hCount = activeItem.horizontalMullionsCount + 1;
+      const currentCustom = activeItem.customHorizontalMullions || [];
+      const newCustom = [...currentCustom, offset];
+
+      const totalDivs = (activeItem.verticalMullionsCount + 1) * (hCount + 1);
+      const newDivisions = Array.from({ length: totalDivs }).map((_, idx) => ({
+        id: `div-${idx + 1}`,
+        type: (activeItem.divisions[idx]?.type || "sabit") as any,
+        sashVerticalMullions: activeItem.divisions[idx]?.sashVerticalMullions || 0,
+        sashHorizontalMullions: activeItem.divisions[idx]?.sashHorizontalMullions || 0,
+      }));
+
+      updateActiveItem({
+        ...activeItem,
+        horizontalMullionsCount: hCount,
+        customHorizontalMullions: newCustom,
+        divisions: newDivisions,
+      });
+    }
+  };
+
+  // Eşit Dağıt (Sıfırla & Eşit Böl)
+  const handleEqualDistributeMullions = (direction: "v" | "h" | "both") => {
+    updateActiveItem({
+      ...activeItem,
+      customVerticalMullions: direction === "h" ? activeItem.customVerticalMullions : undefined,
+      customHorizontalMullions: direction === "v" ? activeItem.customHorizontalMullions : undefined,
     });
   };
 
@@ -196,21 +250,6 @@ export default function SaaSWindowDashboard() {
         updated[index].sashProfileType = sashProfileType;
       }
       updateActiveItem({ ...activeItem, divisions: updated });
-    }
-  };
-
-  // ERCOM CAD Butonundan Hızlı Dikey/Yatay Kayıt Ekleme
-  const handleAddMullion = (direction: "v" | "h") => {
-    if (direction === "v") {
-      handleGridMullionsChange(
-        activeItem.verticalMullionsCount + 1,
-        activeItem.horizontalMullionsCount
-      );
-    } else {
-      handleGridMullionsChange(
-        activeItem.verticalMullionsCount,
-        activeItem.horizontalMullionsCount + 1
-      );
     }
   };
 
@@ -800,7 +839,8 @@ export default function SaaSWindowDashboard() {
               item={activeItem}
               onUpdateDivisionType={handleUpdateDivisionType}
               onUpdateSashMullions={handleUpdateSashMullions}
-              onAddMullion={handleAddMullion}
+              onAddCustomMullion={handleAddCustomMullion}
+              onEqualDistributeMullions={handleEqualDistributeMullions}
               isDark={isDark}
             />
           </div>

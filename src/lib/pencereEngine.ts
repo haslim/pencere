@@ -62,6 +62,9 @@ export interface WindowItem {
   color: ProfileColor;
   systemType?: SystemType;
   kasaProfileType?: KasaProfileType;
+  // Özel Konumlandırılmış Kayıtlar (Offset mm: Pozitif soldan/üstten, Negatif sağdan/alttan)
+  customVerticalMullions?: number[];
+  customHorizontalMullions?: number[];
   verticalMullionsCount: number; // Kasa geneli Dikey Orta Kayıt sayısı
   horizontalMullionsCount: number; // Kasa geneli Yatay Orta Kayıt sayısı
   divisions: DivisionItem[];
@@ -133,6 +136,29 @@ export interface OptimizationStock {
   wasteLength: number;
 }
 
+// Kayıtların Mutlak mm Konumlarını Hesaplama (Offset + Soldan, - Sağdan/Alttan)
+export function resolveMullionPositions(
+  totalLength: number,
+  count: number,
+  customOffsets?: number[]
+): number[] {
+  if (count <= 0) return [];
+
+  if (customOffsets && customOffsets.length === count) {
+    const resolved = customOffsets.map((offset) => {
+      if (offset < 0) {
+        return Math.max(80, totalLength + offset); // Negatif ise sağdan/alttan
+      }
+      return Math.min(totalLength - 80, offset); // Pozitif ise soldan/üstten
+    });
+    return resolved.sort((a, b) => a - b);
+  }
+
+  // Varsayılan Eşit Dağıtım
+  const step = totalLength / (count + 1);
+  return Array.from({ length: count }).map((_, i) => Math.round(step * (i + 1)));
+}
+
 // Sistem SaaS Gelişmiş İmalat & Düşüm Hesaplama Motoru
 export function calculateWindowDimensions(
   item: WindowItem,
@@ -144,6 +170,8 @@ export function calculateWindowDimensions(
     color,
     verticalMullionsCount,
     horizontalMullionsCount,
+    customVerticalMullions,
+    customHorizontalMullions,
     divisions,
     systemType = "STANDART_DOGRAMA",
     kasaProfileType = "L_KASA",
@@ -173,7 +201,6 @@ export function calculateWindowDimensions(
   const kasaBoyLength = height + weldAllowance * 2;
 
   if (isEsikli) {
-    // Alüminyum Eşikli Kapı Kasası (Üst L Kasa + Yanlar L Kasa + Alt Alüminyum Eşik)
     cutPieces.push({
       id: "kasa-ust",
       label: "Kasa Üst Profili (L Kasa)",
@@ -202,7 +229,6 @@ export function calculateWindowDimensions(
       colorName: "Eloksal Alüminyum",
     });
   } else {
-    // Standart 45-45 4 Taraf Kasa
     cutPieces.push({
       id: "kasa-en",
       label: `${kasaLabel} (En)`,
@@ -243,12 +269,16 @@ export function calculateWindowDimensions(
     colorName: "Galvaniz Sac",
   });
 
-  // 2. Kasa Geneli Dikey & Yatay Orta Kayıtlar (90° / 90°)
+  // 2. Kasa Geneli Dikey & Yatay Orta Kayıtlar
   const KASA_GENISLIGI = isSurme ? 75 : 60;
   const ORTA_KAYIT_GENISLIGI = 60;
 
   const netInternalW = width - KASA_GENISLIGI * 2;
   const netInternalH = height - KASA_GENISLIGI * 2;
+
+  // Dikey Ve Yatay Kayıt Konumlarının Hesaplanması (Offset + / - Destekli)
+  const vPositions = resolveMullionPositions(width, verticalMullionsCount, customVerticalMullions);
+  const hPositions = resolveMullionPositions(height, horizontalMullionsCount, customHorizontalMullions);
 
   // Dikey Orta Kayıtlar
   if (verticalMullionsCount > 0) {
@@ -275,169 +305,181 @@ export function calculateWindowDimensions(
 
   // Yatay Orta Kayıtlar
   if (horizontalMullionsCount > 0) {
-    const usableWPerCol =
-      (netInternalW - verticalMullionsCount * ORTA_KAYIT_GENISLIGI) /
-      (verticalMullionsCount + 1);
-    const yatayEn = usableWPerCol + 4;
-    const totalYatayAdet = horizontalMullionsCount * (verticalMullionsCount + 1);
+    // Kasa içindeki dikey bölme genişliklerine göre yatay kayıtlar kesilir
+    const colCount = verticalMullionsCount + 1;
+    let totalYatayLengthSum = 0;
 
-    cutPieces.push({
-      id: "yatay-orta-kayit",
-      label: "Kasa Yatay Orta Kayıt",
-      type: "ORTA_KAYIT",
-      length: Math.round(yatayEn),
-      quantity: totalYatayAdet,
-      angle: "90-90",
-      colorName: color.name,
-    });
-    cutPieces.push({
-      id: "yatay-orta-kayit-sac",
-      label: "Yatay Kayıt Destek Sacı",
-      type: "DESTEK_SACI",
-      length: Math.round(yatayEn - steelShortage),
-      quantity: totalYatayAdet,
-      angle: "90-90",
-      colorName: "Galvaniz Sac",
-    });
+    for (let c = 0; c < colCount; c++) {
+      const colLeft = c === 0 ? KASA_GENISLIGI : vPositions[c - 1] + ORTA_KAYIT_GENISLIGI / 2;
+      const colRight = c === verticalMullionsCount ? width - KASA_GENISLIGI : vPositions[c] - ORTA_KAYIT_GENISLIGI / 2;
+      const colW = colRight - colLeft;
+
+      cutPieces.push({
+        id: `yatay-orta-kayit-col-${c}`,
+        label: `Kasa Yatay Orta Kayıt (Bölüm ${c + 1})`,
+        type: "ORTA_KAYIT",
+        length: Math.round(colW + 4),
+        quantity: horizontalMullionsCount,
+        angle: "90-90",
+        colorName: color.name,
+      });
+
+      cutPieces.push({
+        id: `yatay-orta-kayit-sac-col-${c}`,
+        label: `Yatay Kayıt Destek Sacı (Bölüm ${c + 1})`,
+        type: "DESTEK_SACI",
+        length: Math.round(colW + 4 - steelShortage),
+        quantity: horizontalMullionsCount,
+        angle: "90-90",
+        colorName: "Galvaniz Sac",
+      });
+    }
   }
 
-  // 3. Bölme ve Kanat İçi Hesaplamalar
+  // 3. Bölme ve Kanat İçi Hesaplamalar (Hassas Konumlu Hücre Boyutları)
   const colCount = verticalMullionsCount + 1;
   const rowCount = horizontalMullionsCount + 1;
   const totalDivisions = colCount * rowCount;
 
-  const sectionW =
-    (netInternalW - verticalMullionsCount * ORTA_KAYIT_GENISLIGI) / colCount;
-  const sectionH =
-    (netInternalH - horizontalMullionsCount * ORTA_KAYIT_GENISLIGI) / rowCount;
+  for (let r = 0; r < rowCount; r++) {
+    for (let c = 0; c < colCount; c++) {
+      const divIdx = r * colCount + c;
+      const div = divisions[divIdx] || {
+        type: "sabit",
+        sashProfileType: "PENCERE_KANADI",
+        sashVerticalMullions: 0,
+        sashHorizontalMullions: 0,
+      };
+      const divType = div.type;
+      const sashProf = div.sashProfileType || (divType.includes("kapi") ? "KAPI_KANADI" : divType.includes("surme") ? "SURME_KANAD" : "PENCERE_KANADI");
 
-  for (let i = 0; i < totalDivisions; i++) {
-    const div = divisions[i] || {
-      type: "sabit",
-      sashProfileType: "PENCERE_KANADI",
-      sashVerticalMullions: 0,
-      sashHorizontalMullions: 0,
-    };
-    const divType = div.type;
-    const sashProf = div.sashProfileType || (divType.includes("kapi") ? "KAPI_KANADI" : divType.includes("surme") ? "SURME_KANAD" : "PENCERE_KANADI");
+      // Hücre Sınırları ve Net En/Boy Hesabı
+      const colLeft = c === 0 ? KASA_GENISLIGI : vPositions[c - 1] + ORTA_KAYIT_GENISLIGI / 2;
+      const colRight = c === verticalMullionsCount ? width - KASA_GENISLIGI : vPositions[c] - ORTA_KAYIT_GENISLIGI / 2;
+      const sectionW = colRight - colLeft;
 
-    if (divType === "sabit") {
-      // 🔒 Sabit Cam Düşümü
-      const glassW = sectionW - glassTolerance;
-      const glassH = sectionH - glassTolerance;
-      const sqM = (glassW * glassH) / 1000000;
+      const rowTop = r === 0 ? KASA_GENISLIGI : hPositions[r - 1] + ORTA_KAYIT_GENISLIGI / 2;
+      const rowBottom = r === horizontalMullionsCount ? height - KASA_GENISLIGI : hPositions[r] - ORTA_KAYIT_GENISLIGI / 2;
+      const sectionH = rowBottom - rowTop;
 
-      glasses.push({
-        width: Math.round(glassW),
-        height: Math.round(glassH),
-        areaSqM: Number(sqM.toFixed(3)),
-        quantity: 1,
-        type: "4+16+4 Isıcam Çift Cam (Kasa İçi Sabit)",
-      });
+      if (divType === "sabit") {
+        // 🔒 Sabit Cam Düşümü
+        const glassW = sectionW - glassTolerance;
+        const glassH = sectionH - glassTolerance;
+        const sqM = (glassW * glassH) / 1000000;
 
-      // Sabit Çıta Kesimleri
-      cutPieces.push({
-        id: `cita-en-${i}`,
-        label: `Bölme ${i + 1} Sabit Çıta (En)`,
-        type: "CITA",
-        length: Math.round(glassW + 10),
-        quantity: 2,
-        angle: "45-45",
-        colorName: color.name,
-      });
-      cutPieces.push({
-        id: `cita-boy-${i}`,
-        label: `Bölme ${i + 1} Sabit Çıta (Boy)`,
-        type: "CITA",
-        length: Math.round(glassH + 10),
-        quantity: 2,
-        angle: "45-45",
-        colorName: color.name,
-      });
-    } else {
-      // 🪟 Açılır Kanat Kesimleri (Pencere Kanadı / Geniş Kapı Kanadı / Sürme Kanat)
-      const isDoorSash = sashProf === "KAPI_KANADI" || divType.includes("kapi");
-      const isSlidingSash = sashProf === "SURME_KANAD" || divType.includes("surme");
+        glasses.push({
+          width: Math.round(glassW),
+          height: Math.round(glassH),
+          areaSqM: Number(sqM.toFixed(3)),
+          quantity: 1,
+          type: "4+16+4 Isıcam Çift Cam (Kasa İçi Sabit)",
+        });
 
-      const kanatOverlap = isDoorSash ? sashOverlap + 6 : sashOverlap;
-      const kanatEn = sectionW + kanatOverlap + weldAllowance * 2;
-      const kanatBoy = sectionH + kanatOverlap + weldAllowance * 2;
-
-      const kanatLabel = isDoorSash
-        ? "Geniş Kapı Kanadı Profili (Ağır Seri)"
-        : isSlidingSash
-        ? "Sürme Seri Kanat Profili"
-        : "Standart Pencere Kanadı Profili";
-
-      cutPieces.push({
-        id: `kanat-en-${i}`,
-        label: `Bölme ${i + 1} ${kanatLabel} (En)`,
-        type: isDoorSash ? "KAPI_KANADI" : "KANAT",
-        length: Math.round(kanatEn),
-        quantity: 2,
-        angle: "45-45",
-        colorName: color.name,
-      });
-
-      cutPieces.push({
-        id: `kanat-boy-${i}`,
-        label: `Bölme ${i + 1} ${kanatLabel} (Boy)`,
-        type: isDoorSash ? "KAPI_KANADI" : "KANAT",
-        length: Math.round(kanatBoy),
-        quantity: 2,
-        angle: "45-45",
-        colorName: color.name,
-      });
-
-      // Kanat İçi Özel Orta Kayıtlar
-      const sashInnerW = sectionW - sashOverlap;
-      const sashInnerH = sectionH - sashOverlap;
-
-      const sVert = div.sashVerticalMullions || 0;
-      const sHoriz = div.sashHorizontalMullions || 0;
-
-      if (sVert > 0) {
+        // Sabit Çıta Kesimleri
         cutPieces.push({
-          id: `kanat-ici-dikey-${i}`,
-          label: `Bölme ${i + 1} Kanat İçi Dikey Kayıt`,
-          type: "ORTA_KAYIT",
-          length: Math.round(sashInnerH + 4),
-          quantity: sVert,
-          angle: "90-90",
+          id: `cita-en-${divIdx}`,
+          label: `Bölme ${divIdx + 1} Sabit Çıta (En)`,
+          type: "CITA",
+          length: Math.round(glassW + 10),
+          quantity: 2,
+          angle: "45-45",
           colorName: color.name,
         });
-      }
-
-      if (sHoriz > 0) {
-        const kanatYatayBoy =
-          (sashInnerW - sVert * ORTA_KAYIT_GENISLIGI) / (sVert + 1) + 4;
         cutPieces.push({
-          id: `kanat-ici-yatay-${i}`,
-          label: `Bölme ${i + 1} Kanat İçi Yatay Kayıt`,
-          type: "ORTA_KAYIT",
-          length: Math.round(kanatYatayBoy),
-          quantity: sHoriz * (sVert + 1),
-          angle: "90-90",
+          id: `cita-boy-${divIdx}`,
+          label: `Bölme ${divIdx + 1} Sabit Çıta (Boy)`,
+          type: "CITA",
+          length: Math.round(glassH + 10),
+          quantity: 2,
+          angle: "45-45",
           colorName: color.name,
         });
+      } else {
+        // 🪟 Açılır Kanat Kesimleri
+        const isDoorSash = sashProf === "KAPI_KANADI" || divType.includes("kapi");
+        const isSlidingSash = sashProf === "SURME_KANAD" || divType.includes("surme");
+
+        const kanatOverlap = isDoorSash ? sashOverlap + 6 : sashOverlap;
+        const kanatEn = sectionW + kanatOverlap + weldAllowance * 2;
+        const kanatBoy = sectionH + kanatOverlap + weldAllowance * 2;
+
+        const kanatLabel = isDoorSash
+          ? "Geniş Kapı Kanadı Profili (Ağır Seri)"
+          : isSlidingSash
+          ? "Sürme Seri Kanat Profili"
+          : "Standart Pencere Kanadı Profili";
+
+        cutPieces.push({
+          id: `kanat-en-${divIdx}`,
+          label: `Bölme ${divIdx + 1} ${kanatLabel} (En)`,
+          type: isDoorSash ? "KAPI_KANADI" : "KANAT",
+          length: Math.round(kanatEn),
+          quantity: 2,
+          angle: "45-45",
+          colorName: color.name,
+        });
+
+        cutPieces.push({
+          id: `kanat-boy-${divIdx}`,
+          label: `Bölme ${divIdx + 1} ${kanatLabel} (Boy)`,
+          type: isDoorSash ? "KAPI_KANADI" : "KANAT",
+          length: Math.round(kanatBoy),
+          quantity: 2,
+          angle: "45-45",
+          colorName: color.name,
+        });
+
+        // Kanat İçi Özel Orta Kayıtlar
+        const sashInnerW = sectionW - sashOverlap;
+        const sashInnerH = sectionH - sashOverlap;
+
+        const sVert = div.sashVerticalMullions || 0;
+        const sHoriz = div.sashHorizontalMullions || 0;
+
+        if (sVert > 0) {
+          cutPieces.push({
+            id: `kanat-ici-dikey-${divIdx}`,
+            label: `Bölme ${divIdx + 1} Kanat İçi Dikey Kayıt`,
+            type: "ORTA_KAYIT",
+            length: Math.round(sashInnerH + 4),
+            quantity: sVert,
+            angle: "90-90",
+            colorName: color.name,
+          });
+        }
+
+        if (sHoriz > 0) {
+          const kanatYatayBoy =
+            (sashInnerW - sVert * ORTA_KAYIT_GENISLIGI) / (sVert + 1) + 4;
+          cutPieces.push({
+            id: `kanat-ici-yatay-${divIdx}`,
+            label: `Bölme ${divIdx + 1} Kanat İçi Yatay Kayıt`,
+            type: "ORTA_KAYIT",
+            length: Math.round(kanatYatayBoy),
+            quantity: sHoriz * (sVert + 1),
+            angle: "90-90",
+            colorName: color.name,
+          });
+        }
+
+        // Kanat İçi Bölünmüş Camlar
+        const gCols = sVert + 1;
+        const gRows = sHoriz + 1;
+        const glassW =
+          (sashInnerW - sVert * ORTA_KAYIT_GENISLIGI) / gCols - glassTolerance;
+        const glassH =
+          (sashInnerH - sHoriz * ORTA_KAYIT_GENISLIGI) / gRows - glassTolerance;
+        const sqM = (glassW * glassH) / 1000000;
+
+        glasses.push({
+          width: Math.round(glassW),
+          height: Math.round(glassH),
+          areaSqM: Number(sqM.toFixed(3)),
+          quantity: gCols * gRows,
+          type: `4+16+4 Isıcam Çift Cam (${isDoorSash ? "Kapı Kanadı İçi" : isSlidingSash ? "Sürme Kanat İçi" : "Pencere Kanat İçi"})`,
+        });
       }
-
-      // Kanat İçi Bölünmüş Camlar
-      const gCols = sVert + 1;
-      const gRows = sHoriz + 1;
-      const glassW =
-        (sashInnerW - sVert * ORTA_KAYIT_GENISLIGI) / gCols - glassTolerance;
-      const glassH =
-        (sashInnerH - sHoriz * ORTA_KAYIT_GENISLIGI) / gRows - glassTolerance;
-      const sqM = (glassW * glassH) / 1000000;
-
-      glasses.push({
-        width: Math.round(glassW),
-        height: Math.round(glassH),
-        areaSqM: Number(sqM.toFixed(3)),
-        quantity: gCols * gRows,
-        type: `4+16+4 Isıcam Çift Cam (${isDoorSash ? "Kapı Kanadı İçi" : isSlidingSash ? "Sürme Kanat İçi" : "Pencere Kanat İçi"})`,
-      });
     }
   }
 
@@ -533,7 +575,6 @@ export function optimizeCutList(
   for (const piece of allPieces) {
     let placed = false;
 
-    // 1. Mevcut açılmış çubuklardan birine sığıyor mu bak
     for (const bar of stockBars) {
       if (bar.barLength - bar.usedLength >= piece.length + sawKerf) {
         bar.cuts.push({ pieceLabel: piece.label, length: piece.length });
@@ -544,7 +585,6 @@ export function optimizeCutList(
       }
     }
 
-    // 2. Sığmıyorsa yeni bir stok boy çubuk aç
     if (!placed) {
       const suitableLengths = availableLengths.filter(
         (l) => l >= piece.length + sawKerf
