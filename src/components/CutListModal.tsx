@@ -64,7 +64,7 @@ export const CutListModal: React.FC<CutListModalProps> = ({
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = `Ercom_CNC_${cncBrand}_Data_${Date.now()}.nc`;
+    link.download = `CNC_${cncBrand}_Data_${Date.now()}.nc`;
     link.click();
     URL.revokeObjectURL(url);
   };
@@ -82,7 +82,7 @@ export const CutListModal: React.FC<CutListModalProps> = ({
               <h2 className="text-lg font-bold text-white flex items-center gap-2">
                 1D Profil Kesim Optimizasyonu & CNC Veri Aktarımı
                 <span className="text-xs px-2 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20">
-                  Ercom Smart Enterprise
+                  İmalat & Otomasyon
                 </span>
               </h2>
               <p className="text-xs text-slate-400">
@@ -90,6 +90,7 @@ export const CutListModal: React.FC<CutListModalProps> = ({
               </p>
             </div>
           </div>
+
 
           <div className="flex items-center gap-2">
             {/* Tab Selector */}
@@ -461,7 +462,7 @@ export const CutListModal: React.FC<CutListModalProps> = ({
                       <div className="flex justify-between items-start border-b border-slate-200 pb-2">
                         <div>
                           <span className="text-[10px] font-bold text-blue-700 uppercase tracking-wider block">
-                            ERCOM SMART ENTERPRISE
+                            TEKNİK İMALAT ETİKETİ
                           </span>
                           <span className="text-xs font-bold block mt-0.5">{c.pieceLabel}</span>
                         </div>
@@ -469,6 +470,7 @@ export const CutListModal: React.FC<CutListModalProps> = ({
                           {c.barcode || `BAR-${bIdx}-${cIdx}`}
                         </span>
                       </div>
+
 
                       <div className="grid grid-cols-2 gap-2 text-xs font-mono pt-1">
                         <div>

@@ -128,3 +128,60 @@
     @apply font-sans;
   }
 }
+
+/* @media print: Yalnızca Teklif ve Sipariş Formunun Temiz Yazdırılması */
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 10mm;
+  }
+
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+
+  /* Modal dışındaki ana ekran elemanlarını, navbarı ve modal overlay zeminlerini gizle */
+  header,
+  main,
+  .fixed:not(#quote-modal-container),
+  button,
+  .no-print {
+    display: none !important;
+  }
+
+  /* Modal konteynırını ve teklif alanını tam sayfa yap */
+  #quote-modal-container {
+    position: static !important;
+    background: transparent !important;
+    backdrop-filter: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-shadow: none !important;
+    border: none !important;
+  }
+
+  #quote-modal-card {
+    border: none !important;
+    box-shadow: none !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+
+  #quote-print-area {
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: visible !important;
+    max-height: none !important;
+    color: #000000 !important;
+  }
+
+  /* Sayfa kesintilerini önle */
+  tr, .print-avoid-break {
+    page-break-inside: avoid;
+  }
+}

@@ -8,7 +8,7 @@ import {
   resolveMullionPositions,
 } from "@/lib/pencereEngine";
 
-export type ErcomToolMode =
+export type WindowToolMode =
   | "select"
   | "v_mullion"
   | "h_mullion"
@@ -18,6 +18,7 @@ export type ErcomToolMode =
   | "surme_kanat"
   | "vasistas"
   | "sabit";
+
 
 interface WindowCanvasProps {
   item: WindowItem;
@@ -59,8 +60,9 @@ export const WindowCanvas: React.FC<WindowCanvasProps> = ({
     kasaProfileType = "L_KASA",
   } = item;
 
-  // Active ERCOM Tool Mode & Modal States
-  const [activeTool, setActiveTool] = useState<ErcomToolMode>("select");
+  // Active Tool Mode & Modal States
+  const [activeTool, setActiveTool] = useState<WindowToolMode>("select");
+
   const [selectedCellIndex, setSelectedCellIndex] = useState<number | null>(null);
 
   // Kayıt Ekleme Modal State
@@ -154,24 +156,22 @@ export const WindowCanvas: React.FC<WindowCanvasProps> = ({
   };
 
   return (
-    <div
-      className={`flex flex-col items-center justify-center p-4 sm:p-6 rounded-2xl border transition-all select-none relative w-full ${
-        isDark
-          ? "bg-slate-950 border-slate-800 shadow-2xl"
-          : "bg-slate-50/90 border-slate-200/80 shadow-md"
-      }`}
-    >
-      {/* 🛠️ ERCOM CAD ÇİZİM ARAÇ ÇUBUĞU (MODE RIBBON TOOLBAR) */}
+    <div className="w-full flex flex-col items-center gap-4">
+      {/* 🛠️ CAD ÇİZİM ARAÇ ÇUBUĞU (MODE RIBBON TOOLBAR) */}
       <div
-        className={`w-full mb-4 p-2.5 rounded-xl border flex flex-wrap items-center justify-between gap-2 shadow-sm transition-colors ${
+        className={`w-full p-2.5 rounded-2xl border flex flex-wrap items-center justify-between gap-2 shadow-sm transition-colors ${
           isDark
-            ? "bg-slate-900 border-slate-800 text-slate-200"
-            : "bg-white border-slate-200 text-slate-800"
+            ? "bg-slate-950/80 border-slate-800 text-slate-200"
+            : "bg-slate-50 border-slate-200/90 text-slate-800"
         }`}
       >
-        <div className="flex flex-wrap items-center gap-1.5">
-          <span className="text-[11px] font-bold text-slate-400 px-1 whitespace-nowrap">
-            🛠️ ERCOM Çizim Araçları:
+        <div className="flex items-center gap-1.5 flex-wrap">
+          <span
+            className={`text-xs font-bold px-2 flex items-center gap-1 ${
+              isDark ? "text-slate-400" : "text-slate-500"
+            }`}
+          >
+            🛠️ Çizim Araçları:
           </span>
 
           <button
@@ -684,7 +684,7 @@ export const WindowCanvas: React.FC<WindowCanvasProps> = ({
         </div>
       </div>
 
-      {/* 📍 ERCOM HASSAS KAYIT EKLEME & KONUMLANDIRMA DİALOGU */}
+      {/* 📍 KAYIT EKLEME & KONUMLANDIRMA DİALOGU */}
       {isAddMullionModalOpen && (
         <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-white border border-slate-200 rounded-2xl p-6 max-w-md w-full shadow-2xl space-y-4 text-slate-800">

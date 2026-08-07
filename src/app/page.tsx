@@ -307,9 +307,10 @@ export default function SaaSWindowDashboard() {
                     : "bg-blue-50 text-blue-700 border-blue-200/80"
                 }`}
               >
-                Ercom Smart Enterprise
+                Pencere CAD & İmalat
               </span>
             </h1>
+
             <p className={`text-xs ${isDark ? "text-slate-400" : "text-slate-500"}`}>
               {settings.company.subtitle || "PVC & Alüminyum Çizim ve İmalat Otomasyonu"}
             </p>
@@ -435,77 +436,119 @@ export default function SaaSWindowDashboard() {
               ⚙️ Poz ve Geometri Parametreleri
             </h2>
 
-            <div className="space-y-4 mt-4">
-              <div>
-                <label
-                  className={`text-xs font-semibold block mb-1 ${
-                    isDark ? "text-slate-400" : "text-slate-600"
-                  }`}
-                >
-                  Poz / Pencere Tanımı
-                </label>
-                <input
-                  type="text"
-                  value={activeItem.name}
-                  onChange={(e) => updateActiveItem({ ...activeItem, name: e.target.value })}
-                  className={`w-full border rounded-lg px-3 py-2 text-sm focus:outline-none transition ${
-                    isDark
-                      ? "bg-slate-950 border-slate-800 text-white focus:border-cyan-500"
-                      : "bg-slate-50 border-slate-200 text-slate-900 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                  }`}
-                />
-              </div>
+              {/* Form Alanlarında Enter ile İlerleme Fonksiyonu */}
+              <div
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    const form = e.currentTarget;
+                    const focusables = Array.from(
+                      form.querySelectorAll<HTMLInputElement | HTMLSelectElement>("input, select, button")
+                    );
+                    const currentIndex = focusables.indexOf(e.target as any);
+                    if (currentIndex >= 0 && currentIndex < focusables.length - 1) {
+                      focusables[currentIndex + 1].focus();
+                    } else if (currentIndex === focusables.length - 1) {
+                      handleAddNewPoz();
+                    }
+                  }
+                }}
+                className="space-y-4 mt-4"
+              >
+                <div>
+                  <label
+                    className={`text-xs font-semibold block mb-1 ${
+                      isDark ? "text-slate-400" : "text-slate-600"
+                    }`}
+                  >
+                    Poz / Pencere Tanımı
+                  </label>
+                  <input
+                    type="text"
+                    value={activeItem.name}
+                    onChange={(e) => updateActiveItem({ ...activeItem, name: e.target.value })}
+                    className={`w-full border rounded-lg px-3 py-2 text-sm focus:outline-none transition ${
+                      isDark
+                        ? "bg-slate-950 border-slate-800 text-white focus:border-cyan-500"
+                        : "bg-slate-50 border-slate-200 text-slate-900 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                    }`}
+                  />
+                </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label
-                    className={`text-xs font-semibold block mb-1 ${
-                      isDark ? "text-slate-400" : "text-slate-600"
-                    }`}
-                  >
-                    Dış Genişlik (mm)
-                  </label>
-                  <input
-                    type="number"
-                    min={400}
-                    max={3500}
-                    step={10}
-                    value={activeItem.width}
-                    onChange={(e) =>
-                      updateActiveItem({ ...activeItem, width: Number(e.target.value) })
-                    }
-                    className={`w-full border rounded-lg px-3 py-2 text-sm font-mono font-bold focus:outline-none transition ${
-                      isDark
-                        ? "bg-slate-950 border-slate-800 text-cyan-300 focus:border-cyan-500"
-                        : "bg-slate-50 border-slate-200 text-blue-700 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                    }`}
-                  />
+                <div className="grid grid-cols-3 gap-2.5">
+                  <div>
+                    <label
+                      className={`text-[11px] font-semibold block mb-1 ${
+                        isDark ? "text-slate-400" : "text-slate-600"
+                      }`}
+                    >
+                      Genişlik (mm)
+                    </label>
+                    <input
+                      type="number"
+                      min={400}
+                      max={3500}
+                      step={10}
+                      value={activeItem.width}
+                      onChange={(e) =>
+                        updateActiveItem({ ...activeItem, width: Number(e.target.value) })
+                      }
+                      className={`w-full border rounded-lg px-2.5 py-1.5 text-xs font-mono font-bold focus:outline-none transition ${
+                        isDark
+                          ? "bg-slate-950 border-slate-800 text-cyan-300 focus:border-cyan-500"
+                          : "bg-slate-50 border-slate-200 text-blue-700 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                      }`}
+                    />
+                  </div>
+                  <div>
+                    <label
+                      className={`text-[11px] font-semibold block mb-1 ${
+                        isDark ? "text-slate-400" : "text-slate-600"
+                      }`}
+                    >
+                      Yükseklik (mm)
+                    </label>
+                    <input
+                      type="number"
+                      min={400}
+                      max={3000}
+                      step={10}
+                      value={activeItem.height}
+                      onChange={(e) =>
+                        updateActiveItem({ ...activeItem, height: Number(e.target.value) })
+                      }
+                      className={`w-full border rounded-lg px-2.5 py-1.5 text-xs font-mono font-bold focus:outline-none transition ${
+                        isDark
+                          ? "bg-slate-950 border-slate-800 text-cyan-300 focus:border-cyan-500"
+                          : "bg-slate-50 border-slate-200 text-blue-700 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                      }`}
+                    />
+                  </div>
+                  <div>
+                    <label
+                      className={`text-[11px] font-semibold block mb-1 ${
+                        isDark ? "text-slate-400" : "text-slate-600"
+                      }`}
+                    >
+                      Poz Adedi
+                    </label>
+                    <input
+                      type="number"
+                      min={1}
+                      max={500}
+                      value={activeItem.quantity || 1}
+                      onChange={(e) =>
+                        updateActiveItem({ ...activeItem, quantity: Math.max(1, Number(e.target.value)) })
+                      }
+                      className={`w-full border rounded-lg px-2.5 py-1.5 text-xs font-mono font-bold focus:outline-none transition ${
+                        isDark
+                          ? "bg-slate-950 border-slate-800 text-amber-300 focus:border-cyan-500"
+                          : "bg-slate-50 border-slate-200 text-amber-700 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                      }`}
+                    />
+                  </div>
                 </div>
-                <div>
-                  <label
-                    className={`text-xs font-semibold block mb-1 ${
-                      isDark ? "text-slate-400" : "text-slate-600"
-                    }`}
-                  >
-                    Dış Yükseklik (mm)
-                  </label>
-                  <input
-                    type="number"
-                    min={400}
-                    max={3000}
-                    step={10}
-                    value={activeItem.height}
-                    onChange={(e) =>
-                      updateActiveItem({ ...activeItem, height: Number(e.target.value) })
-                    }
-                    className={`w-full border rounded-lg px-3 py-2 text-sm font-mono font-bold focus:outline-none transition ${
-                      isDark
-                        ? "bg-slate-950 border-slate-800 text-cyan-300 focus:border-cyan-500"
-                        : "bg-slate-50 border-slate-200 text-blue-700 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                    }`}
-                  />
-                </div>
-              </div>
+
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
@@ -514,10 +557,10 @@ export default function SaaSWindowDashboard() {
                       isDark ? "text-slate-400" : "text-slate-600"
                     }`}
                   >
-                    İmalat Sistem Tipi
+                    Profil Serisi (Egepen Deceuninck)
                   </label>
                   <select
-                    value={activeItem.systemType || "STANDART_DOGRAMA"}
+                    value={activeItem.systemType || "EGEPEN_ZENDOW"}
                     onChange={(e) =>
                       updateActiveItem({ ...activeItem, systemType: e.target.value as any })
                     }
@@ -527,12 +570,14 @@ export default function SaaSWindowDashboard() {
                         : "bg-slate-50 border-slate-200 text-slate-900"
                     }`}
                   >
-                    <option value="STANDART_DOGRAMA">🪟 Standart Pencere/Kapı</option>
-                    <option value="KAPI_SISTEMI">🚪 Kapı Sistemi (Ağır Seri)</option>
-                    <option value="SURME_SISTEM">↔️ Sürme Sistem (Sliding)</option>
-                    <option value="HEBESCHIEBE">🔄 Hebeschiebe (Kaldırmalı)</option>
+                    <option value="EGEPEN_LEGEND">🥇 Egepen Legend (80 mm / 6 Odacık)</option>
+                    <option value="EGEPEN_ZENDOW">⭐ Egepen Zendow (70 mm / 5 Odacık)</option>
+                    <option value="EGEPEN_FUSION">🔹 Egepen Fusion (70 mm Ekonomi)</option>
+                    <option value="EGEPEN_LEGEND_SLIDE">↔️ Egepen Legend Slide Sürme</option>
+                    <option value="EGEPEN_HS76">🔄 Egepen HS 76 Hebeschiebe</option>
                   </select>
                 </div>
+
 
                 <div>
                   <label

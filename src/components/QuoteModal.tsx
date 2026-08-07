@@ -42,10 +42,10 @@ export const QuoteModal: React.FC<QuoteModalProps> = ({
   const costPriceConverted = convertPrice(orderSummary.costPriceTL);
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-950/75 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
-      <div className="bg-white border border-slate-200 rounded-2xl w-full max-w-4xl max-h-[92vh] flex flex-col shadow-2xl overflow-hidden text-slate-800">
-        {/* Header */}
-        <div className="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50">
+    <div id="quote-modal-container" className="fixed inset-0 z-50 bg-slate-950/75 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
+      <div id="quote-modal-card" className="bg-white border border-slate-200 rounded-2xl w-full max-w-4xl max-h-[92vh] flex flex-col shadow-2xl overflow-hidden text-slate-800">
+        {/* Header (Yazdırırken Gizlenir) */}
+        <div className="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50 no-print">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-blue-600/10 text-blue-600 rounded-lg border border-blue-200">
               <FileText className="w-5 h-5" />
@@ -54,17 +54,18 @@ export const QuoteModal: React.FC<QuoteModalProps> = ({
               <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
                 Resmi Müşteri Teklif Formu & Maliyet Analizi
                 <span className="text-xs px-2 py-0.5 rounded bg-blue-100 text-blue-700 font-semibold border border-blue-200">
-                  Ercom Smart Enterprise
+                  {companyInfo?.name || "Kurumsal Teklif"}
                 </span>
               </h2>
               <p className="text-xs text-slate-500">
                 Özelleştirilebilir Kurumsal Teklif ve Çoklu Para Birimi Desteği
               </p>
             </div>
+
           </div>
 
           {/* Para Birimi & Kur Seçeneği */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 no-print">
             <div className="flex bg-white border border-slate-200 rounded-xl p-1 text-xs shadow-sm">
               <button
                 onClick={() => setCurrency("TRY")}
@@ -100,6 +101,7 @@ export const QuoteModal: React.FC<QuoteModalProps> = ({
             </button>
           </div>
         </div>
+
 
         {/* Printable Area */}
         <div id="quote-print-area" className="p-8 space-y-6 overflow-y-auto bg-white text-slate-800 flex-1">
@@ -236,12 +238,13 @@ export const QuoteModal: React.FC<QuoteModalProps> = ({
           </div>
         </div>
 
-        {/* Footer */}
-        <div className="p-4 border-t border-slate-100 bg-slate-50 flex justify-between items-center">
+        {/* Footer (Yazdırırken Gizlenir) */}
+        <div className="p-4 border-t border-slate-100 bg-slate-50 flex justify-between items-center no-print">
           <div className="flex items-center gap-2 text-xs text-slate-500">
             <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-            <span>Ercom Smart Parametrik Hesaplama Doğrulandı</span>
+            <span>Otomatik Parametrik İmalat & Maliyet Hesaplaması Doğrulandı</span>
           </div>
+
 
           <div className="flex items-center gap-3">
             <button
@@ -263,4 +266,5 @@ export const QuoteModal: React.FC<QuoteModalProps> = ({
     </div>
   );
 };
+
 

@@ -16,10 +16,63 @@ export const PROFILE_COLORS: ProfileColor[] = [
 ];
 
 export type SystemType =
-  | "STANDART_DOGRAMA"
-  | "KAPI_SISTEMI"
-  | "SURME_SISTEM"
-  | "HEBESCHIEBE";
+  | "EGEPEN_LEGEND" // Egepen Legend 80mm Seri (Lüks 6 Odacıklı)
+  | "EGEPEN_ZENDOW" // Egepen Zendow 70mm Seri (Standart 5 Odacıklı)
+  | "EGEPEN_FUSION" // Egepen Fusion 70mm Ekonomi Seri
+  | "EGEPEN_LEGEND_SLIDE" // Egepen Legend Slide Sürme Sistem
+  | "EGEPEN_HS76"; // Egepen HS 76 Hebeschiebe Kaldırmalı Sürme
+
+export interface EgepenSeriesInfo {
+  id: SystemType;
+  name: string;
+  depthMm: number;
+  chamberCount: number;
+  description: string;
+  pricePerMeter: number;
+}
+
+export const EGEPEN_SERIES: EgepenSeriesInfo[] = [
+  {
+    id: "EGEPEN_LEGEND",
+    name: "Egepen Legend (80 mm)",
+    depthMm: 80,
+    chamberCount: 6,
+    description: "80 mm Genişlik, 6 Odacıklı Üst Sınıf Isı Yalıtım Serisi",
+    pricePerMeter: 210,
+  },
+  {
+    id: "EGEPEN_ZENDOW",
+    name: "Egepen Zendow (70 mm)",
+    depthMm: 70,
+    chamberCount: 5,
+    description: "70 mm Genişlik, 5 Odacıklı Standart Seri",
+    pricePerMeter: 180,
+  },
+  {
+    id: "EGEPEN_FUSION",
+    name: "Egepen Fusion (70 mm)",
+    depthMm: 70,
+    chamberCount: 5,
+    description: "70 mm Ekonomik Seri Profil Sistemleri",
+    pricePerMeter: 160,
+  },
+  {
+    id: "EGEPEN_LEGEND_SLIDE",
+    name: "Egepen Legend Slide Sürme",
+    depthMm: 140,
+    chamberCount: 5,
+    description: "Legend Seri Özel Sızdırmaz Sürme Sistem",
+    pricePerMeter: 240,
+  },
+  {
+    id: "EGEPEN_HS76",
+    name: "Egepen HS 76 Hebeschiebe",
+    depthMm: 175,
+    chamberCount: 5,
+    description: "76 mm Kaldırmalı Ağır Sürme Kapı Serisi",
+    pricePerMeter: 290,
+  },
+];
 
 export type KasaProfileType =
   | "L_KASA" // Standart L Kasa (Dış Kasa)
@@ -34,6 +87,7 @@ export type SashProfileType =
   | "KAPI_KANADI" // Ağır Seri Dışa/İçe Açılır Kapı Kanadı
   | "SURME_KANAD" // Sürme Seri Kanat
   | "VASISTAS"; // Vasistas Kanat
+
 
 export type DivisionType =
   | "sabit"
@@ -59,6 +113,7 @@ export interface WindowItem {
   name: string;
   width: number; // mm (dış kasa eni)
   height: number; // mm (dış kasa boyu)
+  quantity?: number; // Poz Adedi (Varsayılan: 1)
   color: ProfileColor;
   systemType?: SystemType;
   kasaProfileType?: KasaProfileType;
@@ -69,6 +124,7 @@ export interface WindowItem {
   horizontalMullionsCount: number; // Kasa geneli Yatay Orta Kayıt sayısı
   divisions: DivisionItem[];
 }
+
 
 export interface CutPiece {
   id: string;
@@ -189,23 +245,25 @@ export function calculateWindowDimensions(
     steelShortage,
   } = settings;
 
-  const cutPieces: CutPiece[] = [];
-  const glasses: GlassCut[] = [];
-
-  // 1. Kasa Profil Kesimleri
+  const seriesInfo = EGEPEN_SERIES.find((s) => s.id === systemType) || EGEPEN_SERIES[1];
+  const isSurme = systemType === "EGEPEN_LEGEND_SLIDE" || systemType === "EGEPEN_HS76";
   const isEsikli = kasaProfileType === "ESIKLI_KASA";
-  const isSurme = systemType === "SURME_SISTEM" || systemType === "HEBESCHIEBE";
 
-  let kasaLabel = "L Kasa Dış Profili";
-  if (kasaProfileType === "T_KASA") kasaLabel = "T Kasa (Kayıtlı Kasa) Profili";
-  if (kasaProfileType === "Z_KASA") kasaLabel = "Z Kasa (Pervazlı Kasa) Profili";
-  if (kasaProfileType === "SURME_KASA_2") kasaLabel = "2 Raylı Sürme Kasa Profili";
-  if (kasaProfileType === "SURME_KASA_3") kasaLabel = "3 Raylı Sürme Kasa Profili";
+  let kasaLabel = `${seriesInfo.name} L Kasa Profili`;
+  if (kasaProfileType === "T_KASA") kasaLabel = `${seriesInfo.name} T Kasa (Orta Kayıtlı Kasa)`;
+  if (kasaProfileType === "Z_KASA") kasaLabel = `${seriesInfo.name} Z Kasa (Pervazlı Kasa)`;
+  if (kasaProfileType === "SURME_KASA_2") kasaLabel = `${seriesInfo.name} 2 Raylı Sürme Kasa`;
+  if (kasaProfileType === "SURME_KASA_3") kasaLabel = `${seriesInfo.name} 3 Raylı Sürme Kasa`;
 
   const kasaEnLength = width + weldAllowance * 2;
   const kasaBoyLength = height + weldAllowance * 2;
 
+  const cutPieces: CutPiece[] = [];
+  const glasses: GlassCut[] = [];
+
+
   if (isEsikli) {
+
     cutPieces.push({
       id: "kasa-ust",
       label: "Kasa Üst Profili (L Kasa)",
@@ -673,7 +731,7 @@ export function optimizeCutList(
   return stockBars;
 }
 
-// Ercom Smart CNC Veri İhracatı (Kaban, Murat, Yılmaz, Biesse CNC Otomasyon Formatı)
+// CNC Veri İhracatı (Kaban, Murat, Yılmaz, Biesse CNC Otomasyon Formatı)
 export function exportToCNCData(
   items: WindowItem[],
   machineBrand: "KABAN" | "MURAT" | "YILMAZ" | "GENERIC_NC" = "KABAN"
@@ -681,11 +739,12 @@ export function exportToCNCData(
   const lines: string[] = [];
   const timestamp = new Date().toISOString();
 
-  lines.push(`; ERCOM SMART ENTERPRISE CNC AUTOMATION FILE`);
+  lines.push(`; CNC PROFILE AUTOMATION FILE`);
   lines.push(`; MACHINE: ${machineBrand}`);
   lines.push(`; GENERATED: ${timestamp}`);
   lines.push(`; HEADER: POS_NO;PROFILE_TYPE;COLOR;LENGTH_MM;ANGLE_L;ANGLE_R;BARCODE;OPS`);
   lines.push(``);
+
 
   let posCounter = 1;
   items.forEach((item) => {
@@ -724,34 +783,42 @@ export function calculateOrderSummary(
 
   const allCutPieces: CutPiece[] = [];
   itemResults.forEach(({ item, calc }) => {
+    const qty = item.quantity || 1;
     calc.cutPieces.forEach((piece) => {
       allCutPieces.push({
         ...piece,
+        quantity: piece.quantity * qty,
         label: `${piece.label} (${item.name})`,
       });
     });
   });
 
   const allGlasses: GlassCut[] = [];
-  itemResults.forEach(({ calc }) => {
-    allGlasses.push(...calc.glasses);
+  itemResults.forEach(({ item, calc }) => {
+    const qty = item.quantity || 1;
+    calc.glasses.forEach((glass) => {
+      allGlasses.push({
+        ...glass,
+        quantity: glass.quantity * qty,
+      });
+    });
   });
 
   const totalProfileMeters = Number(
-    itemResults.reduce((acc, curr) => acc + curr.calc.totalProfileMeters, 0).toFixed(2)
+    itemResults.reduce((acc, curr) => acc + curr.calc.totalProfileMeters * (curr.item.quantity || 1), 0).toFixed(2)
   );
   const totalSteelMeters = Number(
-    itemResults.reduce((acc, curr) => acc + curr.calc.totalSteelMeters, 0).toFixed(2)
+    itemResults.reduce((acc, curr) => acc + curr.calc.totalSteelMeters * (curr.item.quantity || 1), 0).toFixed(2)
   );
   const totalGlassSqM = Number(
-    itemResults.reduce((acc, curr) => acc + curr.calc.totalGlassSqM, 0).toFixed(2)
+    itemResults.reduce((acc, curr) => acc + curr.calc.totalGlassSqM * (curr.item.quantity || 1), 0).toFixed(2)
   );
 
   const costPriceTL = Math.round(
-    itemResults.reduce((acc, curr) => acc + curr.calc.costPriceTL, 0)
+    itemResults.reduce((acc, curr) => acc + curr.calc.costPriceTL * (curr.item.quantity || 1), 0)
   );
   const totalPriceTL = Math.round(
-    itemResults.reduce((acc, curr) => acc + curr.calc.estimatedPriceTL, 0)
+    itemResults.reduce((acc, curr) => acc + curr.calc.estimatedPriceTL * (curr.item.quantity || 1), 0)
   );
   const profitTL = Math.max(0, totalPriceTL - costPriceTL);
 
@@ -767,4 +834,5 @@ export function calculateOrderSummary(
     profitTL,
   };
 }
+
 

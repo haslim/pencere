@@ -44,10 +44,10 @@ export const GlassOrderModal: React.FC<GlassOrderModalProps> = ({
   const handleExportGlassList = () => {
     const textLines = [
       `==========================================`,
-      `   ERCOM SMART - CAM İMALAT SİPARİŞİ      `,
+      `      CAM & ISICAM İMALAT SİPARİŞİ        `,
       `==========================================`,
-      `Sipariş Başlığı: ${orderTitle}`,
-      `Müşteri: ${customerName}`,
+      `Proje / Başlık: ${orderTitle}`,
+      `Müşteri / Cari: ${customerName}`,
       `Tarih: ${new Date().toLocaleDateString("tr-TR")}`,
       `------------------------------------------`,
       `POZ / GENİŞLİK(mm) / YÜKSEKLİK(mm) / ADET / m² / CAM TİPİ`,
@@ -90,7 +90,7 @@ export const GlassOrderModal: React.FC<GlassOrderModalProps> = ({
               <h2 className="text-lg font-bold text-white flex items-center gap-2">
                 Isıcam & Cam Sipariş Listesi
                 <span className="text-xs px-2 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20">
-                  Ercom Smart Enterprise
+                  Fabrika Sipariş Modülü
                 </span>
               </h2>
               <p className="text-xs text-slate-400">
@@ -98,6 +98,7 @@ export const GlassOrderModal: React.FC<GlassOrderModalProps> = ({
               </p>
             </div>
           </div>
+
           <button
             onClick={onClose}
             className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition"
