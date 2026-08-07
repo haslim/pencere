@@ -106,7 +106,18 @@ export default function SaaSWindowDashboard() {
     return calculateOrderSummary(items, settings);
   }, [items, settings]);
 
+  // Aktif Pozun Sürme Serisi Olup Olmadığı
+  const isSurmeSelected = useMemo(() => {
+    return (
+      activeItem.systemType === "EGEPEN_LEGEND_SLIDE" ||
+      activeItem.systemType === "EGEPEN_HS76" ||
+      (activeItem.systemType as any) === "SURME_SISTEM" ||
+      (activeItem.systemType as any) === "HEBESCHIEBE"
+    );
+  }, [activeItem.systemType]);
+
   // Aktif Düzenlenen Poz Hesaplaması
+
   const calcResult = useMemo(() => {
     return calculateWindowDimensions(activeItem, settings);
   }, [activeItem, settings]);
@@ -490,6 +501,8 @@ export default function SaaSWindowDashboard() {
                 }}
                 className="space-y-4 mt-4"
               >
+
+
                 <div>
                   <label
                     className={`text-xs font-semibold block mb-1 ${
@@ -628,7 +641,7 @@ export default function SaaSWindowDashboard() {
                     Kasa Profil Kesiti
                   </label>
                   <select
-                    value={activeItem.kasaProfileType || "L_KASA"}
+                    value={activeItem.kasaProfileType || (isSurmeSelected ? "SURME_KASA_2" : "L_KASA")}
                     onChange={(e) =>
                       updateActiveItem({ ...activeItem, kasaProfileType: e.target.value as any })
                     }
@@ -638,13 +651,22 @@ export default function SaaSWindowDashboard() {
                         : "bg-slate-50 border-slate-200 text-slate-900"
                     }`}
                   >
-                    <option value="L_KASA">🧱 L Kasa (Dış Kasa)</option>
-                    <option value="T_KASA">🧱 T Kasa (Kayıtlı Kasa)</option>
-                    <option value="Z_KASA">🧱 Z Kasa (Pervazlı Kasa)</option>
-                    <option value="ESIKLI_KASA">🚪 Alüminyum Eşikli Kasa</option>
-                    <option value="SURME_KASA_2">↔️ 2'li Sürme Kasa</option>
-                    <option value="SURME_KASA_3">↔️ 3'lü Sürme Kasa</option>
+                    {!isSurmeSelected && (
+                      <>
+                        <option value="L_KASA">🧱 L Kasa (Dış Kasa)</option>
+                        <option value="T_KASA">🧱 T Kasa (Kayıtlı Kasa)</option>
+                        <option value="Z_KASA">🧱 Z Kasa (Pervazlı Kasa)</option>
+                        <option value="ESIKLI_KASA">🚪 Alüminyum Eşikli Kasa</option>
+                      </>
+                    )}
+                    {isSurmeSelected && (
+                      <>
+                        <option value="SURME_KASA_2">↔️ 2'li Sürme Kasa</option>
+                        <option value="SURME_KASA_3">↔️ 3'lü Sürme Kasa</option>
+                      </>
+                    )}
                   </select>
+
                 </div>
               </div>
 
@@ -696,6 +718,7 @@ export default function SaaSWindowDashboard() {
                 </div>
               </div>
             </div>
+
           </div>
 
           <div className="mt-auto bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-950 p-4 rounded-xl border border-slate-800 space-y-3 text-white shadow-lg">
