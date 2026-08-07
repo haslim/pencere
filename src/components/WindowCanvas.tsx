@@ -747,18 +747,62 @@ export const WindowCanvas: React.FC<WindowCanvasProps> = ({
                       opacity={isDark ? "0.85" : "0.9"}
                     />
 
-                    {/* Cam Üzerinde Net En x Boy Etiketi */}
-                    <text
-                      x={startX + sectionW / 2}
-                      y={startY + sectionH / 2}
-                      textAnchor="middle"
-                      fill={isDark ? "#ffffff" : "#0f172a"}
-                      fontSize="10"
-                      fontWeight="bold"
-                      fontFamily="monospace"
+                    {/* Cam Üzerinde Net En x Boy Etiketi (Tıklayarak Ölçü Düzenlenebilir) */}
+                    <g
+                      className="cursor-pointer hover:opacity-80 transition"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        // Eğer solda/üstte dikey veya yatay kayıt varsa onun konumunu sor
+                        if (cIdx > 0 && vPositions[cIdx - 1]) {
+                          const currentMM = vPositions[cIdx - 1];
+                          const val = prompt(
+                            `Bu bölmenin dikey orta kayıt mesafesini girin (Mevcut: ${currentMM} mm):`,
+                            String(currentMM)
+                          );
+                          if (val) {
+                            const num = Number(val);
+                            if (!isNaN(num) && num > 50 && num < width - 50) {
+                              onUpdateMullionPosition?.("v", cIdx - 1, num);
+                            }
+                          }
+                        } else if (rIdx > 0 && hPositions[rIdx - 1]) {
+                          const currentMM = hPositions[rIdx - 1];
+                          const val = prompt(
+                            `Bu bölmenin yatay orta kayıt mesafesini girin (Mevcut: ${currentMM} mm):`,
+                            String(currentMM)
+                          );
+                          if (val) {
+                            const num = Number(val);
+                            if (!isNaN(num) && num > 50 && num < height - 50) {
+                              onUpdateMullionPosition?.("h", rIdx - 1, num);
+                            }
+                          }
+                        }
+                      }}
                     >
-                      {Math.round(secWMM)}x{Math.round(secHMM)}
-                    </text>
+                      <rect
+                        x={startX + sectionW / 2 - 35}
+                        y={startY + sectionH / 2 - 10}
+                        width={70}
+                        height={18}
+                        rx="4"
+                        fill={isDark ? "#0f172a" : "#ffffff"}
+                        stroke={isDark ? "#38bdf8" : "#2563eb"}
+                        strokeWidth="1"
+                      />
+                      <text
+                        x={startX + sectionW / 2}
+                        y={startY + sectionH / 2 + 3}
+                        textAnchor="middle"
+                        fill={isDark ? "#38bdf8" : "#1e40af"}
+                        fontSize="10"
+                        fontWeight="bold"
+                        fontFamily="monospace"
+                      >
+                        ✏️ {Math.round(secWMM)}x{Math.round(secHMM)}
+                      </text>
+                    </g>
+
 
                     {/* Açılım Yönü Çizgileri */}
                     {(divType === "tek-acilim" || divType === "kapi-ic" || divType === "kapi-dis") && (
