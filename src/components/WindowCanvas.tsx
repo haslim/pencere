@@ -59,9 +59,12 @@ export const WindowCanvas: React.FC<WindowCanvasProps> = ({
     customVerticalMullions,
     customHorizontalMullions,
     divisions,
-    systemType = "STANDART_DOGRAMA",
+    systemType = "EGEPEN_ZENDOW" as any,
     kasaProfileType = "L_KASA",
   } = item;
+
+  const isSurme = systemType === "EGEPEN_LEGEND_SLIDE" || systemType === "EGEPEN_HS76" || systemType === "SURME_SISTEM" || systemType === "HEBESCHIEBE";
+
 
   // Active Tool Mode & Modal States
   const [activeTool, setActiveTool] = useState<WindowToolMode>("select");
@@ -216,83 +219,94 @@ export const WindowCanvas: React.FC<WindowCanvasProps> = ({
             ⚖️ Eşit Dağıt
           </button>
 
-          <button
-            onClick={() => setActiveTool("tek_acilim")}
-            className={`px-2.5 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1 whitespace-nowrap border ${
-              activeTool === "tek_acilim"
-                ? "bg-blue-600 text-white border-blue-600 shadow"
-                : isDark
-                ? "bg-slate-950 border-slate-800 hover:bg-slate-800"
-                : "bg-slate-50 border-slate-200 hover:bg-slate-100"
-            }`}
-          >
-            🪟 Pencere Kanadı
-          </button>
+          {/* Standart Doğrama Serileri İçin Pencere & Kapı Kanat Araçları */}
+          {!isSurme && (
+            <>
+              <button
+                onClick={() => setActiveTool("tek_acilim")}
+                className={`px-2.5 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1 whitespace-nowrap border ${
+                  activeTool === "tek_acilim"
+                    ? "bg-blue-600 text-white border-blue-600 shadow"
+                    : isDark
+                    ? "bg-slate-950 border-slate-800 hover:bg-slate-800"
+                    : "bg-slate-50 border-slate-200 hover:bg-slate-100"
+                }`}
+              >
+                🪟 Pencere Kanadı
+              </button>
 
-          <button
-            onClick={() => setActiveTool("cift_acilim")}
-            className={`px-2.5 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1 whitespace-nowrap border ${
-              activeTool === "cift_acilim"
-                ? "bg-blue-600 text-white border-blue-600 shadow"
-                : isDark
-                ? "bg-slate-950 border-slate-800 hover:bg-slate-800"
-                : "bg-slate-50 border-slate-200 hover:bg-slate-100"
-            }`}
-          >
-            🔄 Çift Açılım
-          </button>
+              <button
+                onClick={() => setActiveTool("cift_acilim")}
+                className={`px-2.5 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1 whitespace-nowrap border ${
+                  activeTool === "cift_acilim"
+                    ? "bg-blue-600 text-white border-blue-600 shadow"
+                    : isDark
+                    ? "bg-slate-950 border-slate-800 hover:bg-slate-800"
+                    : "bg-slate-50 border-slate-200 hover:bg-slate-100"
+                }`}
+              >
+                🔄 Çift Açılım
+              </button>
 
-          <button
-            onClick={() => setActiveTool("kapi_kanadi")}
-            className={`px-2.5 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1 whitespace-nowrap border ${
-              activeTool === "kapi_kanadi"
-                ? "bg-emerald-600 text-white border-emerald-600 shadow"
-                : isDark
-                ? "bg-slate-950 border-slate-800 hover:bg-slate-800 text-emerald-400"
-                : "bg-slate-50 border-slate-200 hover:bg-slate-100 text-emerald-700"
-            }`}
-          >
-            🚪 Kapı Kanadı
-          </button>
+              <button
+                onClick={() => setActiveTool("kapi_kanadi")}
+                className={`px-2.5 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1 whitespace-nowrap border ${
+                  activeTool === "kapi_kanadi"
+                    ? "bg-emerald-600 text-white border-emerald-600 shadow"
+                    : isDark
+                    ? "bg-slate-950 border-slate-800 hover:bg-slate-800 text-emerald-400"
+                    : "bg-slate-50 border-slate-200 hover:bg-slate-100 text-emerald-700"
+                }`}
+              >
+                🚪 Kapı Kanadı
+              </button>
+            </>
+          )}
 
-          <button
-            onClick={() => setActiveTool("surme_kanat")}
-            className={`px-2.5 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1 whitespace-nowrap border ${
-              activeTool === "surme_kanat"
-                ? "bg-indigo-600 text-white border-indigo-600 shadow"
-                : isDark
-                ? "bg-slate-950 border-slate-800 hover:bg-slate-800 text-indigo-400"
-                : "bg-slate-50 border-slate-200 hover:bg-slate-100 text-indigo-700"
-            }`}
-          >
-            ↔️ Hareketli Sürme
-          </button>
+          {/* Yalnızca Sürme Serilerinde (Egepen Legend Slide / HS 76) Görünen Sürme Araçları */}
+          {isSurme && (
+            <>
+              <button
+                onClick={() => setActiveTool("surme_kanat")}
+                className={`px-2.5 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1 whitespace-nowrap border ${
+                  activeTool === "surme_kanat"
+                    ? "bg-indigo-600 text-white border-indigo-600 shadow"
+                    : isDark
+                    ? "bg-slate-950 border-slate-800 hover:bg-slate-800 text-indigo-400"
+                    : "bg-slate-50 border-slate-200 hover:bg-slate-100 text-indigo-700"
+                }`}
+              >
+                ↔️ Hareketli Sürme
+              </button>
 
-          <button
-            onClick={() => setActiveTool("surme_sabit" as any)}
-            className={`px-2.5 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1 whitespace-nowrap border ${
-              (activeTool as any) === "surme_sabit"
-                ? "bg-cyan-600 text-white border-cyan-600 shadow"
-                : isDark
-                ? "bg-slate-950 border-slate-800 hover:bg-slate-800 text-cyan-400"
-                : "bg-slate-50 border-slate-200 hover:bg-slate-100 text-cyan-700"
-            }`}
-          >
-            🔒 Sabit Sürme (Fix)
-          </button>
+              <button
+                onClick={() => setActiveTool("surme_sabit" as any)}
+                className={`px-2.5 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1 whitespace-nowrap border ${
+                  (activeTool as any) === "surme_sabit"
+                    ? "bg-cyan-600 text-white border-cyan-600 shadow"
+                    : isDark
+                    ? "bg-slate-950 border-slate-800 hover:bg-slate-800 text-cyan-400"
+                    : "bg-slate-50 border-slate-200 hover:bg-slate-100 text-cyan-700"
+                }`}
+              >
+                🔒 Sabit Sürme (Fix)
+              </button>
 
-          <button
-            onClick={() => setActiveTool("surme_cift" as any)}
-            className={`px-2.5 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1 whitespace-nowrap border ${
-              (activeTool as any) === "surme_cift"
-                ? "bg-purple-600 text-white border-purple-600 shadow"
-                : isDark
-                ? "bg-slate-950 border-slate-800 hover:bg-slate-800 text-purple-400"
-                : "bg-slate-50 border-slate-200 hover:bg-slate-100 text-purple-700"
-            }`}
-          >
-            ↔️↔️ Çiftli Sürme
-          </button>
+              <button
+                onClick={() => setActiveTool("surme_cift" as any)}
+                className={`px-2.5 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1 whitespace-nowrap border ${
+                  (activeTool as any) === "surme_cift"
+                    ? "bg-purple-600 text-white border-purple-600 shadow"
+                    : isDark
+                    ? "bg-slate-950 border-slate-800 hover:bg-slate-800 text-purple-400"
+                    : "bg-slate-50 border-slate-200 hover:bg-slate-100 text-purple-700"
+                }`}
+              >
+                ↔️↔️ Çiftli Sürme
+              </button>
+            </>
+          )}
+
 
 
           <button

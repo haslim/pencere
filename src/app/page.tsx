@@ -123,24 +123,59 @@ export default function SaaSWindowDashboard() {
     setItems(copy);
   };
 
-  // Yeni Poz Ekleme
+  // Genişlik Input Ref
+  const widthInputRef = React.useRef<HTMLInputElement>(null);
+
+  // Yeni Poz Ekleme (Önceki Pozun Seri, Kasa Tipi ve Rengini Miras Alır)
   const handleAddNewPoz = () => {
+    const lastItem = items[items.length - 1] || activeItem;
     const newPozNum = items.length + 1;
     const newPoz: WindowItem = {
       id: `pencere-${Date.now()}`,
       name: `Poz ${newPozNum}: Yeni Pencere Pozu`,
       width: 1200,
       height: 1200,
-      color: PROFILE_COLORS[0],
+      quantity: 1,
+      color: lastItem?.color || PROFILE_COLORS[0],
+      systemType: lastItem?.systemType || "EGEPEN_ZENDOW",
+      kasaProfileType: lastItem?.kasaProfileType || "L_KASA",
       verticalMullionsCount: 0,
       horizontalMullionsCount: 0,
       divisions: [
         { id: "div-1", type: "sabit", sashVerticalMullions: 0, sashHorizontalMullions: 0 },
       ],
     };
-    setItems([...items, newPoz]);
+    setItems((prev) => [...prev, newPoz]);
     setActiveItemIndex(items.length);
+
+    // Otomatik olarak Genişlik alanına odaklan ve metni seç
+    setTimeout(() => {
+      if (widthInputRef.current) {
+        widthInputRef.current.focus();
+        widthInputRef.current.select();
+      }
+    }, 50);
   };
+
+  // Global (") Çift Tırnak Tuşu Kısayolu Entegrasyonu
+  useEffect(() => {
+    const handleGlobalKeyDown = (e: KeyboardEvent) => {
+      // Çift tırnak tuşu: '"' veya Quote (e.key === '"' veya e.code === 'Quote')
+      if (e.key === '"' || (e.code === 'Quote' && e.shiftKey)) {
+        // Eğer kullanıcı bir metin kutusunda yazıyorsa ve tek başına tırnak basmışsa eylemi tetikle
+        const activeElem = document.activeElement;
+        const isInput = activeElem?.tagName === "INPUT" || activeElem?.tagName === "TEXTAREA";
+        
+        // Input içerisinde dahi olsa " tuşu basıldığında yeni poz aç ve genişliğe odaklan
+        e.preventDefault();
+        handleAddNewPoz();
+      }
+    };
+
+    window.addEventListener("keydown", handleGlobalKeyDown);
+    return () => window.removeEventListener("keydown", handleGlobalKeyDown);
+  }, [items, activeItem]);
+
 
   // Poz Çoğaltma / Kopyalama
   const handleDuplicatePoz = (indexToDup: number) => {
@@ -485,11 +520,13 @@ export default function SaaSWindowDashboard() {
                       Genişlik (mm)
                     </label>
                     <input
+                      ref={widthInputRef}
                       type="number"
                       min={400}
                       max={3500}
                       step={10}
                       value={activeItem.width}
+                      onFocus={(e) => e.target.select()}
                       onChange={(e) =>
                         updateActiveItem({ ...activeItem, width: Number(e.target.value) })
                       }
@@ -514,6 +551,7 @@ export default function SaaSWindowDashboard() {
                       max={3000}
                       step={10}
                       value={activeItem.height}
+                      onFocus={(e) => e.target.select()}
                       onChange={(e) =>
                         updateActiveItem({ ...activeItem, height: Number(e.target.value) })
                       }
@@ -537,6 +575,7 @@ export default function SaaSWindowDashboard() {
                       min={1}
                       max={500}
                       value={activeItem.quantity || 1}
+                      onFocus={(e) => e.target.select()}
                       onChange={(e) =>
                         updateActiveItem({ ...activeItem, quantity: Math.max(1, Number(e.target.value)) })
                       }
@@ -548,6 +587,7 @@ export default function SaaSWindowDashboard() {
                     />
                   </div>
                 </div>
+
 
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
