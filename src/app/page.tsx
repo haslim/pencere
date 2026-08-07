@@ -168,11 +168,10 @@ export default function SaaSWindowDashboard() {
 
   // Aktif Pozun Sürme Serisi Olup Olmadığı
   const isSurmeSelected = useMemo(() => {
-    return (
-      activeItem.systemType === "EGEPEN_LEGEND_SLIDE" ||
-      activeItem.systemType === "EGEPEN_HS76"
-    );
+    const seri = EGEPEN_SERIES.find((s) => s.id === activeItem.systemType);
+    return seri ? seri.isSliding : false;
   }, [activeItem.systemType]);
+
 
 
   // Aktif Düzenlenen Poz Hesaplaması
@@ -181,7 +180,13 @@ export default function SaaSWindowDashboard() {
     return calculateWindowDimensions(activeItem, settings);
   }, [activeItem, settings]);
 
+  // Tüm Sipariş (Tüm Pozlar) Toplam Hesap Çıktısı
+  const orderSummary = useMemo(() => {
+    return calculateOrderSummary(items, settings);
+  }, [items, settings]);
+
   // Siparişteki Tüm Pozların Harmanlanmış 1D Profil Kesim Optimizasyonu
+
   const optimizedBars = useMemo(() => {
     return optimizeCutList(orderSummary.allCutPieces, settings.stockBarLength, settings.sawKerf);
   }, [orderSummary, settings]);
