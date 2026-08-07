@@ -972,75 +972,11 @@ export const WindowCanvas: React.FC<WindowCanvasProps> = ({
                       width: `${sectionW}px`,
                       height: `${sectionH}px`,
                     }}
-                    className={`pointer-events-auto flex flex-col items-center justify-center gap-1 p-1 transition rounded-lg ${
-                      selectedCellIndex === divIdx ? "ring-2 ring-blue-500 bg-blue-500/10" : ""
+                    className={`pointer-events-auto transition rounded-lg ${
+                      selectedCellIndex === divIdx ? "ring-2 ring-blue-500/80 bg-blue-500/10" : ""
                     }`}
-                  >
+                  />
 
-                    <select
-                      value={divType}
-                      onChange={(e) =>
-                        onUpdateDivisionType &&
-                        onUpdateDivisionType(divIdx, e.target.value as any, div.sashProfileType)
-                      }
-                      className={`text-[10px] font-semibold border rounded px-1 py-0.5 shadow-md focus:outline-none transition ${
-                        isDark
-                          ? "bg-slate-900/95 text-slate-200 border-slate-700 hover:border-cyan-500"
-                          : "bg-white/95 text-slate-800 border-slate-300 hover:border-blue-500 shadow-slate-300/50"
-                      }`}
-                    >
-                      <option value="sabit">🔒 Sabit</option>
-                      <option value="tek-acilim">🪟 Pencere Tek Açılım</option>
-                      <option value="cift-acilim">🔄 Pencere Çift Açılım</option>
-                      <option value="vasistas">⬆️ Vasistas</option>
-                      <option value="kapi-ic">🚪 Kapı (İçe Açılır)</option>
-                      <option value="kapi-dis">🚪 Kapı (Dışa Açılır)</option>
-                      <option value="surme-sol">↔️ Sürme (Sol Açılır)</option>
-                    </select>
-
-                    {/* Kanat İçi Orta Kayıt Butonları */}
-                    {divType !== "sabit" && (
-                      <div
-                        className={`flex items-center gap-1 border rounded px-1 py-0.5 text-[9px] font-mono shadow ${
-                          isDark
-                            ? "bg-slate-900/90 border-slate-800 text-slate-300"
-                            : "bg-white/95 border-slate-300 text-slate-800 shadow-slate-200"
-                        }`}
-                      >
-                        <button
-                          title="Kanat İçi Dikey Kayıt Arttır"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onUpdateSashMullions &&
-                              onUpdateSashMullions(
-                                divIdx,
-                                (div.sashVerticalMullions || 0) + 1,
-                                div.sashHorizontalMullions || 0
-                              );
-                          }}
-                          className="hover:text-blue-600 font-bold"
-                        >
-                          +D ({div.sashVerticalMullions || 0})
-                        </button>
-                        <span>|</span>
-                        <button
-                          title="Kanat İçi Yatay Kayıt Arttır"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onUpdateSashMullions &&
-                              onUpdateSashMullions(
-                                divIdx,
-                                div.sashVerticalMullions || 0,
-                                (div.sashHorizontalMullions || 0) + 1
-                              );
-                          }}
-                          className="hover:text-blue-600 font-bold"
-                        >
-                          +Y ({div.sashHorizontalMullions || 0})
-                        </button>
-                      </div>
-                    )}
-                  </div>
                 );
               })
             )}
