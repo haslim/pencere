@@ -16,8 +16,11 @@ export type WindowToolMode =
   | "cift_acilim"
   | "kapi_kanadi"
   | "surme_kanat"
+  | "surme_sabit"
+  | "surme_cift"
   | "vasistas"
   | "sabit";
+
 
 
 interface WindowCanvasProps {
@@ -144,6 +147,10 @@ export const WindowCanvas: React.FC<WindowCanvasProps> = ({
       onUpdateDivisionType(divIdx, "kapi-ic", "KAPI_KANADI");
     } else if (activeTool === "surme_kanat" && onUpdateDivisionType) {
       onUpdateDivisionType(divIdx, "surme-sol", "SURME_KANAD");
+    } else if ((activeTool as any) === "surme_sabit" && onUpdateDivisionType) {
+      onUpdateDivisionType(divIdx, "surme-sabit", "SURME_KANAD");
+    } else if ((activeTool as any) === "surme_cift" && onUpdateDivisionType) {
+      onUpdateDivisionType(divIdx, "surme-cift", "SURME_KANAD");
     } else if (activeTool === "vasistas" && onUpdateDivisionType) {
       onUpdateDivisionType(divIdx, "vasistas", "VASISTAS");
     } else if (activeTool === "sabit" && onUpdateDivisionType) {
@@ -154,6 +161,7 @@ export const WindowCanvas: React.FC<WindowCanvasProps> = ({
       handleOpenAddMullionModal("h");
     }
   };
+
 
   return (
     <div className="w-full flex flex-col items-center gap-4">
@@ -257,8 +265,35 @@ export const WindowCanvas: React.FC<WindowCanvasProps> = ({
                 : "bg-slate-50 border-slate-200 hover:bg-slate-100 text-indigo-700"
             }`}
           >
-            ↔️ Sürme Kanat
+            ↔️ Hareketli Sürme
           </button>
+
+          <button
+            onClick={() => setActiveTool("surme_sabit" as any)}
+            className={`px-2.5 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1 whitespace-nowrap border ${
+              (activeTool as any) === "surme_sabit"
+                ? "bg-cyan-600 text-white border-cyan-600 shadow"
+                : isDark
+                ? "bg-slate-950 border-slate-800 hover:bg-slate-800 text-cyan-400"
+                : "bg-slate-50 border-slate-200 hover:bg-slate-100 text-cyan-700"
+            }`}
+          >
+            🔒 Sabit Sürme (Fix)
+          </button>
+
+          <button
+            onClick={() => setActiveTool("surme_cift" as any)}
+            className={`px-2.5 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1 whitespace-nowrap border ${
+              (activeTool as any) === "surme_cift"
+                ? "bg-purple-600 text-white border-purple-600 shadow"
+                : isDark
+                ? "bg-slate-950 border-slate-800 hover:bg-slate-800 text-purple-400"
+                : "bg-slate-50 border-slate-200 hover:bg-slate-100 text-purple-700"
+            }`}
+          >
+            ↔️↔️ Çiftli Sürme
+          </button>
+
 
           <button
             onClick={() => setActiveTool("sabit")}
@@ -546,10 +581,52 @@ export const WindowCanvas: React.FC<WindowCanvasProps> = ({
                         />
                       </>
                     )}
+
+                    {/* Sürme Görsel Çizgileri & Simgeleri */}
+
+                    {(divType === "surme-sol" || divType === "surme-sag") && (
+                      <path
+                        d={`M ${startX + 12} ${startY + sectionH / 2} L ${startX + sectionW - 12} ${startY + sectionH / 2} M ${startX + (divType === "surme-sol" ? 20 : sectionW - 20)} ${startY + sectionH / 2 - 5} L ${startX + (divType === "surme-sol" ? 12 : sectionW - 12)} ${startY + sectionH / 2} L ${startX + (divType === "surme-sol" ? 20 : sectionW - 20)} ${startY + sectionH / 2 + 5}`}
+                        fill="none"
+                        stroke="#6366f1"
+                        strokeWidth="2.5"
+                      />
+                    )}
+
+                    {divType === "surme-sabit" && (
+                      <text
+                        x={startX + sectionW / 2}
+                        y={startY + 22}
+                        textAnchor="middle"
+                        fill={isDark ? "#38bdf8" : "#0284c7"}
+                        fontSize="11"
+                        fontWeight="bold"
+                      >
+                        🔒 SABİT SÜRME (FIX)
+                      </text>
+                    )}
+
+                    {divType === "surme-cift" && (
+                      <g>
+                        <path
+                          d={`M ${startX + 12} ${startY + sectionH / 2 - 4} L ${startX + sectionW - 12} ${startY + sectionH / 2 - 4} M ${startX + 20} ${startY + sectionH / 2 - 9} L ${startX + 12} ${startY + sectionH / 2 - 4} L ${startX + 20} ${startY + sectionH / 2 + 1}`}
+                          fill="none"
+                          stroke="#a855f7"
+                          strokeWidth="2"
+                        />
+                        <path
+                          d={`M ${startX + 12} ${startY + sectionH / 2 + 6} L ${startX + sectionW - 12} ${startY + sectionH / 2 + 6} M ${startX + sectionW - 20} ${startY + sectionH / 2 + 1} L ${startX + sectionW - 12} ${startY + sectionH / 2 + 6} L ${startX + sectionW - 20} ${startY + sectionH / 2 + 11}`}
+                          fill="none"
+                          stroke="#a855f7"
+                          strokeWidth="2"
+                        />
+                      </g>
+                    )}
                   </g>
                 );
               })
             )}
+
 
             {/* Isıcam Yansıma Gradyanı */}
             <defs>

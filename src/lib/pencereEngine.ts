@@ -96,9 +96,11 @@ export type DivisionType =
   | "vasistas"
   | "kapi-ic"
   | "kapi-dis"
-  | "surme-sol"
-  | "surme-sag"
-  | "surme-cift";
+  | "surme-sol" // Sol Hareketli Sürme
+  | "surme-sag" // Sağ Hareketli Sürme
+  | "surme-sabit" // Sabit Sürme Kanadı (Fix Sliding)
+  | "surme-cift"; // Çift Hareketli Sürme Kanatlar
+
 
 export interface DivisionItem {
   id: string;
