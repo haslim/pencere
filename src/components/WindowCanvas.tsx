@@ -72,7 +72,11 @@ export const WindowCanvas: React.FC<WindowCanvasProps> = ({
   // Active Tool Mode & Modal States
   const [activeTool, setActiveTool] = useState<WindowToolMode>("select");
 
+  // Fare Takip Kayıt Önizleme State
+  const [hoverPos, setHoverPos] = useState<{ x: number; y: number } | null>(null);
+
   const [selectedCellIndex, setSelectedCellIndex] = useState<number | null>(null);
+
 
   // Kayıt Ekleme Modal State
   const [isAddMullionModalOpen, setIsAddMullionModalOpen] = useState<boolean>(false);
@@ -395,8 +399,24 @@ export const WindowCanvas: React.FC<WindowCanvasProps> = ({
         <div
           style={{ width: canvasW, height: canvasH }}
           className={`relative rounded-lg overflow-hidden border shadow-lg transition-all ${
+            activeTool === "v_mullion"
+              ? "cursor-col-resize"
+              : activeTool === "h_mullion"
+              ? "cursor-row-resize"
+              : "cursor-pointer"
+          } ${
             isDark ? "border-slate-700/60 shadow-slate-950/80" : "border-slate-300 shadow-slate-300/40"
           }`}
+          onMouseMove={(e) => {
+            if (activeTool === "v_mullion" || activeTool === "h_mullion") {
+              const rect = e.currentTarget.getBoundingClientRect();
+              setHoverPos({
+                x: e.clientX - rect.left,
+                y: e.clientY - rect.top,
+              });
+            }
+          }}
+          onMouseLeave={() => setHoverPos(null)}
         >
           <svg
             width={canvasW}
@@ -422,6 +442,7 @@ export const WindowCanvas: React.FC<WindowCanvasProps> = ({
               }
             }}
           >
+
 
             {/* Dış Kasa Çerçevesi */}
             <rect
@@ -564,6 +585,75 @@ export const WindowCanvas: React.FC<WindowCanvasProps> = ({
               );
             })}
 
+            {/* 🎯 FARE TAKİP KAYIT HİZALAMA ÇİZGİSİ & CANLI MM ETİKETİ */}
+
+            {hoverPos && activeTool === "v_mullion" && (
+              <g pointerEvents="none">
+                <line
+                  x1={hoverPos.x}
+                  y1={PROFILE_THICKNESS}
+                  x2={hoverPos.x}
+                  y2={canvasH - PROFILE_THICKNESS}
+                  stroke="#06b6d4"
+                  strokeWidth="2.5"
+                  strokeDasharray="4 2"
+                />
+                <rect
+                  x={hoverPos.x - 30}
+                  y={canvasH - PROFILE_THICKNESS - 24}
+                  width={60}
+                  height={20}
+                  rx="4"
+                  fill="#0891b2"
+                />
+                <text
+                  x={hoverPos.x}
+                  y={canvasH - PROFILE_THICKNESS - 10}
+                  textAnchor="middle"
+                  fill="#ffffff"
+                  fontSize="10"
+                  fontWeight="bold"
+                  fontFamily="monospace"
+                >
+                  {Math.round(hoverPos.x / scale)} mm
+                </text>
+              </g>
+            )}
+
+            {hoverPos && activeTool === "h_mullion" && (
+              <g pointerEvents="none">
+                <line
+                  x1={PROFILE_THICKNESS}
+                  y1={hoverPos.y}
+                  x2={canvasW - PROFILE_THICKNESS}
+                  y2={hoverPos.y}
+                  stroke="#06b6d4"
+                  strokeWidth="2.5"
+                  strokeDasharray="4 2"
+                />
+                <rect
+                  x={canvasW - PROFILE_THICKNESS - 65}
+                  y={hoverPos.y - 10}
+                  width={60}
+                  height={20}
+                  rx="4"
+                  fill="#0891b2"
+                />
+                <text
+                  x={canvasW - PROFILE_THICKNESS - 35}
+                  y={hoverPos.y + 4}
+                  textAnchor="middle"
+                  fill="#ffffff"
+                  fontSize="10"
+                  fontWeight="bold"
+                  fontFamily="monospace"
+                >
+                  {Math.round(hoverPos.y / scale)} mm
+                </text>
+              </g>
+            )}
+
+
 
             {/* Bölme Detayları ve Camlar (Hassas Konumlu) */}
             {Array.from({ length: rowCount }).map((_, rIdx) =>
@@ -603,7 +693,18 @@ export const WindowCanvas: React.FC<WindowCanvasProps> = ({
                 const glassBoxH = Math.max(10, sectionH - SASH_MARGIN * 2);
 
                 return (
-                  <g key={`div-${divIdx}`} onClick={() => handleCellClick(divIdx)} className="cursor-pointer">
+                  <g
+                    key={`div-${divIdx}`}
+                    onClick={(e) => {
+                      if (activeTool === "v_mullion" || activeTool === "h_mullion") {
+                        // Tıklama olayını üstteki SVG tıklama olayına bırak ki fare X/Y koordinatını hesaplasın
+                        return;
+                      }
+                      handleCellClick(divIdx);
+                    }}
+                    className="cursor-pointer"
+                  >
+
                     {/* Kanat Çerçevesi */}
                     {divType !== "sabit" && (
                       <rect

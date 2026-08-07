@@ -9,12 +9,14 @@ Tarih: 2026-08-07
 
 | # | Özellik | Efor | Durum |
 |---|---------|------|-------|
-| P1 | Sipariş + müşteri kalıcılığı (localStorage) | S (~1 saat) | 🔲 |
-| P2 | CNC dışa aktarma UI'ı (exportToCNCData çıktısını arayüze bağla) | S–M | 🔲 |
+| P1 | Sipariş + müşteri kalıcılığı (localStorage) | S (~1 saat) | ✅ |
+| P2 | CNC dışa aktarma UI'ı | — | ✅ (zaten mevcut) |
 | P3 | Sipariş/teklif geçmişi (çoklu sipariş) | M | 🔲 |
 | P4 | CutList tekrar eden kesimleri grupla | M | 🔲 |
 | P5 | Motor test paketi (vitest) | L | 🔲 |
 | P6 | `as any` tip dönüşüm denetimi | S–M | 🔲 |
+
+> Güncelleme: P2 incelendiğinde CutListModal'da CNC aktarım sekmesi zaten uygulanmış (makine markası seçici, indirme butonu, önizleme). Raporun ilk sürümündeki "ölü kod" tespiti hatalıydı — iptal edildi.
 
 ## Detaylar
 
