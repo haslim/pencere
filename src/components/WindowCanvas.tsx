@@ -37,6 +37,7 @@ interface WindowCanvasProps {
   ) => void;
   onAddCustomMullion?: (direction: "v" | "h", offset: number) => void;
   onEqualDistributeMullions?: (direction: "v" | "h" | "both") => void;
+  onUpdateMullionPosition?: (direction: "v" | "h", index: number, newOffset: number) => void;
   onRemoveMullion?: (direction: "v" | "h", index: number) => void;
   isDark?: boolean;
 }
@@ -47,9 +48,11 @@ export const WindowCanvas: React.FC<WindowCanvasProps> = ({
   onUpdateSashMullions,
   onAddCustomMullion,
   onEqualDistributeMullions,
+  onUpdateMullionPosition,
   onRemoveMullion,
   isDark = false,
 }) => {
+
   const {
     width,
     height,
@@ -199,18 +202,31 @@ export const WindowCanvas: React.FC<WindowCanvasProps> = ({
           </button>
 
           <button
-            onClick={() => handleOpenAddMullionModal("v")}
-            className="px-2.5 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1 whitespace-nowrap border bg-slate-50 hover:bg-blue-50 border-slate-200 text-blue-700"
+            onClick={() => setActiveTool(activeTool === "v_mullion" ? "select" : "v_mullion")}
+            className={`px-2.5 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1 whitespace-nowrap border ${
+              activeTool === "v_mullion"
+                ? "bg-cyan-600 text-white border-cyan-600 shadow"
+                : isDark
+                ? "bg-slate-950 border-slate-800 hover:bg-slate-800 text-cyan-400"
+                : "bg-slate-50 border-slate-200 hover:bg-slate-100 text-blue-700"
+            }`}
           >
-            ╍ +Dikey Kayıt (Konumlandırmalı)
+            ╍ +Dikey Kayıt (Tıkla & Konumlandır)
           </button>
 
           <button
-            onClick={() => handleOpenAddMullionModal("h")}
-            className="px-2.5 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1 whitespace-nowrap border bg-slate-50 hover:bg-blue-50 border-slate-200 text-blue-700"
+            onClick={() => setActiveTool(activeTool === "h_mullion" ? "select" : "h_mullion")}
+            className={`px-2.5 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1 whitespace-nowrap border ${
+              activeTool === "h_mullion"
+                ? "bg-cyan-600 text-white border-cyan-600 shadow"
+                : isDark
+                ? "bg-slate-950 border-slate-800 hover:bg-slate-800 text-cyan-400"
+                : "bg-slate-50 border-slate-200 hover:bg-slate-100 text-blue-700"
+            }`}
           >
-            ➖ +Yatay Kayıt (Konumlandırmalı)
+            ➖ +Yatay Kayıt (Tıkla & Konumlandır)
           </button>
+
 
           <button
             onClick={() => onEqualDistributeMullions && onEqualDistributeMullions("both")}
@@ -382,7 +398,31 @@ export const WindowCanvas: React.FC<WindowCanvasProps> = ({
             isDark ? "border-slate-700/60 shadow-slate-950/80" : "border-slate-300 shadow-slate-300/40"
           }`}
         >
-          <svg width={canvasW} height={canvasH} className="w-full h-full">
+          <svg
+            width={canvasW}
+            height={canvasH}
+            className="w-full h-full"
+            onClick={(e) => {
+              if (activeTool === "v_mullion" || activeTool === "h_mullion") {
+                const rect = e.currentTarget.getBoundingClientRect();
+                const clickX = e.clientX - rect.left;
+                const clickY = e.clientY - rect.top;
+
+                if (activeTool === "v_mullion") {
+                  const clickedMM = Math.round(clickX / scale);
+                  if (clickedMM > 60 && clickedMM < width - 60) {
+                    onAddCustomMullion?.("v", clickedMM);
+                  }
+                } else if (activeTool === "h_mullion") {
+                  const clickedMM = Math.round(clickY / scale);
+                  if (clickedMM > 60 && clickedMM < height - 60) {
+                    onAddCustomMullion?.("h", clickedMM);
+                  }
+                }
+              }
+            }}
+          >
+
             {/* Dış Kasa Çerçevesi */}
             <rect
               x={0}
@@ -430,18 +470,42 @@ export const WindowCanvas: React.FC<WindowCanvasProps> = ({
                     stroke={isDark ? "#38bdf8" : "#2563eb"}
                     strokeWidth="1.5"
                   />
-                  {/* Mesafe Metni (Soldan mm) */}
-                  <text
-                    x={xPosCanvas + PROFILE_THICKNESS / 2}
-                    y={PROFILE_THICKNESS + 14}
-                    textAnchor="middle"
-                    fill={isDark ? "#38bdf8" : "#1e40af"}
-                    fontSize="9"
-                    fontWeight="bold"
-                    fontFamily="monospace"
+                  {/* Düzenlenebilir Mesafe Etiketi (Soldan mm) */}
+                  <g
+                    className="cursor-pointer"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      const val = prompt(`Dikey Kayıt ${vIdx + 1} İçin Soldan Yeni MM Mesafesini Girin:`, String(vPosMM));
+                      if (val) {
+                        const num = Number(val);
+                        if (!isNaN(num) && num > 50 && num < width - 50) {
+                          onUpdateMullionPosition?.("v", vIdx, num);
+                        }
+                      }
+                    }}
                   >
-                    {vPosMM}mm
-                  </text>
+                    <rect
+                      x={xPosCanvas - 20}
+                      y={PROFILE_THICKNESS + 4}
+                      width={PROFILE_THICKNESS + 40}
+                      height={18}
+                      rx="4"
+                      fill={isDark ? "#0f172a" : "#ffffff"}
+                      stroke={isDark ? "#38bdf8" : "#2563eb"}
+                      strokeWidth="1"
+                    />
+                    <text
+                      x={xPosCanvas + PROFILE_THICKNESS / 2}
+                      y={PROFILE_THICKNESS + 16}
+                      textAnchor="middle"
+                      fill={isDark ? "#38bdf8" : "#1e40af"}
+                      fontSize="9"
+                      fontWeight="bold"
+                      fontFamily="monospace"
+                    >
+                      ✏️ {vPosMM}mm
+                    </text>
+                  </g>
                 </g>
               );
             })}
@@ -460,21 +524,46 @@ export const WindowCanvas: React.FC<WindowCanvasProps> = ({
                     stroke={isDark ? "#38bdf8" : "#2563eb"}
                     strokeWidth="1.5"
                   />
-                  {/* Mesafe Metni (Üstten mm) */}
-                  <text
-                    x={PROFILE_THICKNESS + 24}
-                    y={yPosCanvas + PROFILE_THICKNESS / 2 + 3}
-                    textAnchor="middle"
-                    fill={isDark ? "#38bdf8" : "#1e40af"}
-                    fontSize="9"
-                    fontWeight="bold"
-                    fontFamily="monospace"
+                  {/* Düzenlenebilir Mesafe Etiketi (Üstten mm) */}
+                  <g
+                    className="cursor-pointer"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      const val = prompt(`Yatay Kayıt ${hIdx + 1} İçin Üstten Yeni MM Mesafesini Girin:`, String(hPosMM));
+                      if (val) {
+                        const num = Number(val);
+                        if (!isNaN(num) && num > 50 && num < height - 50) {
+                          onUpdateMullionPosition?.("h", hIdx, num);
+                        }
+                      }
+                    }}
                   >
-                    {hPosMM}mm
-                  </text>
+                    <rect
+                      x={PROFILE_THICKNESS + 4}
+                      y={yPosCanvas - 9}
+                      width={55}
+                      height={18}
+                      rx="4"
+                      fill={isDark ? "#0f172a" : "#ffffff"}
+                      stroke={isDark ? "#38bdf8" : "#2563eb"}
+                      strokeWidth="1"
+                    />
+                    <text
+                      x={PROFILE_THICKNESS + 31}
+                      y={yPosCanvas + 3}
+                      textAnchor="middle"
+                      fill={isDark ? "#38bdf8" : "#1e40af"}
+                      fontSize="9"
+                      fontWeight="bold"
+                      fontFamily="monospace"
+                    >
+                      ✏️ {hPosMM}mm
+                    </text>
+                  </g>
                 </g>
               );
             })}
+
 
             {/* Bölme Detayları ve Camlar (Hassas Konumlu) */}
             {Array.from({ length: rowCount }).map((_, rIdx) =>

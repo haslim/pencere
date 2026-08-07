@@ -12,6 +12,7 @@ import {
   calculateWindowDimensions,
   calculateOrderSummary,
   optimizeCutList,
+  resolveMullionPositions,
 } from "@/lib/pencereEngine";
 import { DEFAULT_SETTINGS, AppSettings, SettingsModal } from "@/components/SettingsModal";
 import { WindowCanvas } from "@/components/WindowCanvas";
@@ -344,6 +345,89 @@ export default function SaaSWindowDashboard() {
       customHorizontalMullions: direction === "v" ? activeItem.customHorizontalMullions : undefined,
     });
   };
+
+  // Mevcut Kaydın Konumunu (mm) Güncelleme
+  const handleUpdateMullionPosition = (direction: "v" | "h", index: number, newOffset: number) => {
+    if (direction === "v") {
+      const vPositions = resolveMullionPositions(
+        activeItem.width,
+        activeItem.verticalMullionsCount,
+        activeItem.customVerticalMullions
+      );
+      const updatedList = [...vPositions];
+      updatedList[index] = newOffset;
+      updateActiveItem({
+        ...activeItem,
+        customVerticalMullions: updatedList,
+      });
+    } else {
+      const hPositions = resolveMullionPositions(
+        activeItem.height,
+        activeItem.horizontalMullionsCount,
+        activeItem.customHorizontalMullions
+      );
+      const updatedList = [...hPositions];
+      updatedList[index] = newOffset;
+      updateActiveItem({
+        ...activeItem,
+        customHorizontalMullions: updatedList,
+      });
+    }
+  };
+
+  // Kayıt Silme
+  const handleRemoveMullion = (direction: "v" | "h", indexToRemove: number) => {
+    if (direction === "v") {
+      if (activeItem.verticalMullionsCount <= 0) return;
+      const vCount = activeItem.verticalMullionsCount - 1;
+      const currentPositions = resolveMullionPositions(
+        activeItem.width,
+        activeItem.verticalMullionsCount,
+        activeItem.customVerticalMullions
+      );
+      const filteredCustom = currentPositions.filter((_, idx) => idx !== indexToRemove);
+
+      const totalDivs = (vCount + 1) * (activeItem.horizontalMullionsCount + 1);
+      const newDivisions = Array.from({ length: totalDivs }).map((_, idx) => ({
+        id: `div-${idx + 1}`,
+        type: (activeItem.divisions[idx]?.type || "sabit") as any,
+        sashVerticalMullions: activeItem.divisions[idx]?.sashVerticalMullions || 0,
+        sashHorizontalMullions: activeItem.divisions[idx]?.sashHorizontalMullions || 0,
+      }));
+
+      updateActiveItem({
+        ...activeItem,
+        verticalMullionsCount: vCount,
+        customVerticalMullions: vCount > 0 ? filteredCustom : undefined,
+        divisions: newDivisions,
+      });
+    } else {
+      if (activeItem.horizontalMullionsCount <= 0) return;
+      const hCount = activeItem.horizontalMullionsCount - 1;
+      const currentPositions = resolveMullionPositions(
+        activeItem.height,
+        activeItem.horizontalMullionsCount,
+        activeItem.customHorizontalMullions
+      );
+      const filteredCustom = currentPositions.filter((_, idx) => idx !== indexToRemove);
+
+      const totalDivs = (activeItem.verticalMullionsCount + 1) * (hCount + 1);
+      const newDivisions = Array.from({ length: totalDivs }).map((_, idx) => ({
+        id: `div-${idx + 1}`,
+        type: (activeItem.divisions[idx]?.type || "sabit") as any,
+        sashVerticalMullions: activeItem.divisions[idx]?.sashVerticalMullions || 0,
+        sashHorizontalMullions: activeItem.divisions[idx]?.sashHorizontalMullions || 0,
+      }));
+
+      updateActiveItem({
+        ...activeItem,
+        horizontalMullionsCount: hCount,
+        customHorizontalMullions: hCount > 0 ? filteredCustom : undefined,
+        divisions: newDivisions,
+      });
+    }
+  };
+
 
   // Bölme Tipi & Kanat Profili Güncelleme
   const handleUpdateDivisionType = (
@@ -944,8 +1028,11 @@ export default function SaaSWindowDashboard() {
               onUpdateSashMullions={handleUpdateSashMullions}
               onAddCustomMullion={handleAddCustomMullion}
               onEqualDistributeMullions={handleEqualDistributeMullions}
+              onUpdateMullionPosition={handleUpdateMullionPosition}
+              onRemoveMullion={handleRemoveMullion}
               isDark={isDark}
             />
+
           </div>
 
           <div
