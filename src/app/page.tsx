@@ -197,7 +197,7 @@ export default function SaaSWindowDashboard() {
   const widthInputRef = React.useRef<HTMLInputElement>(null);
 
   // Yeni Poz Ekleme (Önceki Pozun Seri, Kasa Tipi ve Rengini Miras Alır)
-  const handleAddNewPoz = () => {
+  const handleAddNewPoz = useCallback(() => {
     const lastItem = items[items.length - 1] || activeItem;
     const newPozNum = items.length + 1;
     const newPoz: WindowItem = {
@@ -225,7 +225,7 @@ export default function SaaSWindowDashboard() {
         widthInputRef.current.select();
       }
     }, 50);
-  };
+  }, [items, activeItem]);
 
   // Global (") Çift Tırnak Tuşu Kısayolu Entegrasyonu
   useEffect(() => {
@@ -240,7 +240,7 @@ export default function SaaSWindowDashboard() {
 
     window.addEventListener("keydown", handleGlobalKeyDown);
     return () => window.removeEventListener("keydown", handleGlobalKeyDown);
-  }, [items, activeItem]);
+  }, [handleAddNewPoz]);
 
 
   // Poz Çoğaltma / Kopyalama
