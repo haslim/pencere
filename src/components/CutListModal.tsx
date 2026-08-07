@@ -36,6 +36,28 @@ export const CutListModal: React.FC<CutListModalProps> = ({
     }
   }, [cutPieces, stockMode, standardBarLength, customStockList, sawKerf]);
 
+  // Atölye Kesim Listesini Gruplama (P4)
+  const groupedCutPieces = useMemo(() => {
+    const groups: { [key: string]: CutPiece } = {};
+
+    cutPieces.forEach((piece) => {
+      // Poz ismini parça etiketinden temizle (örn: "Kasa En (Poz 1)" -> "Kasa En")
+      const cleanLabel = piece.label.replace(/\s*\([^)]*\)\s*$/, "").trim();
+      const key = `${cleanLabel}_${piece.type}_${piece.length}_${piece.leftAngle || 90}_${piece.rightAngle || 90}_${piece.colorName}`;
+
+      if (groups[key]) {
+        groups[key].quantity += piece.quantity;
+      } else {
+        groups[key] = {
+          ...piece,
+          label: cleanLabel,
+        };
+      }
+    });
+
+    return Object.values(groups).sort((a, b) => b.length - a.length);
+  }, [cutPieces]);
+
   if (!isOpen) return null;
 
   const totalWaste = optimizedBars.reduce((sum, b) => sum + b.wasteLength, 0);
@@ -346,8 +368,8 @@ export const CutListModal: React.FC<CutListModalProps> = ({
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-800 text-slate-300">
-                      {cutPieces.map((piece) => (
-                        <tr key={piece.id} className="hover:bg-slate-800/40 transition">
+                      {groupedCutPieces.map((piece, idx) => (
+                        <tr key={`${piece.id}_${idx}`} className="hover:bg-slate-800/40 transition">
                           <td className="px-4 py-3 font-medium text-white">
                             {piece.label}
                           </td>

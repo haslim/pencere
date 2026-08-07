@@ -20,6 +20,7 @@ import { CutListModal } from "@/components/CutListModal";
 import { GlassOrderModal } from "@/components/GlassOrderModal";
 import { QuoteModal } from "@/components/QuoteModal";
 import { CustomerModal, DEFAULT_CUSTOMERS } from "@/components/CustomerModal";
+import { OrderHistoryModal } from "@/components/OrderHistoryModal";
 
 export type ThemeMode = "light" | "dark" | "system";
 
@@ -119,6 +120,13 @@ export default function SaaSWindowDashboard() {
   const [isCutModalOpen, setIsCutModalOpen] = useState(false);
   const [isGlassModalOpen, setIsGlassModalOpen] = useState(false);
   const [isQuoteModalOpen, setIsQuoteModalOpen] = useState(false);
+  const [isOrderHistoryOpen, setIsOrderHistoryOpen] = useState(false);
+
+  // Kayıtlı siparişten pozları geri yükleme
+  const handleLoadOrder = useCallback((loadedItems: WindowItem[]) => {
+    updateItems(loadedItems);
+    setActiveItemIndex(0);
+  }, []);
 
   // Sayfa yüklendiğinde ayarları ve temayı yükle
   useEffect(() => {
@@ -345,6 +353,21 @@ export default function SaaSWindowDashboard() {
       customHorizontalMullions: direction === "v" ? activeItem.customHorizontalMullions : undefined,
     });
   };
+
+  // Doğramanın İçini İç Kayıtsız Tamamen Boşaltma (Temizle / Sıfırla)
+  const handleClearAllMullions = () => {
+    updateActiveItem({
+      ...activeItem,
+      verticalMullionsCount: 0,
+      horizontalMullionsCount: 0,
+      customVerticalMullions: undefined,
+      customHorizontalMullions: undefined,
+      divisions: [
+        { id: "div-1", type: "sabit", sashVerticalMullions: 0, sashHorizontalMullions: 0 },
+      ],
+    });
+  };
+
 
   // Mevcut Kaydın Konumunu (mm) Güncelleme
   const handleUpdateMullionPosition = (direction: "v" | "h", index: number, newOffset: number) => {
@@ -577,6 +600,16 @@ export default function SaaSWindowDashboard() {
             }`}
           >
             ⚙️ Ayarlar
+          </button>
+          <button
+            onClick={() => setIsOrderHistoryOpen(true)}
+            className={`px-3 py-1.5 border rounded-xl text-xs font-semibold transition shadow-sm flex items-center gap-1.5 ${
+              isDark
+                ? "bg-slate-900 hover:bg-slate-800 text-slate-300 border-slate-700"
+                : "bg-white hover:bg-slate-100 text-slate-700 border-slate-200"
+            }`}
+          >
+            🗂️ Geçmiş
           </button>
           <button
             onClick={() => setIsCutModalOpen(true)}
@@ -1028,10 +1061,12 @@ export default function SaaSWindowDashboard() {
               onUpdateSashMullions={handleUpdateSashMullions}
               onAddCustomMullion={handleAddCustomMullion}
               onEqualDistributeMullions={handleEqualDistributeMullions}
+              onClearAllMullions={handleClearAllMullions}
               onUpdateMullionPosition={handleUpdateMullionPosition}
               onRemoveMullion={handleRemoveMullion}
               isDark={isDark}
             />
+
 
           </div>
 
@@ -1154,6 +1189,14 @@ export default function SaaSWindowDashboard() {
         activeCustomer={activeCustomer}
         onSelectCustomer={(cust) => selectCustomer(cust)}
         onAddCustomer={(newCust) => updateCustomers([...customers, newCust])}
+      />
+
+      <OrderHistoryModal
+        isOpen={isOrderHistoryOpen}
+        onClose={() => setIsOrderHistoryOpen(false)}
+        items={items}
+        customerName={activeCustomer.name}
+        onLoadOrder={handleLoadOrder}
       />
 
       <SettingsModal

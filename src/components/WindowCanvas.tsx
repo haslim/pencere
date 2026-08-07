@@ -37,6 +37,7 @@ interface WindowCanvasProps {
   ) => void;
   onAddCustomMullion?: (direction: "v" | "h", offset: number) => void;
   onEqualDistributeMullions?: (direction: "v" | "h" | "both") => void;
+  onClearAllMullions?: () => void;
   onUpdateMullionPosition?: (direction: "v" | "h", index: number, newOffset: number) => void;
   onRemoveMullion?: (direction: "v" | "h", index: number) => void;
   isDark?: boolean;
@@ -48,10 +49,12 @@ export const WindowCanvas: React.FC<WindowCanvasProps> = ({
   onUpdateSashMullions,
   onAddCustomMullion,
   onEqualDistributeMullions,
+  onClearAllMullions,
   onUpdateMullionPosition,
   onRemoveMullion,
   isDark = false,
 }) => {
+
 
   const {
     width,
@@ -238,6 +241,19 @@ export const WindowCanvas: React.FC<WindowCanvasProps> = ({
           >
             ⚖️ Eşit Dağıt
           </button>
+
+          <button
+            onClick={() => {
+              if (confirm("Doğramanın içindeki tüm dikey ve yatay orta kayıtlar silinecek. Onaylıyor musunuz?")) {
+                onClearAllMullions?.();
+                setActiveTool("select");
+              }
+            }}
+            className="px-2.5 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1 whitespace-nowrap border bg-rose-50 hover:bg-rose-100 border-rose-200 text-rose-700 shadow-sm"
+          >
+            🧹 Doğramayı Boşalt (Sıfırla)
+          </button>
+
 
           {/* Standart Doğrama Serileri İçin Pencere & Kapı Kanat Araçları */}
           {!isSurme && (
