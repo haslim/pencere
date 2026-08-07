@@ -942,7 +942,29 @@ export const WindowCanvas: React.FC<WindowCanvasProps> = ({
                 return (
                   <div
                     key={`ctrl-${divIdx}`}
-                    onClick={() => handleCellClick(divIdx)}
+                    onClick={(e) => {
+                      if (activeTool === "v_mullion" || activeTool === "h_mullion") {
+                        const canvasDiv = e.currentTarget.parentElement?.parentElement;
+                        if (canvasDiv) {
+                          const rect = canvasDiv.getBoundingClientRect();
+                          const clickX = e.clientX - rect.left;
+                          const clickY = e.clientY - rect.top;
+                          if (activeTool === "v_mullion") {
+                            const clickedMM = Math.round(clickX / scale);
+                            if (clickedMM > 60 && clickedMM < width - 60) {
+                              onAddCustomMullion?.("v", clickedMM);
+                            }
+                          } else if (activeTool === "h_mullion") {
+                            const clickedMM = Math.round(clickY / scale);
+                            if (clickedMM > 60 && clickedMM < height - 60) {
+                              onAddCustomMullion?.("h", clickedMM);
+                            }
+                          }
+                        }
+                        return;
+                      }
+                      handleCellClick(divIdx);
+                    }}
                     style={{
                       position: "absolute",
                       left: `${startX}px`,
@@ -954,6 +976,7 @@ export const WindowCanvas: React.FC<WindowCanvasProps> = ({
                       selectedCellIndex === divIdx ? "ring-2 ring-blue-500 bg-blue-500/10" : ""
                     }`}
                   >
+
                     <select
                       value={divType}
                       onChange={(e) =>
