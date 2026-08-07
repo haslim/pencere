@@ -948,84 +948,77 @@ export default function SaaSWindowDashboard() {
           </div>
         </div>
 
-        {/* Sağ Çizim ve Poz Sekmeleri */}
+        {/* Sağ Çizim ve Poz Seçim Paneli */}
         <div className="lg:col-span-8 flex flex-col gap-6">
           <div
-            className={`border rounded-2xl p-3 shadow-md backdrop-blur-sm flex items-center gap-2 overflow-x-auto transition-colors ${
+            className={`border rounded-2xl p-3 shadow-md backdrop-blur-sm flex flex-wrap items-center justify-between gap-3 transition-colors ${
               isDark
                 ? "bg-slate-900/80 border-slate-800 text-slate-200"
                 : "bg-white/90 border-slate-200/80 text-slate-800 shadow-slate-200/50"
             }`}
           >
-            <span
-              className={`text-xs font-bold px-2 flex items-center gap-1 ${
-                isDark ? "text-slate-400" : "text-slate-500"
-              }`}
-            >
-              🪟 Pozlar:
-            </span>
+            <div className="flex items-center gap-2 flex-1 min-w-[260px]">
+              <span
+                className={`text-xs font-extrabold px-1 flex items-center gap-1.5 whitespace-nowrap ${
+                  isDark ? "text-cyan-400" : "text-blue-700"
+                }`}
+              >
+                🪟 Aktif Poz Listesi:
+              </span>
 
-            {items.map((item, idx) => {
-              const isActive = idx === activeItemIndex;
-              return (
-                <div
-                  key={item.id}
-                  onClick={() => setActiveItemIndex(idx)}
-                  className={`px-3 py-1.5 rounded-xl border text-xs font-bold cursor-pointer transition flex items-center gap-2 whitespace-nowrap ${
-                    isActive
-                      ? isDark
-                        ? "bg-cyan-600 text-white border-cyan-500 shadow-md shadow-cyan-500/20"
-                        : "bg-blue-600 text-white border-blue-600 shadow-md shadow-blue-500/20"
-                      : isDark
-                      ? "bg-slate-950 border-slate-800 text-slate-300 hover:bg-slate-900"
-                      : "bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100"
-                  }`}
+              {/* Tıklanınca Açılan Şık Poz Seçenek Listesi */}
+              <select
+                value={activeItemIndex}
+                onChange={(e) => setActiveItemIndex(Number(e.target.value))}
+                className={`flex-1 border rounded-xl px-3 py-2 text-xs font-bold focus:outline-none transition shadow-sm cursor-pointer ${
+                  isDark
+                    ? "bg-slate-950 border-slate-800 text-white focus:border-cyan-500"
+                    : "bg-slate-50 border-slate-300 text-slate-900 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                }`}
+              >
+                {items.map((item, idx) => (
+                  <option key={item.id} value={idx}>
+                    {idx + 1}. {item.name} — ({item.width} x {item.height} mm) {item.quantity ? `[${item.quantity} Adet]` : ""}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Poz İşlem Butonları (Kopyala, Sil, Yeni Ekle) */}
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <button
+                type="button"
+                onClick={() => handleDuplicatePoz(activeItemIndex)}
+                title="Aktif Pozu Kopyala"
+                className={`px-3 py-1.5 rounded-xl border text-xs font-bold transition flex items-center gap-1.5 shadow-sm ${
+                  isDark
+                    ? "bg-slate-950 border-slate-800 hover:bg-slate-800 text-slate-300"
+                    : "bg-slate-50 border-slate-200 hover:bg-slate-100 text-slate-700"
+                }`}
+              >
+                📋 Kopyala
+              </button>
+
+              {items.length > 1 && (
+                <button
+                  type="button"
+                  onClick={() => handleDeletePoz(activeItemIndex)}
+                  title="Aktif Pozu Sil"
+                  className="px-3 py-1.5 rounded-xl border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-bold transition shadow-sm flex items-center gap-1"
                 >
-                  <span>{item.name}</span>
-                  <span
-                    className={`text-[10px] font-mono opacity-80 ${
-                      isActive ? "text-white" : isDark ? "text-slate-500" : "text-slate-400"
-                    }`}
-                  >
-                    ({item.width}x{item.height})
-                  </span>
+                  🗑️ Pozu Sil
+                </button>
+              )}
 
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleDuplicatePoz(idx);
-                    }}
-                    title="Pozu Kopyala"
-                    className="hover:scale-125 transition ml-1 text-slate-400 hover:text-white"
-                  >
-                    📋
-                  </button>
-
-                  {items.length > 1 && (
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDeletePoz(idx);
-                      }}
-                      title="Pozu Sil"
-                      className="hover:scale-125 transition text-slate-400 hover:text-red-300"
-                    >
-                      ✕
-                    </button>
-                  )}
-                </div>
-              );
-            })}
-
-            <button
-              onClick={handleAddNewPoz}
-              className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition shadow-sm flex items-center gap-1 whitespace-nowrap ml-auto"
-            >
-              + Yeni Poz Ekle
-            </button>
+              <button
+                onClick={handleAddNewPoz}
+                className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition shadow-md flex items-center gap-1 whitespace-nowrap"
+              >
+                + Yeni Poz Ekle
+              </button>
+            </div>
           </div>
+
 
           <div
             className={`border rounded-2xl p-4 sm:p-6 flex flex-col items-center justify-center min-h-[460px] shadow-xl relative backdrop-blur-sm transition-colors ${
