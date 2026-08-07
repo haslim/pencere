@@ -14,6 +14,7 @@ import {
 import { DEFAULT_SETTINGS, AppSettings, SettingsModal } from "@/components/SettingsModal";
 import { WindowCanvas } from "@/components/WindowCanvas";
 import { CutListModal } from "@/components/CutListModal";
+import { GlassOrderModal } from "@/components/GlassOrderModal";
 import { QuoteModal } from "@/components/QuoteModal";
 import { CustomerModal, DEFAULT_CUSTOMERS } from "@/components/CustomerModal";
 
@@ -97,6 +98,7 @@ export default function SaaSWindowDashboard() {
   // Modal Durumları
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
   const [isCutModalOpen, setIsCutModalOpen] = useState(false);
+  const [isGlassModalOpen, setIsGlassModalOpen] = useState(false);
   const [isQuoteModalOpen, setIsQuoteModalOpen] = useState(false);
 
   // Tüm Sipariş (Tüm Pozlar) Toplam Hesap Çıktısı
@@ -305,7 +307,7 @@ export default function SaaSWindowDashboard() {
                     : "bg-blue-50 text-blue-700 border-blue-200/80"
                 }`}
               >
-                Cloud V1.2
+                Ercom Smart Enterprise
               </span>
             </h1>
             <p className={`text-xs ${isDark ? "text-slate-400" : "text-slate-500"}`}>
@@ -316,7 +318,7 @@ export default function SaaSWindowDashboard() {
 
         {/* Orta & Sağ Aksiyon Butonları */}
         <div className="flex items-center flex-wrap gap-2 sm:gap-3">
-          {/* Tema Değiştirici (Light / Dark / System) */}
+          {/* Tema Değiştirici */}
           <div
             className={`flex items-center p-0.5 rounded-xl border text-xs font-medium ${
               isDark ? "bg-slate-950 border-slate-800" : "bg-slate-100 border-slate-200"
@@ -363,7 +365,6 @@ export default function SaaSWindowDashboard() {
             </button>
           </div>
 
-          {/* Cari Kart / Müşteri Seçici Butonu */}
           <button
             onClick={() => setIsCustomerModalOpen(true)}
             className={`px-3 py-1.5 border rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-sm ${
@@ -394,7 +395,17 @@ export default function SaaSWindowDashboard() {
                 : "bg-sky-50 hover:bg-sky-100 text-sky-700 border-sky-200/80"
             }`}
           >
-            ✂️ 1D Kesim ({items.length})
+            ✂️ 1D Kesim & CNC ({items.length})
+          </button>
+          <button
+            onClick={() => setIsGlassModalOpen(true)}
+            className={`px-3 py-1.5 border rounded-xl text-xs font-semibold transition shadow-sm flex items-center gap-1.5 ${
+              isDark
+                ? "bg-slate-800 hover:bg-slate-700 text-blue-300 border-blue-500/30"
+                : "bg-blue-50 hover:bg-blue-100 text-blue-800 border-blue-200"
+            }`}
+          >
+            🪟 Cam Sipariş ({orderSummary.totalGlassSqM} m²)
           </button>
           <button
             onClick={() => setIsQuoteModalOpen(true)}
@@ -407,7 +418,7 @@ export default function SaaSWindowDashboard() {
 
       {/* Main Workspace Layout */}
       <main className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6 p-4 sm:p-6 max-w-[1600px] w-full mx-auto">
-        {/* Sol Kontrol & Parametre Paneli */}
+        {/* Sol Kontrol Paneli */}
         <div
           className={`lg:col-span-4 border rounded-2xl p-5 sm:p-6 flex flex-col gap-6 shadow-xl backdrop-blur-sm transition-colors ${
             isDark
@@ -425,7 +436,6 @@ export default function SaaSWindowDashboard() {
             </h2>
 
             <div className="space-y-4 mt-4">
-              {/* Poz Adı */}
               <div>
                 <label
                   className={`text-xs font-semibold block mb-1 ${
@@ -446,7 +456,6 @@ export default function SaaSWindowDashboard() {
                 />
               </div>
 
-              {/* Genişlik & Yükseklik */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label
@@ -498,7 +507,6 @@ export default function SaaSWindowDashboard() {
                 </div>
               </div>
 
-              {/* ERCOM Sistem Tipi & Kasa Profil Seçimi */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label
@@ -555,7 +563,6 @@ export default function SaaSWindowDashboard() {
                 </div>
               </div>
 
-              {/* Kasa Geneli Dikey & Yatay Orta Kayıtlar */}
               <div
                 className={`p-3.5 rounded-xl border space-y-3 ${
                   isDark
@@ -636,7 +643,6 @@ export default function SaaSWindowDashboard() {
                 </div>
               </div>
 
-              {/* Profil Lamine Rengi */}
               <div>
                 <label
                   className={`text-xs font-semibold block mb-1.5 ${
@@ -685,7 +691,6 @@ export default function SaaSWindowDashboard() {
             </div>
           </div>
 
-          {/* Anlık Hesaplanan Sipariş Geneli Maliyet, Satış & Kar Özeti */}
           <div className="mt-auto bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-950 p-4 rounded-xl border border-slate-800 space-y-3 text-white shadow-lg">
             <div className="flex items-center justify-between border-b border-slate-700/80 pb-2">
               <h3 className="text-xs font-bold uppercase tracking-wider text-slate-300">
@@ -734,9 +739,8 @@ export default function SaaSWindowDashboard() {
           </div>
         </div>
 
-        {/* Sağ İnteraktif Tuval & Çoklu Poz Sekmeleri */}
+        {/* Sağ Çizim ve Poz Sekmeleri */}
         <div className="lg:col-span-8 flex flex-col gap-6">
-          {/* Poz Sekmeleri (Poz 1, Poz 2, ...) */}
           <div
             className={`border rounded-2xl p-3 shadow-md backdrop-blur-sm flex items-center gap-2 overflow-x-auto transition-colors ${
               isDark
@@ -777,7 +781,6 @@ export default function SaaSWindowDashboard() {
                     ({item.width}x{item.height})
                   </span>
 
-                  {/* Kopyala & Sil Butonları */}
                   <button
                     type="button"
                     onClick={(e) => {
@@ -815,7 +818,6 @@ export default function SaaSWindowDashboard() {
             </button>
           </div>
 
-          {/* Çizim Tuval Alanı */}
           <div
             className={`border rounded-2xl p-4 sm:p-6 flex flex-col items-center justify-center min-h-[460px] shadow-xl relative backdrop-blur-sm transition-colors ${
               isDark
@@ -854,7 +856,6 @@ export default function SaaSWindowDashboard() {
             />
           </div>
 
-          {/* İmalat & Kesim Tablosu Önizlemesi */}
           <div
             className={`border rounded-2xl p-6 shadow-xl backdrop-blur-sm transition-colors ${
               isDark
@@ -988,7 +989,17 @@ export default function SaaSWindowDashboard() {
         onClose={() => setIsCutModalOpen(false)}
         cutPieces={orderSummary.allCutPieces}
         optimizedBars={optimizedBars}
+        items={items}
         sawKerf={settings.sawKerf}
+      />
+
+      <GlassOrderModal
+        isOpen={isGlassModalOpen}
+        onClose={() => setIsGlassModalOpen(false)}
+        items={items}
+        settings={settings}
+        orderTitle={items[0]?.name || "İmalat Siparişi"}
+        customerName={activeCustomer.name}
       />
 
       <QuoteModal
@@ -1002,3 +1013,4 @@ export default function SaaSWindowDashboard() {
     </div>
   );
 }
+

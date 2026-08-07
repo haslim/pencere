@@ -76,7 +76,10 @@ export interface CutPiece {
   type: "KASA" | "KANAT" | "KAPI_KANADI" | "ORTA_KAYIT" | "DESTEK_SACI" | "CITA" | "ALUMINYUM_ESIK";
   length: number; // mm
   quantity: number;
-  angle: "45-45" | "90-90" | "45-90";
+  angle: "45-45" | "90-90" | "45-90" | "90-45";
+  leftAngle?: number; // deg e.g. 45 or 90
+  rightAngle?: number; // deg e.g. 45 or 90
+  cncOperations?: string[]; // CNC freze/delik işleme parametreleri
   colorName: string;
 }
 
@@ -86,6 +89,7 @@ export interface GlassCut {
   areaSqM: number;
   quantity: number;
   type: string;
+  posName?: string;
 }
 
 export interface Customer {
@@ -132,8 +136,9 @@ export interface CalculationResult {
 export interface OptimizationStock {
   barLength: number; // mm (6000mm)
   usedLength: number;
-  cuts: { pieceLabel: string; length: number }[];
+  cuts: { pieceLabel: string; length: number; leftAngle?: number; rightAngle?: number; barcode?: string }[];
   wasteLength: number;
+  wastePercentage: number;
 }
 
 // Kayıtların Mutlak mm Konumlarını Hesaplama (Offset + Soldan, - Sağdan/Alttan)
@@ -208,6 +213,9 @@ export function calculateWindowDimensions(
       length: Math.round(kasaEnLength),
       quantity: 1,
       angle: "45-45",
+      leftAngle: 45,
+      rightAngle: 45,
+      cncOperations: ["KABA_SU_TAHLIYE_1", "CORNER_WELD_NOTCH"],
       colorName: color.name,
     });
     cutPieces.push({
@@ -217,6 +225,9 @@ export function calculateWindowDimensions(
       length: Math.round(kasaBoyLength),
       quantity: 2,
       angle: "45-90",
+      leftAngle: 45,
+      rightAngle: 90,
+      cncOperations: ["HINGE_DRILL_LEFT", "LOCK_STRIKER_MILL"],
       colorName: color.name,
     });
     cutPieces.push({
@@ -226,6 +237,9 @@ export function calculateWindowDimensions(
       length: Math.round(width - 12),
       quantity: 1,
       angle: "90-90",
+      leftAngle: 90,
+      rightAngle: 90,
+      cncOperations: [],
       colorName: "Eloksal Alüminyum",
     });
   } else {
@@ -236,6 +250,9 @@ export function calculateWindowDimensions(
       length: Math.round(kasaEnLength),
       quantity: 2,
       angle: "45-45",
+      leftAngle: 45,
+      rightAngle: 45,
+      cncOperations: ["DRAINAGE_SLOT_CENTER", "CORNER_WELD_NOTCH"],
       colorName: color.name,
     });
     cutPieces.push({
@@ -245,6 +262,9 @@ export function calculateWindowDimensions(
       length: Math.round(kasaBoyLength),
       quantity: 2,
       angle: "45-45",
+      leftAngle: 45,
+      rightAngle: 45,
+      cncOperations: ["CORNER_WELD_NOTCH"],
       colorName: color.name,
     });
   }
@@ -257,6 +277,8 @@ export function calculateWindowDimensions(
     length: Math.round(width - steelShortage),
     quantity: isEsikli ? 1 : 2,
     angle: "90-90",
+    leftAngle: 90,
+    rightAngle: 90,
     colorName: "Galvaniz Sac",
   });
   cutPieces.push({
@@ -266,6 +288,8 @@ export function calculateWindowDimensions(
     length: Math.round(height - steelShortage),
     quantity: 2,
     angle: "90-90",
+    leftAngle: 90,
+    rightAngle: 90,
     colorName: "Galvaniz Sac",
   });
 
@@ -290,6 +314,9 @@ export function calculateWindowDimensions(
       length: Math.round(dikeyBoy),
       quantity: verticalMullionsCount,
       angle: "90-90",
+      leftAngle: 90,
+      rightAngle: 90,
+      cncOperations: ["MULLION_END_MILLING", "SCREW_HOLE_DRILL"],
       colorName: color.name,
     });
     cutPieces.push({
@@ -299,15 +326,15 @@ export function calculateWindowDimensions(
       length: Math.round(dikeyBoy - steelShortage),
       quantity: verticalMullionsCount,
       angle: "90-90",
+      leftAngle: 90,
+      rightAngle: 90,
       colorName: "Galvaniz Sac",
     });
   }
 
   // Yatay Orta Kayıtlar
   if (horizontalMullionsCount > 0) {
-    // Kasa içindeki dikey bölme genişliklerine göre yatay kayıtlar kesilir
     const colCount = verticalMullionsCount + 1;
-    let totalYatayLengthSum = 0;
 
     for (let c = 0; c < colCount; c++) {
       const colLeft = c === 0 ? KASA_GENISLIGI : vPositions[c - 1] + ORTA_KAYIT_GENISLIGI / 2;
@@ -321,6 +348,9 @@ export function calculateWindowDimensions(
         length: Math.round(colW + 4),
         quantity: horizontalMullionsCount,
         angle: "90-90",
+        leftAngle: 90,
+        rightAngle: 90,
+        cncOperations: ["MULLION_END_MILLING"],
         colorName: color.name,
       });
 
@@ -331,15 +361,16 @@ export function calculateWindowDimensions(
         length: Math.round(colW + 4 - steelShortage),
         quantity: horizontalMullionsCount,
         angle: "90-90",
+        leftAngle: 90,
+        rightAngle: 90,
         colorName: "Galvaniz Sac",
       });
     }
   }
 
-  // 3. Bölme ve Kanat İçi Hesaplamalar (Hassas Konumlu Hücre Boyutları)
+  // 3. Bölme ve Kanat İçi Hesaplamalar
   const colCount = verticalMullionsCount + 1;
   const rowCount = horizontalMullionsCount + 1;
-  const totalDivisions = colCount * rowCount;
 
   for (let r = 0; r < rowCount; r++) {
     for (let c = 0; c < colCount; c++) {
@@ -353,7 +384,6 @@ export function calculateWindowDimensions(
       const divType = div.type;
       const sashProf = div.sashProfileType || (divType.includes("kapi") ? "KAPI_KANADI" : divType.includes("surme") ? "SURME_KANAD" : "PENCERE_KANADI");
 
-      // Hücre Sınırları ve Net En/Boy Hesabı
       const colLeft = c === 0 ? KASA_GENISLIGI : vPositions[c - 1] + ORTA_KAYIT_GENISLIGI / 2;
       const colRight = c === verticalMullionsCount ? width - KASA_GENISLIGI : vPositions[c] - ORTA_KAYIT_GENISLIGI / 2;
       const sectionW = colRight - colLeft;
@@ -363,7 +393,6 @@ export function calculateWindowDimensions(
       const sectionH = rowBottom - rowTop;
 
       if (divType === "sabit") {
-        // 🔒 Sabit Cam Düşümü
         const glassW = sectionW - glassTolerance;
         const glassH = sectionH - glassTolerance;
         const sqM = (glassW * glassH) / 1000000;
@@ -374,9 +403,9 @@ export function calculateWindowDimensions(
           areaSqM: Number(sqM.toFixed(3)),
           quantity: 1,
           type: "4+16+4 Isıcam Çift Cam (Kasa İçi Sabit)",
+          posName: item.name,
         });
 
-        // Sabit Çıta Kesimleri
         cutPieces.push({
           id: `cita-en-${divIdx}`,
           label: `Bölme ${divIdx + 1} Sabit Çıta (En)`,
@@ -384,6 +413,8 @@ export function calculateWindowDimensions(
           length: Math.round(glassW + 10),
           quantity: 2,
           angle: "45-45",
+          leftAngle: 45,
+          rightAngle: 45,
           colorName: color.name,
         });
         cutPieces.push({
@@ -393,10 +424,11 @@ export function calculateWindowDimensions(
           length: Math.round(glassH + 10),
           quantity: 2,
           angle: "45-45",
+          leftAngle: 45,
+          rightAngle: 45,
           colorName: color.name,
         });
       } else {
-        // 🪟 Açılır Kanat Kesimleri
         const isDoorSash = sashProf === "KAPI_KANADI" || divType.includes("kapi");
         const isSlidingSash = sashProf === "SURME_KANAD" || divType.includes("surme");
 
@@ -417,6 +449,9 @@ export function calculateWindowDimensions(
           length: Math.round(kanatEn),
           quantity: 2,
           angle: "45-45",
+          leftAngle: 45,
+          rightAngle: 45,
+          cncOperations: ["HANDLE_LOCK_ROD_MILLING", "ESPAGNOLETTE_NOTCH"],
           colorName: color.name,
         });
 
@@ -427,10 +462,12 @@ export function calculateWindowDimensions(
           length: Math.round(kanatBoy),
           quantity: 2,
           angle: "45-45",
+          leftAngle: 45,
+          rightAngle: 45,
+          cncOperations: ["HINGE_DRILL_SASH", "CORNER_WELD_NOTCH"],
           colorName: color.name,
         });
 
-        // Kanat İçi Özel Orta Kayıtlar
         const sashInnerW = sectionW - sashOverlap;
         const sashInnerH = sectionH - sashOverlap;
 
@@ -445,6 +482,8 @@ export function calculateWindowDimensions(
             length: Math.round(sashInnerH + 4),
             quantity: sVert,
             angle: "90-90",
+            leftAngle: 90,
+            rightAngle: 90,
             colorName: color.name,
           });
         }
@@ -459,11 +498,12 @@ export function calculateWindowDimensions(
             length: Math.round(kanatYatayBoy),
             quantity: sHoriz * (sVert + 1),
             angle: "90-90",
+            leftAngle: 90,
+            rightAngle: 90,
             colorName: color.name,
           });
         }
 
-        // Kanat İçi Bölünmüş Camlar
         const gCols = sVert + 1;
         const gRows = sHoriz + 1;
         const glassW =
@@ -478,6 +518,7 @@ export function calculateWindowDimensions(
           areaSqM: Number(sqM.toFixed(3)),
           quantity: gCols * gRows,
           type: `4+16+4 Isıcam Çift Cam (${isDoorSash ? "Kapı Kanadı İçi" : isSlidingSash ? "Sürme Kanat İçi" : "Pencere Kanat İçi"})`,
+          posName: item.name,
         });
       }
     }
@@ -516,7 +557,6 @@ export function calculateWindowDimensions(
     profitMarginPercent = 0,
   } = settings;
 
-  // 1. Net Üretim Maliyeti
   const costPriceTL = Math.round(
     totalProfileMeters * (profilePricePerMeter * color.priceMultiplier) +
       totalSteelMeters * steelPricePerMeter +
@@ -524,7 +564,6 @@ export function calculateWindowDimensions(
       acilirSayisi * fittingSetPrice
   );
 
-  // 2. Müşteri Satış Fiyatı (Özel Satış Fiyatları Veya Kar Marjı İle)
   const baseSalesPrice = Math.round(
     totalProfileMeters * ((profileSalePricePerMeter || profilePricePerMeter * 1.3) * color.priceMultiplier) +
       totalSteelMeters * (steelSalePricePerMeter || steelPricePerMeter * 1.3) +
@@ -556,10 +595,20 @@ export function optimizeCutList(
   stockBarLength: number | number[] = 6000,
   sawKerf = 5
 ): OptimizationStock[] {
-  const allPieces: { label: string; length: number }[] = [];
+  const allPieces: { label: string; length: number; leftAngle?: number; rightAngle?: number; barcode: string }[] = [];
+  let indexCounter = 1;
+
   pieces.forEach((p) => {
     for (let i = 0; i < p.quantity; i++) {
-      allPieces.push({ label: `${p.label} #${i + 1}`, length: p.length });
+      const barcode = `PR-${String(indexCounter).padStart(5, "0")}`;
+      allPieces.push({
+        label: `${p.label} #${i + 1}`,
+        length: p.length,
+        leftAngle: p.leftAngle || (p.angle.startsWith("45") ? 45 : 90),
+        rightAngle: p.rightAngle || (p.angle.endsWith("45") ? 45 : 90),
+        barcode,
+      });
+      indexCounter++;
     }
   });
 
@@ -577,9 +626,16 @@ export function optimizeCutList(
 
     for (const bar of stockBars) {
       if (bar.barLength - bar.usedLength >= piece.length + sawKerf) {
-        bar.cuts.push({ pieceLabel: piece.label, length: piece.length });
+        bar.cuts.push({
+          pieceLabel: piece.label,
+          length: piece.length,
+          leftAngle: piece.leftAngle,
+          rightAngle: piece.rightAngle,
+          barcode: piece.barcode,
+        });
         bar.usedLength += piece.length + sawKerf;
         bar.wasteLength = bar.barLength - bar.usedLength;
+        bar.wastePercentage = Number(((bar.wasteLength / bar.barLength) * 100).toFixed(1));
         placed = true;
         break;
       }
@@ -594,16 +650,66 @@ export function optimizeCutList(
           ? Math.min(...suitableLengths)
           : Math.max(...availableLengths, piece.length + sawKerf + 100);
 
+      const used = piece.length + sawKerf;
+      const waste = chosenLength - used;
       stockBars.push({
         barLength: chosenLength,
-        usedLength: piece.length + sawKerf,
-        cuts: [{ pieceLabel: piece.label, length: piece.length }],
-        wasteLength: chosenLength - (piece.length + sawKerf),
+        usedLength: used,
+        cuts: [
+          {
+            pieceLabel: piece.label,
+            length: piece.length,
+            leftAngle: piece.leftAngle,
+            rightAngle: piece.rightAngle,
+            barcode: piece.barcode,
+          },
+        ],
+        wasteLength: waste,
+        wastePercentage: Number(((waste / chosenLength) * 100).toFixed(1)),
       });
     }
   }
 
   return stockBars;
+}
+
+// Ercom Smart CNC Veri İhracatı (Kaban, Murat, Yılmaz, Biesse CNC Otomasyon Formatı)
+export function exportToCNCData(
+  items: WindowItem[],
+  machineBrand: "KABAN" | "MURAT" | "YILMAZ" | "GENERIC_NC" = "KABAN"
+): string {
+  const lines: string[] = [];
+  const timestamp = new Date().toISOString();
+
+  lines.push(`; ERCOM SMART ENTERPRISE CNC AUTOMATION FILE`);
+  lines.push(`; MACHINE: ${machineBrand}`);
+  lines.push(`; GENERATED: ${timestamp}`);
+  lines.push(`; HEADER: POS_NO;PROFILE_TYPE;COLOR;LENGTH_MM;ANGLE_L;ANGLE_R;BARCODE;OPS`);
+  lines.push(``);
+
+  let posCounter = 1;
+  items.forEach((item) => {
+    const calc = calculateWindowDimensions(item);
+    calc.cutPieces.forEach((piece) => {
+      for (let q = 1; q <= piece.quantity; q++) {
+        const barcode = `BAR-${posCounter}-${q}`;
+        const ops = (piece.cncOperations || []).join("|") || "NONE";
+        const lAngle = piece.leftAngle || 45;
+        const rAngle = piece.rightAngle || 45;
+
+        if (machineBrand === "KABAN") {
+          lines.push(`KABAN_CUT,${posCounter},${piece.type},${piece.colorName},${piece.length},${lAngle},${rAngle},${barcode},[${ops}]`);
+        } else if (machineBrand === "MURAT") {
+          lines.push(`MURAT_NC;${posCounter};${piece.type};${piece.length};${lAngle};${rAngle};${barcode}`);
+        } else {
+          lines.push(`${posCounter},${piece.type},${piece.length},${lAngle},${rAngle},${barcode}`);
+        }
+        posCounter++;
+      }
+    });
+  });
+
+  return lines.join("\n");
 }
 
 // Sipariş Geneli (Çoklu Poz) Toplam Hesaplama
@@ -661,3 +767,4 @@ export function calculateOrderSummary(
     profitTL,
   };
 }
+
