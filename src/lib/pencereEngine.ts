@@ -16,11 +16,14 @@ export const PROFILE_COLORS: ProfileColor[] = [
 ];
 
 export type SystemType =
-  | "EGEPEN_LEGEND" // Egepen Legend 80mm Seri (Lüks 6 Odacıklı)
-  | "EGEPEN_ZENDOW" // Egepen Zendow 70mm Seri (Standart 5 Odacıklı)
-  | "EGEPEN_FUSION" // Egepen Fusion 70mm Ekonomi Seri
-  | "EGEPEN_LEGEND_SLIDE" // Egepen Legend Slide Sürme Sistem
-  | "EGEPEN_HS76"; // Egepen HS 76 Hebeschiebe Kaldırmalı Sürme
+  | "EGEPEN_LEGEND" // Egepen Legend 80mm Seri (Orta Contalı)
+  | "EGEPEN_LEGEND_ART" // Egepen Legend Art Sistemi (Tasarım Ödüllü Minimal Seri)
+  | "EGEPEN_LEGEND_CROWN" // Egepen Legend Crown / Crown-76
+  | "EGEPEN_ZENDOW" // Egepen Zendow 70mm Seri
+  | "EGEPEN_ZENDOW_DELUXE" // Egepen Zendow Deluxe Seri
+  | "EGEPEN_SURME" // Egepen Standart Sürme Sistemi (2 & 3 Raylı)
+  | "EGEPEN_LEGEND_PLUS_SLIDE" // Egepen Legend Plus / Slide Sürme
+  | "EGEPEN_HS76"; // Egepen HS 76 Hebeschiebe (Kaldırmalı Sürme)
 
 export interface EgepenSeriesInfo {
   id: SystemType;
@@ -29,6 +32,7 @@ export interface EgepenSeriesInfo {
   chamberCount: number;
   description: string;
   pricePerMeter: number;
+  isSliding: boolean;
 }
 
 export const EGEPEN_SERIES: EgepenSeriesInfo[] = [
@@ -37,42 +41,75 @@ export const EGEPEN_SERIES: EgepenSeriesInfo[] = [
     name: "Egepen Legend (80 mm)",
     depthMm: 80,
     chamberCount: 6,
-    description: "80 mm Genişlik, 6 Odacıklı Üst Sınıf Isı Yalıtım Serisi",
-    pricePerMeter: 210,
+    description: "80 mm Genişlik, 6 Odacıklı & 3 Contalı Üst Isı Yalıtım Serisi",
+    pricePerMeter: 322.51,
+    isSliding: false,
+  },
+  {
+    id: "EGEPEN_LEGEND_ART",
+    name: "Egepen Legend Art (Tasarım Seri)",
+    depthMm: 80,
+    chamberCount: 6,
+    description: "İnce Kesitli Özel Tasarım Pembe/Yalıtımlı Çıtalar",
+    pricePerMeter: 265.66,
+    isSliding: false,
+  },
+  {
+    id: "EGEPEN_LEGEND_CROWN",
+    name: "Egepen Legend Crown (76 mm)",
+    depthMm: 76,
+    chamberCount: 5,
+    description: "76 mm Özel Kanat ve Kasa Profili Sistemleri",
+    pricePerMeter: 313.39,
+    isSliding: false,
   },
   {
     id: "EGEPEN_ZENDOW",
     name: "Egepen Zendow (70 mm)",
     depthMm: 70,
     chamberCount: 5,
-    description: "70 mm Genişlik, 5 Odacıklı Standart Seri",
-    pricePerMeter: 180,
+    description: "70 mm Genişlik, 5 Odacıklı Klasik Seri",
+    pricePerMeter: 308.65,
+    isSliding: false,
   },
   {
-    id: "EGEPEN_FUSION",
-    name: "Egepen Fusion (70 mm)",
+    id: "EGEPEN_ZENDOW_DELUXE",
+    name: "Egepen Zendow Deluxe",
     depthMm: 70,
     chamberCount: 5,
-    description: "70 mm Ekonomik Seri Profil Sistemleri",
-    pricePerMeter: 160,
+    description: "70 mm L-44 ve Pervazlı Kasa Seçenekli Lüks Seri",
+    pricePerMeter: 327.84,
+    isSliding: false,
   },
   {
-    id: "EGEPEN_LEGEND_SLIDE",
-    name: "Egepen Legend Slide Sürme",
+    id: "EGEPEN_SURME",
+    name: "Egepen Sürme Sistemi",
+    depthMm: 110,
+    chamberCount: 3,
+    description: "Ekonomik ve Pratik Sürme Pencere/Kapı Sistemleri",
+    pricePerMeter: 268.37,
+    isSliding: true,
+  },
+  {
+    id: "EGEPEN_LEGEND_PLUS_SLIDE",
+    name: "Egepen Legend Plus / Slide Sürme",
     depthMm: 140,
     chamberCount: 5,
-    description: "Legend Seri Özel Sızdırmaz Sürme Sistem",
-    pricePerMeter: 240,
+    description: "Legend Seri Sızdırmaz Contalı Özel Sürme",
+    pricePerMeter: 466.59,
+    isSliding: true,
   },
   {
     id: "EGEPEN_HS76",
     name: "Egepen HS 76 Hebeschiebe",
     depthMm: 175,
     chamberCount: 5,
-    description: "76 mm Kaldırmalı Ağır Sürme Kapı Serisi",
-    pricePerMeter: 290,
+    description: "76 mm Kaldırmalı Ağır Sürme Kapı Serisi (Hebeschiebe)",
+    pricePerMeter: 746.30,
+    isSliding: true,
   },
 ];
+
 
 export type KasaProfileType =
   | "L_KASA" // Standart L Kasa (Dış Kasa)
@@ -247,9 +284,10 @@ export function calculateWindowDimensions(
     steelShortage,
   } = settings;
 
-  const seriesInfo = EGEPEN_SERIES.find((s) => s.id === systemType) || EGEPEN_SERIES[1];
-  const isSurme = systemType === "EGEPEN_LEGEND_SLIDE" || systemType === "EGEPEN_HS76";
+  const seriesInfo = EGEPEN_SERIES.find((s) => s.id === systemType) || EGEPEN_SERIES[3];
+  const isSurme = seriesInfo.isSliding;
   const isEsikli = kasaProfileType === "ESIKLI_KASA";
+
 
   let kasaLabel = `${seriesInfo.name} L Kasa Profili`;
   if (kasaProfileType === "T_KASA") kasaLabel = `${seriesInfo.name} T Kasa (Orta Kayıtlı Kasa)`;

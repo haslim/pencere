@@ -1,9 +1,11 @@
 "use client";
 
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo, useEffect, useCallback } from "react";
 import {
   PROFILE_COLORS,
+  EGEPEN_SERIES,
   WindowItem,
+
   Customer,
   DivisionType,
   SashProfileType,
@@ -21,29 +23,105 @@ import { CustomerModal, DEFAULT_CUSTOMERS } from "@/components/CustomerModal";
 export type ThemeMode = "light" | "dark" | "system";
 
 export default function SaaSWindowDashboard() {
+  // Müşteri / Cari Kartlar State (En üstte olmalı - Hoisting engelleme)
+  const [customers, setCustomers] = useState<Customer[]>(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("app_customers");
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        } catch (e) {}
+      }
+    }
+    return DEFAULT_CUSTOMERS;
+  });
+
+  const [activeCustomer, setActiveCustomer] = useState<Customer>(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("app_active_customer");
+      if (saved) {
+        try {
+          return JSON.parse(saved);
+        } catch (e) {}
+      }
+    }
+    return DEFAULT_CUSTOMERS[0];
+  });
+
+  const [isCustomerModalOpen, setIsCustomerModalOpen] = useState(false);
+
+  // Siparişteki Doğrama Pozları (Çoklu Poz Mimarisi)
+  const [items, setItems] = useState<WindowItem[]>(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("app_order_items");
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        } catch (e) {}
+      }
+    }
+    return [
+      {
+        id: "pencere-1",
+        name: "Poz 1: Salon Çift Açılım Pencere",
+        width: 1500,
+        height: 1400,
+        color: PROFILE_COLORS[0], // Standart Beyaz
+        verticalMullionsCount: 1,
+        horizontalMullionsCount: 0,
+        divisions: [
+          { id: "div-1", type: "sabit", sashVerticalMullions: 0, sashHorizontalMullions: 0 },
+          { id: "div-2", type: "cift-acilim", sashVerticalMullions: 0, sashHorizontalMullions: 0 },
+        ],
+      },
+    ];
+  });
+
   // Tema Modu State ("light" | "dark" | "system")
-  const [themeMode, setThemeMode] = useState<ThemeMode>("light");
-  const [systemIsDark, setSystemIsDark] = useState<boolean>(false);
+  const [themeMode, setThemeMode] = useState<ThemeMode>(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("app_theme");
+      if (saved) return saved as ThemeMode;
+    }
+    return "light";
+  });
+  const [systemIsDark, setSystemIsDark] = useState<boolean>(() => {
+    if (typeof window !== "undefined") {
+      return window.matchMedia("(prefers-color-scheme: dark)").matches;
+    }
+    return false;
+  });
 
   // Fabrika Parametre Ayarları State (Kalıcı LocalStorage)
-  const [settings, setSettings] = useState<AppSettings>(DEFAULT_SETTINGS);
+  const [settings, setSettings] = useState<AppSettings>(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("app_factory_settings");
+      if (saved) {
+        try {
+          return JSON.parse(saved);
+        } catch (e) {}
+      }
+    }
+    return DEFAULT_SETTINGS;
+  });
+
+  // Şu An Aktif Düzenlenen Poz İndeksi
+  const [activeItemIndex, setActiveItemIndex] = useState<number>(0);
+
+  // Güvenli Aktif Poz Referansı
+  const activeItem = items[activeItemIndex] || items[0];
+
+  // Modal Durumları
+  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
+  const [isCutModalOpen, setIsCutModalOpen] = useState(false);
+  const [isGlassModalOpen, setIsGlassModalOpen] = useState(false);
+  const [isQuoteModalOpen, setIsQuoteModalOpen] = useState(false);
 
   // Sayfa yüklendiğinde ayarları ve temayı yükle
   useEffect(() => {
-    const savedTheme = localStorage.getItem("app_theme") as ThemeMode | null;
-    if (savedTheme) {
-      setThemeMode(savedTheme);
-    }
-
-    const savedSettings = localStorage.getItem("app_factory_settings");
-    if (savedSettings) {
-      try {
-        setSettings(JSON.parse(savedSettings));
-      } catch (e) {}
-    }
-
     const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-    setSystemIsDark(mediaQuery.matches);
 
     const handleChange = (e: MediaQueryListEvent) => setSystemIsDark(e.matches);
     mediaQuery.addEventListener("change", handleChange);
@@ -53,6 +131,27 @@ export default function SaaSWindowDashboard() {
   const handleSaveSettings = (newSettings: AppSettings) => {
     setSettings(newSettings);
     localStorage.setItem("app_factory_settings", JSON.stringify(newSettings));
+  };
+
+  // Sipariş pozlarını güncelleyip kalıcılaştıran yardımcı (Kalıcı Sipariş)
+  const updateItems = (next: WindowItem[] | ((prev: WindowItem[]) => WindowItem[])) => {
+    setItems((prev) => {
+      const resolved = typeof next === "function" ? (next as (p: WindowItem[]) => WindowItem[])(prev) : next;
+      localStorage.setItem("app_order_items", JSON.stringify(resolved));
+      return resolved;
+    });
+  };
+
+  // Müşterileri güncelleyip kalıcılaştıran yardımcı (Kalıcı Cari Kartlar)
+  const updateCustomers = (next: Customer[]) => {
+    setCustomers(next);
+    localStorage.setItem("app_customers", JSON.stringify(next));
+  };
+
+  // Aktif müşteriyi güncelleyip kalıcılaştıran yardımcı
+  const selectCustomer = (next: Customer) => {
+    setActiveCustomer(next);
+    localStorage.setItem("app_active_customer", JSON.stringify(next));
   };
 
   // Aktif Koyu/Açık Durumu Hesabı
@@ -67,54 +166,14 @@ export default function SaaSWindowDashboard() {
     localStorage.setItem("app_theme", mode);
   };
 
-  // Müşteri / Cari Kartlar State
-  const [customers, setCustomers] = useState<Customer[]>(DEFAULT_CUSTOMERS);
-  const [activeCustomer, setActiveCustomer] = useState<Customer>(DEFAULT_CUSTOMERS[0]);
-  const [isCustomerModalOpen, setIsCustomerModalOpen] = useState(false);
-
-  // Siparişteki Doğrama Pozları (Çoklu Poz Mimarisi)
-  const [items, setItems] = useState<WindowItem[]>([
-    {
-      id: "pencere-1",
-      name: "Poz 1: Salon Çift Açılım Pencere",
-      width: 1500,
-      height: 1400,
-      color: PROFILE_COLORS[0], // Standart Beyaz
-      verticalMullionsCount: 1,
-      horizontalMullionsCount: 0,
-      divisions: [
-        { id: "div-1", type: "sabit", sashVerticalMullions: 0, sashHorizontalMullions: 0 },
-        { id: "div-2", type: "cift-acilim", sashVerticalMullions: 0, sashHorizontalMullions: 0 },
-      ],
-    },
-  ]);
-
-  // Şu An Aktif Düzenlenen Poz İndeksi
-  const [activeItemIndex, setActiveItemIndex] = useState<number>(0);
-
-  // Güvenli Aktif Poz Referansı
-  const activeItem = items[activeItemIndex] || items[0];
-
-  // Modal Durumları
-  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
-  const [isCutModalOpen, setIsCutModalOpen] = useState(false);
-  const [isGlassModalOpen, setIsGlassModalOpen] = useState(false);
-  const [isQuoteModalOpen, setIsQuoteModalOpen] = useState(false);
-
-  // Tüm Sipariş (Tüm Pozlar) Toplam Hesap Çıktısı
-  const orderSummary = useMemo(() => {
-    return calculateOrderSummary(items, settings);
-  }, [items, settings]);
-
   // Aktif Pozun Sürme Serisi Olup Olmadığı
   const isSurmeSelected = useMemo(() => {
     return (
       activeItem.systemType === "EGEPEN_LEGEND_SLIDE" ||
-      activeItem.systemType === "EGEPEN_HS76" ||
-      (activeItem.systemType as any) === "SURME_SISTEM" ||
-      (activeItem.systemType as any) === "HEBESCHIEBE"
+      activeItem.systemType === "EGEPEN_HS76"
     );
   }, [activeItem.systemType]);
+
 
   // Aktif Düzenlenen Poz Hesaplaması
 
@@ -131,7 +190,7 @@ export default function SaaSWindowDashboard() {
   const updateActiveItem = (updated: WindowItem) => {
     const copy = [...items];
     copy[activeItemIndex] = updated;
-    setItems(copy);
+    updateItems(copy);
   };
 
   // Genişlik Input Ref
@@ -142,7 +201,7 @@ export default function SaaSWindowDashboard() {
     const lastItem = items[items.length - 1] || activeItem;
     const newPozNum = items.length + 1;
     const newPoz: WindowItem = {
-      id: `pencere-${Date.now()}`,
+      id: `pencere-${crypto.randomUUID()}`,
       name: `Poz ${newPozNum}: Yeni Pencere Pozu`,
       width: 1200,
       height: 1200,
@@ -156,7 +215,7 @@ export default function SaaSWindowDashboard() {
         { id: "div-1", type: "sabit", sashVerticalMullions: 0, sashHorizontalMullions: 0 },
       ],
     };
-    setItems((prev) => [...prev, newPoz]);
+    updateItems((prev) => [...prev, newPoz]);
     setActiveItemIndex(items.length);
 
     // Otomatik olarak Genişlik alanına odaklan ve metni seç
@@ -173,10 +232,6 @@ export default function SaaSWindowDashboard() {
     const handleGlobalKeyDown = (e: KeyboardEvent) => {
       // Çift tırnak tuşu: '"' veya Quote (e.key === '"' veya e.code === 'Quote')
       if (e.key === '"' || (e.code === 'Quote' && e.shiftKey)) {
-        // Eğer kullanıcı bir metin kutusunda yazıyorsa ve tek başına tırnak basmışsa eylemi tetikle
-        const activeElem = document.activeElement;
-        const isInput = activeElem?.tagName === "INPUT" || activeElem?.tagName === "TEXTAREA";
-        
         // Input içerisinde dahi olsa " tuşu basıldığında yeni poz aç ve genişliğe odaklan
         e.preventDefault();
         handleAddNewPoz();
@@ -194,12 +249,12 @@ export default function SaaSWindowDashboard() {
     if (!target) return;
     const duplicated: WindowItem = {
       ...JSON.parse(JSON.stringify(target)),
-      id: `pencere-${Date.now()}`,
+      id: `pencere-${crypto.randomUUID()}`,
       name: `${target.name} (Kopya)`,
     };
     const copy = [...items];
     copy.splice(indexToDup + 1, 0, duplicated);
-    setItems(copy);
+    updateItems(copy);
     setActiveItemIndex(indexToDup + 1);
   };
 
@@ -207,7 +262,7 @@ export default function SaaSWindowDashboard() {
   const handleDeletePoz = (indexToDelete: number) => {
     if (items.length <= 1) return; // En az 1 poz kalmalı
     const copy = items.filter((_, idx) => idx !== indexToDelete);
-    setItems(copy);
+    updateItems(copy);
     if (activeItemIndex >= copy.length) {
       setActiveItemIndex(copy.length - 1);
     }
@@ -623,12 +678,14 @@ export default function SaaSWindowDashboard() {
                         : "bg-slate-50 border-slate-200 text-slate-900"
                     }`}
                   >
-                    <option value="EGEPEN_LEGEND">🥇 Egepen Legend (80 mm / 6 Odacık)</option>
-                    <option value="EGEPEN_ZENDOW">⭐ Egepen Zendow (70 mm / 5 Odacık)</option>
-                    <option value="EGEPEN_FUSION">🔹 Egepen Fusion (70 mm Ekonomi)</option>
-                    <option value="EGEPEN_LEGEND_SLIDE">↔️ Egepen Legend Slide Sürme</option>
-                    <option value="EGEPEN_HS76">🔄 Egepen HS 76 Hebeschiebe</option>
+                    {EGEPEN_SERIES.map((seri) => (
+                      <option key={seri.id} value={seri.id}>
+                        {seri.isSliding ? "↔️ " : "🪟 "}
+                        {seri.name}
+                      </option>
+                    ))}
                   </select>
+
                 </div>
 
 
@@ -661,8 +718,8 @@ export default function SaaSWindowDashboard() {
                     )}
                     {isSurmeSelected && (
                       <>
-                        <option value="SURME_KASA_2">↔️ 2'li Sürme Kasa</option>
-                        <option value="SURME_KASA_3">↔️ 3'lü Sürme Kasa</option>
+                        <option value="SURME_KASA_2">↔️ 2 Raylı Sürme Kasa</option>
+                        <option value="SURME_KASA_3">↔️ 3 Raylı Sürme Kasa</option>
                       </>
                     )}
                   </select>
@@ -1003,8 +1060,8 @@ export default function SaaSWindowDashboard() {
         onClose={() => setIsCustomerModalOpen(false)}
         customers={customers}
         activeCustomer={activeCustomer}
-        onSelectCustomer={(cust) => setActiveCustomer(cust)}
-        onAddCustomer={(newCust) => setCustomers([...customers, newCust])}
+        onSelectCustomer={(cust) => selectCustomer(cust)}
+        onAddCustomer={(newCust) => updateCustomers([...customers, newCust])}
       />
 
       <SettingsModal
