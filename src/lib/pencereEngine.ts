@@ -205,28 +205,55 @@ export interface Order {
   createdAt: string;
 }
 
+export interface AccessoryItem {
+  id: string;
+  name: string;
+  category: "DONANIM" | "MENTESE" | "CONTA_FITIL" | "TAKAZ_BAGLANTI" | "SARF_MALZEME";
+  unit: "ADET" | "TAKIM" | "METRE";
+  quantity: number;
+  unitPriceTL: number;
+  totalPriceTL: number;
+}
+
+export interface CostBreakdown {
+  profileCostTL: number;
+  steelCostTL: number;
+  glassCostTL: number;
+  accessoryCostTL: number;
+  laborCostTL: number;
+}
+
 export interface OrderCalculationResult {
   itemResults: { item: WindowItem; calc: CalculationResult }[];
   allCutPieces: CutPiece[];
   allGlasses: GlassCut[];
+  allAccessories: AccessoryItem[];
   totalProfileMeters: number;
   totalSteelMeters: number;
   totalGlassSqM: number;
+  totalAccessoryCostTL: number;
+  totalLaborCostTL: number;
   costPriceTL: number;
   totalPriceTL: number;
   profitTL: number;
+  breakdown: CostBreakdown;
 }
 
 export interface CalculationResult {
   cutPieces: CutPiece[];
   glasses: GlassCut[];
+  accessories: AccessoryItem[];
   totalProfileMeters: number;
   totalSteelMeters: number;
   totalGlassSqM: number;
+  totalAccessoryCostTL: number;
+  totalLaborCostTL: number;
   costPriceTL: number;
   estimatedPriceTL: number;
   profitTL: number;
+  breakdown: CostBreakdown;
 }
+
 
 export interface OptimizationStock {
   barLength: number; // mm (6000mm)
@@ -626,6 +653,10 @@ export function calculateWindowDimensions(
     }
   }
 
+  // 4. Aksesuar ve Donanım Reçetesi (BOM)
+  const accessories = calculateAccessoryList(item, settings);
+  const totalAccessoryCostTL = accessories.reduce((sum, a) => sum + a.totalPriceTL, 0);
+
   // Toplam Metrajlar
   const totalProfileMeters = Number(
     cutPieces
@@ -645,53 +676,227 @@ export function calculateWindowDimensions(
     glasses.reduce((sum, g) => sum + g.areaSqM * g.quantity, 0).toFixed(2)
   );
 
-  const acilirSayisi = divisions.filter((d) => d.type !== "sabit").length;
-
   const {
     profilePricePerMeter = 180,
     steelPricePerMeter = 65,
     glassPricePerSqM = 950,
-    fittingSetPrice = 450,
-    profileSalePricePerMeter,
-    steelSalePricePerMeter,
-    glassSalePricePerSqM,
-    fittingSalePrice,
-    profitMarginPercent = 0,
+    profitMarginPercent = 25,
   } = settings;
 
-  const costPriceTL = Math.round(
-    totalProfileMeters * (profilePricePerMeter * color.priceMultiplier) +
-      totalSteelMeters * steelPricePerMeter +
-      totalGlassSqM * glassPricePerSqM +
-      acilirSayisi * fittingSetPrice
-  );
+  // Maliyet Kırılımları (Cost Breakdown)
+  const profileCostTL = Math.round(totalProfileMeters * (profilePricePerMeter * color.priceMultiplier));
+  const steelCostTL = Math.round(totalSteelMeters * steelPricePerMeter);
+  const glassCostTL = Math.round(totalGlassSqM * glassPricePerSqM);
+  const accessoryCostTL = Math.round(totalAccessoryCostTL);
+  
+  // Fabrika İşçilik & Amortisman Gider Payı (%15)
+  const laborCostTL = Math.round((profileCostTL + steelCostTL + glassCostTL + accessoryCostTL) * 0.15);
 
-  const baseSalesPrice = Math.round(
-    totalProfileMeters * ((profileSalePricePerMeter || profilePricePerMeter * 1.3) * color.priceMultiplier) +
-      totalSteelMeters * (steelSalePricePerMeter || steelPricePerMeter * 1.3) +
-      totalGlassSqM * (glassSalePricePerSqM || glassPricePerSqM * 1.3) +
-      acilirSayisi * (fittingSalePrice || fittingSetPrice * 1.3)
-  );
+  const costPriceTL = profileCostTL + steelCostTL + glassCostTL + accessoryCostTL + laborCostTL;
 
-  const estimatedPriceTL = Math.round(
-    profitMarginPercent > 0 ? costPriceTL * (1 + profitMarginPercent / 100) : baseSalesPrice
-  );
-
+  // Kar Marjlı Müşteri Satış Fiyatı
+  const marginRate = (profitMarginPercent || 25) / 100;
+  const estimatedPriceTL = Math.round(costPriceTL * (1 + marginRate));
   const profitTL = Math.max(0, estimatedPriceTL - costPriceTL);
+
+  const breakdown: CostBreakdown = {
+    profileCostTL,
+    steelCostTL,
+    glassCostTL,
+    accessoryCostTL,
+    laborCostTL,
+  };
 
   return {
     cutPieces,
     glasses,
+    accessories,
     totalProfileMeters,
     totalSteelMeters,
     totalGlassSqM,
+    totalAccessoryCostTL,
+    totalLaborCostTL: laborCostTL,
     costPriceTL,
     estimatedPriceTL,
     profitTL,
+    breakdown,
   };
 }
 
+// Tam Aksesuar & Sarf Malzeme Hesaplama Motoru (BOM Engine)
+export function calculateAccessoryList(
+  item: WindowItem,
+  settings: AppSettings = DEFAULT_SETTINGS
+): AccessoryItem[] {
+  const accessories: AccessoryItem[] = [];
+  const { width, height, divisions, verticalMullionsCount, horizontalMullionsCount } = item;
+
+  const singleTurnPrice = (settings as any).singleTurnFittingPrice || 280;
+  const doubleTurnPrice = (settings as any).doubleTurnFittingPrice || 550;
+  const doorLockPrice = (settings as any).doorLockFittingPrice || 850;
+  const slidingFittingPrice = (settings as any).slidingFittingPrice || 420;
+  const hingeUnitPrice = (settings as any).hingeUnitPrice || 35;
+  const gasketPricePerMeter = (settings as any).gasketPricePerMeter || 12;
+
+  let singleTurnCount = 0;
+  let doubleTurnCount = 0;
+  let doorCount = 0;
+  let slidingCount = 0;
+  let vasistasCount = 0;
+  let totalHinges = 0;
+
+  divisions.forEach((div) => {
+    if (div.type === "tek-acilim") {
+      singleTurnCount++;
+      totalHinges += height < 1200 ? 2 : 3;
+    } else if (div.type === "cift-acilim") {
+      doubleTurnCount++;
+      totalHinges += height < 1200 ? 2 : 3;
+    } else if (div.type === "vasistas") {
+      vasistasCount++;
+      totalHinges += 2;
+    } else if (div.type === "kapi-ic" || div.type === "kapi-dis") {
+      doorCount++;
+      totalHinges += height < 2000 ? 3 : 4;
+    } else if (div.type.includes("surme")) {
+      slidingCount++;
+    }
+  });
+
+  if (singleTurnCount > 0) {
+    accessories.push({
+      id: "acc-tek-acilim",
+      name: "Tek Açılım İspanyolet & Karşılık Seti",
+      category: "DONANIM",
+      unit: "TAKIM",
+      quantity: singleTurnCount,
+      unitPriceTL: singleTurnPrice,
+      totalPriceTL: singleTurnCount * singleTurnPrice,
+    });
+  }
+
+  if (doubleTurnCount > 0) {
+    accessories.push({
+      id: "acc-cift-acilim",
+      name: "Egepen Çift Açılım İspanyolet, Makas & Eğim Seti",
+      category: "DONANIM",
+      unit: "TAKIM",
+      quantity: doubleTurnCount,
+      unitPriceTL: doubleTurnPrice,
+      totalPriceTL: doubleTurnCount * doubleTurnPrice,
+    });
+  }
+
+  if (vasistasCount > 0) {
+    accessories.push({
+      id: "acc-vasistas",
+      name: "Vasistas Makas & Çarpma Kilit Seti",
+      category: "DONANIM",
+      unit: "TAKIM",
+      quantity: vasistasCount,
+      unitPriceTL: singleTurnPrice,
+      totalPriceTL: vasistasCount * singleTurnPrice,
+    });
+  }
+
+  if (doorCount > 0) {
+    accessories.push({
+      id: "acc-kapi-kilit",
+      name: "Egepen Kilitli Kapı İspanyoleti, Alüminyum Kol & Barel Seti",
+      category: "DONANIM",
+      unit: "TAKIM",
+      quantity: doorCount,
+      unitPriceTL: doorLockPrice,
+      totalPriceTL: doorCount * doorLockPrice,
+    });
+  }
+
+  if (slidingCount > 0) {
+    accessories.push({
+      id: "acc-surme-tekerlek",
+      name: "Sürme Seri Ayarlı Rulman & Tekerlek Takımı",
+      category: "DONANIM",
+      unit: "TAKIM",
+      quantity: slidingCount,
+      unitPriceTL: slidingFittingPrice,
+      totalPriceTL: slidingCount * slidingFittingPrice,
+    });
+    accessories.push({
+      id: "acc-surme-stoper",
+      name: "Sürme Kanat Stoper & Kenet Takozu Seti",
+      category: "DONANIM",
+      unit: "ADET",
+      quantity: slidingCount * 2,
+      unitPriceTL: 45,
+      totalPriceTL: slidingCount * 2 * 45,
+    });
+  }
+
+  if (totalHinges > 0) {
+    accessories.push({
+      id: "acc-mentese",
+      name: doorCount > 0 ? "Ağır Seri Kapı / Pencere Menteşesi (75mm-90mm)" : "Pencere Menteşesi (75mm)",
+      category: "MENTESE",
+      unit: "ADET",
+      quantity: totalHinges,
+      unitPriceTL: hingeUnitPrice,
+      totalPriceTL: totalHinges * hingeUnitPrice,
+    });
+  }
+
+  const kasaPerimeterMeters = Number((((width + height) * 2) / 1000).toFixed(2));
+  const activeSashes = divisions.filter((d) => d.type !== "sabit").length;
+  const gasketMeters = Number((kasaPerimeterMeters * 2 + activeSashes * 3.5).toFixed(2));
+
+  accessories.push({
+    id: "acc-epdm-gasket",
+    name: item.systemType?.includes("SURME") ? "Sürme Kıl Fitili & Cam Contası" : "EPDM Kauçuk Kasa & Kanat Contası (Siyah/Gri)",
+    category: "CONTA_FITIL",
+    unit: "METRE",
+    quantity: gasketMeters,
+    unitPriceTL: gasketPricePerMeter,
+    totalPriceTL: Math.round(gasketMeters * gasketPricePerMeter),
+  });
+
+  const mullionCount = verticalMullionsCount + horizontalMullionsCount;
+  if (mullionCount > 0) {
+    accessories.push({
+      id: "acc-kayit-takozu",
+      name: "Orta Kayıt Bağlantı Takozu & Vidası",
+      category: "TAKAZ_BAGLANTI",
+      unit: "ADET",
+      quantity: mullionCount * 2,
+      unitPriceTL: 18,
+      totalPriceTL: mullionCount * 2 * 18,
+    });
+  }
+
+  const totalGlassCount = divisions.length;
+  accessories.push({
+    id: "acc-cam-takozu",
+    name: "Ağır Yük Cam Ayar Takozu Seti",
+    category: "TAKAZ_BAGLANTI",
+    unit: "ADET",
+    quantity: totalGlassCount * 4,
+    unitPriceTL: 6,
+    totalPriceTL: totalGlassCount * 4 * 6,
+  });
+
+  accessories.push({
+    id: "acc-su-kapak",
+    name: "Dış Kasa Alt Su Tahliye Slot Kapağı",
+    category: "SARF_MALZEME",
+    unit: "ADET",
+    quantity: (verticalMullionsCount + 1) * 2,
+    unitPriceTL: 8,
+    totalPriceTL: (verticalMullionsCount + 1) * 2 * 8,
+  });
+
+  return accessories;
+}
+
 // 1D Optimizasyon Algoritması (First Fit Decreasing / FFD) - Çoklu / Özel Stok Boyu Destekli
+
 export function optimizeCutList(
   pieces: CutPiece[],
   stockBarLength: number | number[] = 6000,
@@ -848,6 +1053,25 @@ export function calculateOrderSummary(
     });
   });
 
+  const allAccessoriesMap = new Map<string, AccessoryItem>();
+  itemResults.forEach(({ item, calc }) => {
+    const qty = item.quantity || 1;
+    calc.accessories.forEach((acc) => {
+      const existing = allAccessoriesMap.get(acc.name);
+      if (existing) {
+        existing.quantity += acc.quantity * qty;
+        existing.totalPriceTL += acc.totalPriceTL * qty;
+      } else {
+        allAccessoriesMap.set(acc.name, {
+          ...acc,
+          quantity: acc.quantity * qty,
+          totalPriceTL: acc.totalPriceTL * qty,
+        });
+      }
+    });
+  });
+  const allAccessories = Array.from(allAccessoriesMap.values());
+
   const totalProfileMeters = Number(
     itemResults.reduce((acc, curr) => acc + curr.calc.totalProfileMeters * (curr.item.quantity || 1), 0).toFixed(2)
   );
@@ -858,6 +1082,19 @@ export function calculateOrderSummary(
     itemResults.reduce((acc, curr) => acc + curr.calc.totalGlassSqM * (curr.item.quantity || 1), 0).toFixed(2)
   );
 
+  const totalAccessoryCostTL = itemResults.reduce(
+    (acc, curr) => acc + curr.calc.totalAccessoryCostTL * (curr.item.quantity || 1),
+    0
+  );
+  const totalLaborCostTL = itemResults.reduce(
+    (acc, curr) => acc + curr.calc.totalLaborCostTL * (curr.item.quantity || 1),
+    0
+  );
+
+  const profileCostTL = itemResults.reduce((acc, curr) => acc + curr.calc.breakdown.profileCostTL * (curr.item.quantity || 1), 0);
+  const steelCostTL = itemResults.reduce((acc, curr) => acc + curr.calc.breakdown.steelCostTL * (curr.item.quantity || 1), 0);
+  const glassCostTL = itemResults.reduce((acc, curr) => acc + curr.calc.breakdown.glassCostTL * (curr.item.quantity || 1), 0);
+
   const costPriceTL = Math.round(
     itemResults.reduce((acc, curr) => acc + curr.calc.costPriceTL * (curr.item.quantity || 1), 0)
   );
@@ -866,17 +1103,30 @@ export function calculateOrderSummary(
   );
   const profitTL = Math.max(0, totalPriceTL - costPriceTL);
 
+  const breakdown: CostBreakdown = {
+    profileCostTL,
+    steelCostTL,
+    glassCostTL,
+    accessoryCostTL: totalAccessoryCostTL,
+    laborCostTL: totalLaborCostTL,
+  };
+
   return {
     itemResults,
     allCutPieces,
     allGlasses,
+    allAccessories,
     totalProfileMeters,
     totalSteelMeters,
     totalGlassSqM,
+    totalAccessoryCostTL,
+    totalLaborCostTL,
     costPriceTL,
     totalPriceTL,
     profitTL,
+    breakdown,
   };
 }
+
 
 

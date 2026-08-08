@@ -339,6 +339,45 @@ export default function OrderSummaryPage() {
             </div>
           </div>
 
+          {/* 🧩 MALİYET VE MALZEME KIRILIM KARTLARI */}
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-3 bg-slate-50 p-4 rounded-xl border border-slate-200 text-xs font-mono">
+            <div className="p-3 bg-white border rounded-lg shadow-sm">
+              <span className="text-[10px] text-slate-500 font-semibold uppercase block mb-1">PVC Profil Maliyeti</span>
+              <span className="text-sm font-bold text-slate-900 block">
+                {convertPrice(orderSummary.breakdown?.profileCostTL || 0).toLocaleString("tr-TR")} {getSymbol()}
+              </span>
+              <span className="text-[10px] text-slate-400 font-sans">{orderSummary.totalProfileMeters} Metre Tül</span>
+            </div>
+            <div className="p-3 bg-white border rounded-lg shadow-sm">
+              <span className="text-[10px] text-slate-500 font-semibold uppercase block mb-1">Galvaniz Sac Maliyeti</span>
+              <span className="text-sm font-bold text-slate-900 block">
+                {convertPrice(orderSummary.breakdown?.steelCostTL || 0).toLocaleString("tr-TR")} {getSymbol()}
+              </span>
+              <span className="text-[10px] text-slate-400 font-sans">{orderSummary.totalSteelMeters} Metre Sac</span>
+            </div>
+            <div className="p-3 bg-white border rounded-lg shadow-sm">
+              <span className="text-[10px] text-slate-500 font-semibold uppercase block mb-1">Isıcam Maliyeti</span>
+              <span className="text-sm font-bold text-cyan-700 block">
+                {convertPrice(orderSummary.breakdown?.glassCostTL || 0).toLocaleString("tr-TR")} {getSymbol()}
+              </span>
+              <span className="text-[10px] text-slate-400 font-sans">{orderSummary.totalGlassSqM} m² Cam</span>
+            </div>
+            <div className="p-3 bg-white border rounded-lg shadow-sm">
+              <span className="text-[10px] text-slate-500 font-semibold uppercase block mb-1">Aksesuar & Donanım</span>
+              <span className="text-sm font-bold text-blue-700 block">
+                {convertPrice(orderSummary.breakdown?.accessoryCostTL || 0).toLocaleString("tr-TR")} {getSymbol()}
+              </span>
+              <span className="text-[10px] text-slate-400 font-sans">{orderSummary.allAccessories.length} Kalem Malzeme</span>
+            </div>
+            <div className="p-3 bg-white border rounded-lg shadow-sm">
+              <span className="text-[10px] text-slate-500 font-semibold uppercase block mb-1">İşçilik & Fabrika Payı</span>
+              <span className="text-sm font-bold text-purple-700 block">
+                {convertPrice(orderSummary.breakdown?.laborCostTL || 0).toLocaleString("tr-TR")} {getSymbol()}
+              </span>
+              <span className="text-[10px] text-slate-400 font-sans">%15 Fabrika Amortisman</span>
+            </div>
+          </div>
+
           <div className="space-y-3">
             <h3 className="text-sm font-bold text-slate-900 flex items-center justify-between">
               <span>📋 Poz Bazlı Detaylı Maliyet & Satış Dağılımı ({orderSummary.itemResults.length} Poz Seçili)</span>
@@ -412,6 +451,67 @@ export default function OrderSummaryPage() {
               </table>
             </div>
           </div>
+
+          {/* 📦 AKSESUAR VE SARF MALZEME REÇETESİ (BOM TABLE) */}
+          <div className="space-y-3 pt-2">
+            <h3 className="text-sm font-bold text-slate-900 flex items-center justify-between">
+              <span>🔩 Aksesuar ve Sarf Malzeme İmalat Reçetesi (BOM Listesi)</span>
+              <span className="text-xs text-blue-600 font-semibold font-mono">
+                {orderSummary.allAccessories.length} Çeşit Aksesuar
+              </span>
+            </h3>
+            <div className="rounded-xl border border-slate-200 overflow-hidden">
+              <table className="w-full text-left text-xs text-slate-700 font-sans">
+                <thead className="bg-slate-100 text-slate-600 font-mono border-b border-slate-200">
+                  <tr>
+                    <th className="p-2.5">#</th>
+                    <th className="p-2.5">Kategori</th>
+                    <th className="p-2.5">Malzeme & Aksesuar Tanımı</th>
+                    <th className="p-2.5 text-center">Birim</th>
+                    <th className="p-2.5 text-center">Miktar</th>
+                    <th className="p-2.5 text-right">Birim Fiyat ({getSymbol()})</th>
+                    <th className="p-2.5 text-right">Toplam Tutar ({getSymbol()})</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 bg-white font-mono">
+                  {orderSummary.allAccessories.map((acc, aIdx) => {
+                    const priceConv = convertPrice(acc.unitPriceTL);
+                    const totalConv = convertPrice(acc.totalPriceTL);
+                    return (
+                      <tr key={acc.id + aIdx} className="hover:bg-slate-50">
+                        <td className="p-2.5 text-slate-400 font-mono">{aIdx + 1}</td>
+                        <td className="p-2.5">
+                          <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200">
+                            {acc.category}
+                          </span>
+                        </td>
+                        <td className="p-2.5 font-bold text-slate-900 font-sans">{acc.name}</td>
+                        <td className="p-2.5 text-center font-bold text-slate-500">{acc.unit}</td>
+                        <td className="p-2.5 text-center font-bold text-blue-800 text-sm">
+                          {acc.quantity % 1 === 0 ? acc.quantity : acc.quantity.toFixed(2)}
+                        </td>
+                        <td className="p-2.5 text-right text-slate-600">
+                          {priceConv.toLocaleString("tr-TR")} {getSymbol()}
+                        </td>
+                        <td className="p-2.5 text-right font-bold text-slate-900">
+                          {totalConv.toLocaleString("tr-TR")} {getSymbol()}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+                <tfoot className="bg-slate-100 font-bold border-t border-slate-200 text-slate-900 font-mono">
+                  <tr>
+                    <td colSpan={6} className="p-2.5 text-right font-sans">TOPLAM AKSESUAR TUTARI:</td>
+                    <td className="p-2.5 text-right text-blue-700 text-sm">
+                      {convertPrice(orderSummary.totalAccessoryCostTL).toLocaleString("tr-TR")} {getSymbol()}
+                    </td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+          </div>
+
         </div>
       </main>
     </div>
