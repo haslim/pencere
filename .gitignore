@@ -40,6 +40,8 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# ignore e2000 folder
+# ignore e2000 & üretimstd folders
 e2000/
+üretimstd/
+
 
