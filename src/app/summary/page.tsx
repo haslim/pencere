@@ -83,6 +83,8 @@ export default function OrderSummaryPage() {
     ];
   }
 
+  const [activeReportView, setActiveReportView] = useState<"official" | "dashboard">("official");
+
   // Seçilen pozlara göre filtrelenmiş item'lar
   const activeFilteredItems = useMemo(() => {
     return items.filter((it) => selectedPosIds.includes(it.id));
@@ -91,6 +93,139 @@ export default function OrderSummaryPage() {
   const orderSummary = useMemo(() => {
     return calculateOrderSummary(activeFilteredItems, settings);
   }, [activeFilteredItems, settings]);
+
+  const categorizedCostData = useMemo(() => {
+
+    const rawCutPieces = orderSummary.allCutPieces;
+    const rawAccs = orderSummary.allAccessories;
+
+    // 1. Ana Profiller
+    const anaProfiller = rawCutPieces
+      .filter((p) => p.type === "KASA" || p.type === "KANAT" || p.type === "KAPI_KANADI" || p.type === "ORTA_KAYIT")
+      .map((p) => ({
+        stokkodu: p.code || "11400",
+        aciklama: `${p.label} (${p.colorName || "Beyaz"})`,
+        miktar: Number(((p.length * p.quantity) / 1000).toFixed(2)),
+        birim: "mtül" as const,
+        birimFiyat: 245.12,
+        toplamFiyat: Number((((p.length * p.quantity) / 1000) * 245.12).toFixed(2)),
+      }));
+
+    // 2. Çıtalar
+    const citalar = rawCutPieces
+      .filter((p) => p.type === "CITA")
+      .map((p) => ({
+        stokkodu: p.code || "12648",
+        aciklama: p.label,
+        miktar: Number(((p.length * p.quantity) / 1000).toFixed(2)),
+        birim: "mtül" as const,
+        birimFiyat: 63.66,
+        toplamFiyat: Number((((p.length * p.quantity) / 1000) * 63.66).toFixed(2)),
+      }));
+
+    // 3. Yardımcı Pls Profiller
+    const yardimciProfiller = rawCutPieces
+      .filter((p) => p.type === "ALUMINYUM_ESIK")
+      .map((p) => ({
+        stokkodu: p.code || "12425",
+        aciklama: p.label,
+        miktar: Number(((p.length * p.quantity) / 1000).toFixed(2)),
+        birim: "mtül" as const,
+        birimFiyat: 98.85,
+        toplamFiyat: Number((((p.length * p.quantity) / 1000) * 98.85).toFixed(2)),
+      }));
+
+    // 4. Destek Sacı
+    const destekSaclari = rawCutPieces
+      .filter((p) => p.type === "DESTEK_SACI")
+      .map((p) => ({
+        stokkodu: p.code || "13060",
+        aciklama: p.label,
+        miktar: Number(((p.length * p.quantity) / 1000).toFixed(2)),
+        birim: "mtül" as const,
+        birimFiyat: 60.11,
+        toplamFiyat: Number((((p.length * p.quantity) / 1000) * 60.11).toFixed(2)),
+      }));
+
+    // 5. Contalar
+    const contalar = rawAccs
+      .filter((a) => a.category === "CONTA_FITIL")
+      .map((a) => ({
+        stokkodu: a.code || "10578",
+        aciklama: a.name,
+        miktar: a.quantity,
+        birim: "mtül" as const,
+        birimFiyat: a.unitPriceTL,
+        toplamFiyat: a.totalPriceTL,
+      }));
+
+    // 6. Vidalar
+    const vidalar = rawAccs
+      .filter((a) => a.code === "13190" || a.name.includes("Vida"))
+      .map((a) => ({
+        stokkodu: a.code || "13000",
+        aciklama: a.name,
+        miktar: a.quantity,
+        birim: "adet" as const,
+        birimFiyat: a.unitPriceTL,
+        toplamFiyat: a.totalPriceTL,
+      }));
+
+    // 7. Yardımcı Malzemeler
+    const yardimciMalzemeler = rawAccs
+      .filter((a) => a.category === "TAKAZ_BAGLANTI")
+      .map((a) => ({
+        stokkodu: a.code || "13135",
+        aciklama: a.name,
+        miktar: a.quantity,
+        birim: "adet" as const,
+        birimFiyat: a.unitPriceTL,
+        toplamFiyat: a.totalPriceTL,
+      }));
+
+    // 8. Aksesuarlar
+    const aksesuarlar = rawAccs
+      .filter((a) => a.category === "DONANIM" || a.category === "MENTESE")
+      .map((a) => ({
+        stokkodu: a.code || "13185",
+        aciklama: a.name,
+        miktar: a.quantity,
+        birim: (a.unit === "TAKIM" ? "takım" : "adet") as "takım" | "adet",
+        birimFiyat: a.unitPriceTL,
+        toplamFiyat: a.totalPriceTL,
+      }));
+
+    // 9. Montaj ve İzolasyon Malzemeleri
+    const montajIzolasyon = rawAccs
+      .filter((a) => a.category === "SARF_MALZEME" && a.code !== "13190" && !a.name.includes("Vida"))
+      .map((a) => ({
+        stokkodu: a.code || "13514",
+        aciklama: a.name,
+        miktar: a.quantity,
+        birim: "adet" as const,
+        birimFiyat: a.unitPriceTL,
+        toplamFiyat: a.totalPriceTL,
+      }));
+
+    const buildGroup = (name: string, list: any[]) => ({
+      categoryName: name,
+      items: list,
+      totalAmount: list.reduce((sum, item) => sum + item.toplamFiyat, 0),
+    });
+
+    return [
+      buildGroup("Ana Profiller", anaProfiller),
+      buildGroup("Çıtalar", citalar),
+      buildGroup("Yardımcı Pls Profiller", yardimciProfiller),
+      buildGroup("Yardımcı Malzemeler", yardimciMalzemeler),
+      buildGroup("Destek Sacı", destekSaclari),
+      buildGroup("Contalar", contalar),
+      buildGroup("Vidalar", vidalar),
+      buildGroup("Aksesuarlar", aksesuarlar),
+      buildGroup("Montaj ve İzolasyon Malzemeleri", montajIzolasyon),
+    ].filter((g) => g.items.length > 0);
+  }, [orderSummary]);
+
 
 
   if (!isLoaded) {
@@ -291,168 +426,311 @@ export default function OrderSummaryPage() {
           </div>
         </div>
 
-        {/* Detaylı Rapor Kartı (Yazdırılabilir Alan) */}
-        <div id="summary-print-area" className="bg-white text-slate-900 border border-slate-200 rounded-2xl p-8 shadow-2xl space-y-6">
-          <div className="flex justify-between items-start border-b border-slate-200 pb-6">
-            <div className="flex items-center gap-4">
-              {companyInfo?.logoUrl && (
-                <img
-                  src={companyInfo.logoUrl}
-                  alt={companyInfo.name}
-                  className="max-h-16 max-w-[140px] object-contain rounded-lg border bg-white p-1 shadow-sm"
-                />
-              )}
+        {/* Tab Selection for Report View */}
+        <div className="flex border-b border-slate-800 gap-4 no-print">
+          <button
+            onClick={() => setActiveReportView("official")}
+            className={`pb-3 text-xs font-bold transition border-b-2 flex items-center gap-2 ${
+              activeReportView === "official"
+                ? "border-blue-500 text-blue-400"
+                : "border-transparent text-slate-400 hover:text-slate-200"
+            }`}
+          >
+            📄 Resmi Fabrika Maliyet Analiz Raporu (M A L İ Y E T   A N A L İ Z İ)
+          </button>
+          <button
+            onClick={() => setActiveReportView("dashboard")}
+            className={`pb-3 text-xs font-bold transition border-b-2 flex items-center gap-2 ${
+              activeReportView === "dashboard"
+                ? "border-blue-500 text-blue-400"
+                : "border-transparent text-slate-400 hover:text-slate-200"
+            }`}
+          >
+            📊 İnteraktif Poz & Maliyet Dashboard'u
+          </button>
+        </div>
+
+        {/* 📄 RESMİ EGEPEN M A L İ Y E T   A N A L İ Z İ FABRİKA MATBU RAPORU */}
+        {activeReportView === "official" && (
+          <div id="official-cost-analysis-report" className="bg-white text-slate-900 border border-slate-300 rounded-xl p-8 shadow-2xl space-y-6 font-mono text-xs">
+            {/* Header Block */}
+            <div className="flex justify-between items-start text-[11px] border-b border-slate-300 pb-4 leading-tight">
               <div>
-                <h2 className="text-2xl font-extrabold text-blue-700 uppercase tracking-tight">
-                  {companyInfo?.name || "SİSTEM YAPI ELEMANLARI"}
-                </h2>
-                <p className="text-sm text-slate-600 font-medium mt-0.5">
-                  {companyInfo?.subtitle || "PVC Kapı & Pencere Doğrama Sistemleri"}
-                </p>
-                <p className="text-xs text-slate-400 mt-1">
-                  Tel: {companyInfo?.phone || "+90 332 812 39 95"} | Web: {companyInfo?.website || "www.aslimlarpencere.com"}
-                </p>
+                <p><span className="font-bold">Cari Unvanı :</span> {customer.name || "TAYYAR YÖRÜK"}</p>
+                <p><span className="font-bold">Müşterisi   :</span> -</p>
+                <p><span className="font-bold">Liste       :</span> TL_Liste No 17 - Aks 516</p>
+              </div>
+              <div className="text-center">
+                <p><span className="font-bold">Sipariş No :</span> S{Date.now().toString().slice(-6)}</p>
+                <p><span className="font-bold">Adet       :</span> {activeFilteredItems.length}</p>
+                <p><span className="font-bold">Seçenek    :</span> Alış Fiyatı Peşin</p>
+              </div>
+              <div className="text-right">
+                <p><span className="font-bold">Tarih:</span> {today} - 3.07 - E</p>
+                <p><span className="font-bold">Sayfa:</span> 1 / 1</p>
               </div>
             </div>
-            <div className="text-right">
-              <span className="bg-blue-50 text-blue-700 text-xs px-3 py-1 rounded-full border border-blue-200 font-mono font-bold">
-                RAPOR NO: #MAL-{Date.now().toString().slice(-6)}
-              </span>
-              <p className="text-xs text-slate-500 mt-2 font-medium">Tarih: {today}</p>
+
+            {/* Title */}
+            <div className="text-center py-2">
+              <h1 className="text-xl font-black uppercase tracking-[0.4em] text-slate-900 border-b-2 border-t-2 border-slate-900 py-1 inline-block px-12">
+                M A L İ Y E T   A N A L İ Z İ
+              </h1>
+            </div>
+
+            {/* Categorized Detailed Item Tables */}
+            <div className="space-y-6">
+              {categorizedCostData.map((catGroup) => (
+                <div key={catGroup.categoryName} className="space-y-1">
+                  <div className="rounded border border-slate-300 overflow-hidden">
+                    <table className="w-full text-left text-[11px] font-mono">
+                      <thead className="bg-slate-100 text-slate-800 border-b border-slate-300 font-bold">
+                        <tr>
+                          <th className="p-1.5 w-24">Stokkodu</th>
+                          <th className="p-1.5">Açıklama</th>
+                          <th className="p-1.5 text-right w-20">Miktar</th>
+                          <th className="p-1.5 text-center w-16">Birim</th>
+                          <th className="p-1.5 text-center w-4">x</th>
+                          <th className="p-1.5 text-right w-24">Birim Fiyat</th>
+                          <th className="p-1.5 text-center w-4">=</th>
+                          <th className="p-1.5 text-right w-28">Toplam Fiyat</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-200">
+                        {catGroup.items.map((it, idx) => (
+                          <tr key={idx} className="hover:bg-slate-50">
+                            <td className="p-1.5 font-bold text-slate-900">{it.stokkodu}</td>
+                            <td className="p-1.5 font-sans font-medium text-slate-800">{it.aciklama}</td>
+                            <td className="p-1.5 text-right font-bold">{it.miktar.toLocaleString("tr-TR", { minimumFractionDigits: 2 })}</td>
+                            <td className="p-1.5 text-center text-slate-600">{it.birim}</td>
+                            <td className="p-1.5 text-center text-slate-400">x</td>
+                            <td className="p-1.5 text-right">{it.birimFiyat.toFixed(2)} TL</td>
+                            <td className="p-1.5 text-center text-slate-400">=</td>
+                            <td className="p-1.5 text-right font-bold text-slate-900">{it.toplamFiyat.toLocaleString("tr-TR", { minimumFractionDigits: 2 })} TL</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                  <div className="flex justify-between items-center bg-slate-100 px-3 py-1.5 rounded border border-slate-300 font-bold text-xs text-slate-900">
+                    <span>{catGroup.categoryName} Toplamı</span>
+                    <span>{catGroup.totalAmount.toLocaleString("tr-TR", { minimumFractionDigits: 2 })} TL</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Official Report Bottom Financial Summary Grid */}
+            <div className="border-t-2 border-slate-900 pt-4 grid grid-cols-1 md:grid-cols-2 gap-6 text-xs font-mono">
+              {/* Left Metric Calculations */}
+              <div className="space-y-1 bg-slate-50 p-4 rounded border border-slate-300">
+                <div className="flex justify-between"><span>Profil m/tül :</span><span className="font-bold">{orderSummary.totalProfileMeters.toLocaleString("tr-TR")}</span></div>
+                <div className="flex justify-between"><span>Profil kg.   :</span><span className="font-bold">{(orderSummary.totalProfileMeters * 2.35).toFixed(3)}</span></div>
+                <div className="flex justify-between"><span>Toplam kg.   :</span><span className="font-bold">{(orderSummary.totalProfileMeters * 2.35 + orderSummary.totalSteelMeters * 1.2).toFixed(3)}</span></div>
+                <div className="flex justify-between border-t border-slate-300 pt-1"><span>Profil Tutarı:</span><span className="font-bold">{orderSummary.breakdown.profileCostTL.toLocaleString("tr-TR")} TL</span></div>
+                <div className="flex justify-between"><span>M/tül Maliyeti:</span><span className="font-bold">{(orderSummary.costPriceTL / (orderSummary.totalProfileMeters || 1)).toFixed(2)} TL</span></div>
+                <div className="flex justify-between"><span>Kg. Maliyeti :</span><span className="font-bold">{(orderSummary.costPriceTL / ((orderSummary.totalProfileMeters * 2.35) || 1)).toFixed(2)} TL</span></div>
+                <div className="flex justify-between border-t border-slate-300 pt-1"><span>Ortalama m/tül Mal.:</span><span className="font-bold">{(orderSummary.totalPriceTL / (orderSummary.totalProfileMeters || 1)).toFixed(2)} TL</span></div>
+                <div className="flex justify-between"><span>Ortalama Kg. Mal.  :</span><span className="font-bold">{(orderSummary.totalPriceTL / ((orderSummary.totalProfileMeters * 2.35) || 1)).toFixed(2)} TL</span></div>
+                <div className="flex justify-between"><span>Profil m/tül / Kg. :</span><span className="font-bold">0,43</span></div>
+              </div>
+
+              {/* Right Grand Financial Calculation Box */}
+              <div className="space-y-2 bg-slate-900 text-white p-5 rounded-lg border border-slate-800 shadow-lg font-mono">
+                <div className="flex justify-between text-sm">
+                  <span>Toplam (Malzeme Gideri) :</span>
+                  <span className="font-bold text-rose-300">{orderSummary.costPriceTL.toLocaleString("tr-TR")} TL</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span>İşçilik % 25 :</span>
+                  <span className="font-bold text-purple-300">{orderSummary.breakdown.laborCostTL.toLocaleString("tr-TR")} TL</span>
+                </div>
+                <div className="flex justify-between text-sm border-t border-slate-700 pt-2">
+                  <span>Ara Toplam :</span>
+                  <span className="font-bold text-cyan-300">{(orderSummary.costPriceTL + orderSummary.breakdown.laborCostTL).toLocaleString("tr-TR")} TL</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span>K.D.V. % 20 :</span>
+                  <span className="font-bold text-amber-300">{Math.round((orderSummary.costPriceTL + orderSummary.breakdown.laborCostTL) * 0.20).toLocaleString("tr-TR")} TL</span>
+                </div>
+                <div className="flex justify-between text-base font-black border-t-2 border-emerald-500 pt-2 text-emerald-400">
+                  <span>GENEL TOPLAM :</span>
+                  <span>{Math.round((orderSummary.costPriceTL + orderSummary.breakdown.laborCostTL) * 1.20).toLocaleString("tr-TR")} TL</span>
+                </div>
+                <div className="pt-2 text-[10px] text-slate-400 flex justify-between border-t border-slate-800">
+                  <span>USD Kur : 50,00</span>
+                  <span>EUR Kur : 60,00</span>
+                </div>
+              </div>
             </div>
           </div>
+        )}
 
-          <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <span className="text-xs text-slate-500 block font-medium">Cari Unvanı / Müşteri</span>
-              <span className="font-bold text-slate-900 text-sm">{customer.name}</span>
+        {/* 📊 İNTERAKTİF DASHBOARD VIEW */}
+        {activeReportView === "dashboard" && (
+          <div id="summary-dashboard-area" className="bg-white text-slate-900 border border-slate-200 rounded-2xl p-8 shadow-2xl space-y-6">
+            <div className="flex justify-between items-start border-b border-slate-200 pb-6">
+              <div className="flex items-center gap-4">
+                {companyInfo?.logoUrl && (
+                  <img
+                    src={companyInfo.logoUrl}
+                    alt={companyInfo.name}
+                    className="max-h-16 max-w-[140px] object-contain rounded-lg border bg-white p-1 shadow-sm"
+                  />
+                )}
+                <div>
+                  <h2 className="text-2xl font-extrabold text-blue-700 uppercase tracking-tight">
+                    {companyInfo?.name || "SİSTEM YAPI ELEMANLARI"}
+                  </h2>
+                  <p className="text-sm text-slate-600 font-medium mt-0.5">
+                    {companyInfo?.subtitle || "PVC Kapı & Pencere Doğrama Sistemleri"}
+                  </p>
+                  <p className="text-xs text-slate-400 mt-1">
+                    Tel: {companyInfo?.phone || "+90 332 812 39 95"} | Web: {companyInfo?.website || "www.aslimlarpencere.com"}
+                  </p>
+                </div>
+              </div>
+              <div className="text-right">
+                <span className="bg-blue-50 text-blue-700 text-xs px-3 py-1 rounded-full border border-blue-200 font-mono font-bold">
+                  RAPOR NO: #MAL-{Date.now().toString().slice(-6)}
+                </span>
+                <p className="text-xs text-slate-500 mt-2 font-medium">Tarih: {today}</p>
+              </div>
             </div>
-            <div>
-              <span className="text-xs text-slate-500 block font-medium">Cari Kodu / Telefon</span>
-              <span className="font-mono text-slate-900 font-bold text-sm">
-                {customer.code} | {customer.phone}
-              </span>
-            </div>
-            <div>
-              <span className="text-xs text-slate-500 block font-medium">Teslimat Adresi</span>
-              <span className="text-xs font-medium text-slate-700">{customer.address || "-"}</span>
-            </div>
-          </div>
 
-          {/* 🧩 MALİYET VE MALZEME KIRILIM KARTLARI */}
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-3 bg-slate-50 p-4 rounded-xl border border-slate-200 text-xs font-mono">
-            <div className="p-3 bg-white border rounded-lg shadow-sm">
-              <span className="text-[10px] text-slate-500 font-semibold uppercase block mb-1">PVC Profil Maliyeti</span>
-              <span className="text-sm font-bold text-slate-900 block">
-                {convertPrice(orderSummary.breakdown?.profileCostTL || 0).toLocaleString("tr-TR")} {getSymbol()}
-              </span>
-              <span className="text-[10px] text-slate-400 font-sans">{orderSummary.totalProfileMeters} Metre Tül</span>
+            <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <span className="text-xs text-slate-500 block font-medium">Cari Unvanı / Müşteri</span>
+                <span className="font-bold text-slate-900 text-sm">{customer.name}</span>
+              </div>
+              <div>
+                <span className="text-xs text-slate-500 block font-medium">Cari Kodu / Telefon</span>
+                <span className="font-mono text-slate-900 font-bold text-sm">
+                  {customer.code} | {customer.phone}
+                </span>
+              </div>
+              <div>
+                <span className="text-xs text-slate-500 block font-medium">Teslimat Adresi</span>
+                <span className="text-xs font-medium text-slate-700">{customer.address || "-"}</span>
+              </div>
             </div>
-            <div className="p-3 bg-white border rounded-lg shadow-sm">
-              <span className="text-[10px] text-slate-500 font-semibold uppercase block mb-1">Galvaniz Sac Maliyeti</span>
-              <span className="text-sm font-bold text-slate-900 block">
-                {convertPrice(orderSummary.breakdown?.steelCostTL || 0).toLocaleString("tr-TR")} {getSymbol()}
-              </span>
-              <span className="text-[10px] text-slate-400 font-sans">{orderSummary.totalSteelMeters} Metre Sac</span>
-            </div>
-            <div className="p-3 bg-white border rounded-lg shadow-sm">
-              <span className="text-[10px] text-slate-500 font-semibold uppercase block mb-1">Isıcam Maliyeti</span>
-              <span className="text-sm font-bold text-cyan-700 block">
-                {convertPrice(orderSummary.breakdown?.glassCostTL || 0).toLocaleString("tr-TR")} {getSymbol()}
-              </span>
-              <span className="text-[10px] text-slate-400 font-sans">{orderSummary.totalGlassSqM} m² Cam</span>
-            </div>
-            <div className="p-3 bg-white border rounded-lg shadow-sm">
-              <span className="text-[10px] text-slate-500 font-semibold uppercase block mb-1">Aksesuar & Donanım</span>
-              <span className="text-sm font-bold text-blue-700 block">
-                {convertPrice(orderSummary.breakdown?.accessoryCostTL || 0).toLocaleString("tr-TR")} {getSymbol()}
-              </span>
-              <span className="text-[10px] text-slate-400 font-sans">{orderSummary.allAccessories.length} Kalem Malzeme</span>
-            </div>
-            <div className="p-3 bg-white border rounded-lg shadow-sm">
-              <span className="text-[10px] text-slate-500 font-semibold uppercase block mb-1">İşçilik & Fabrika Payı</span>
-              <span className="text-sm font-bold text-purple-700 block">
-                {convertPrice(orderSummary.breakdown?.laborCostTL || 0).toLocaleString("tr-TR")} {getSymbol()}
-              </span>
-              <span className="text-[10px] text-slate-400 font-sans">%15 Fabrika Amortisman</span>
-            </div>
-          </div>
 
-          <div className="space-y-3">
-            <h3 className="text-sm font-bold text-slate-900 flex items-center justify-between">
-              <span>📋 Poz Bazlı Detaylı Maliyet & Satış Dağılımı ({orderSummary.itemResults.length} Poz Seçili)</span>
-              <span className="text-xs text-slate-500 font-normal">Para Birimi: {currency}</span>
-            </h3>
-            <div className="rounded-xl border border-slate-200 overflow-hidden">
-              <table className="w-full text-left text-xs text-slate-700">
-                <thead className="bg-slate-100 text-slate-600 font-mono border-b border-slate-200">
-                  <tr>
-                    <th className="p-3">Çizim</th>
-                    <th className="p-3">#</th>
-                    <th className="p-3">Poz Adı</th>
-                    <th className="p-3">Ölçü (WxH mm)</th>
-                    <th className="p-3">Adet</th>
-                    <th className="p-3">Profil (m)</th>
-                    <th className="p-3">Cam (m²)</th>
-                    <th className="p-3 text-right">Birim Maliyet ({getSymbol()})</th>
-                    <th className="p-3 text-right">Satış Fiyatı ({getSymbol()})</th>
-                    <th className="p-3 text-right">Kâr ({getSymbol()})</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100 bg-white">
-                  {orderSummary.itemResults.map(({ item, calc }, idx) => {
-                    const qty = item.quantity || 1;
-                    const itemCost = convertPrice(calc.costPriceTL * qty);
-                    const itemSale = convertPrice(calc.estimatedPriceTL * qty);
-                    const itemProfit = Math.max(0, itemSale - itemCost);
-
-                    return (
-                      <tr key={item.id} className="hover:bg-slate-50">
-                        <td className="p-2.5">
-                          <WindowPreviewSvg item={item} maxW={90} maxH={70} />
-                        </td>
-                        <td className="p-3 font-mono text-slate-400">{idx + 1}</td>
-                        <td className="p-3 font-bold text-slate-900">{item.name}</td>
-                        <td className="p-3 font-mono text-blue-600 font-bold">
-                          {item.width} x {item.height} mm
-                        </td>
-                        <td className="p-3 font-bold">{qty}</td>
-                        <td className="p-3 font-mono">{(calc.totalProfileMeters * qty).toFixed(2)} m</td>
-                        <td className="p-3 font-mono">{(calc.totalGlassSqM * qty).toFixed(2)} m²</td>
-                        <td className="p-3 font-mono text-right text-rose-600 font-semibold">
-                          {itemCost.toLocaleString("tr-TR")} {getSymbol()}
-                        </td>
-                        <td className="p-3 font-mono text-right text-slate-900 font-bold">
-                          {itemSale.toLocaleString("tr-TR")} {getSymbol()}
-                        </td>
-                        <td className="p-3 font-mono text-right text-emerald-600 font-bold">
-                          +{itemProfit.toLocaleString("tr-TR")} {getSymbol()}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-                <tfoot className="bg-slate-100 font-bold border-t border-slate-200 text-slate-900">
-                  <tr>
-                    <td colSpan={5} className="p-3 text-right">GENEL TOPLAM:</td>
-                    <td className="p-3 font-mono">{orderSummary.totalProfileMeters} m</td>
-                    <td className="p-3 font-mono">{orderSummary.totalGlassSqM} m²</td>
-                    <td className="p-3 font-mono text-right text-rose-700">
-                      {costPriceConverted.toLocaleString("tr-TR")} {getSymbol()}
-                    </td>
-                    <td className="p-3 font-mono text-right text-blue-700 text-sm">
-                      {totalPriceConverted.toLocaleString("tr-TR")} {getSymbol()}
-                    </td>
-                    <td className="p-3 font-mono text-right text-emerald-700">
-                      +{profitConverted.toLocaleString("tr-TR")} {getSymbol()}
-                    </td>
-                  </tr>
-                </tfoot>
-              </table>
+            {/* 🧩 MALİYET VE MALZEME KIRILIM KARTLARI */}
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-3 bg-slate-50 p-4 rounded-xl border border-slate-200 text-xs font-mono">
+              <div className="p-3 bg-white border rounded-lg shadow-sm">
+                <span className="text-[10px] text-slate-500 font-semibold uppercase block mb-1">PVC Profil Maliyeti</span>
+                <span className="text-sm font-bold text-slate-900 block">
+                  {convertPrice(orderSummary.breakdown?.profileCostTL || 0).toLocaleString("tr-TR")} {getSymbol()}
+                </span>
+                <span className="text-[10px] text-slate-400 font-sans">{orderSummary.totalProfileMeters} Metre Tül</span>
+              </div>
+              <div className="p-3 bg-white border rounded-lg shadow-sm">
+                <span className="text-[10px] text-slate-500 font-semibold uppercase block mb-1">Galvaniz Sac Maliyeti</span>
+                <span className="text-sm font-bold text-slate-900 block">
+                  {convertPrice(orderSummary.breakdown?.steelCostTL || 0).toLocaleString("tr-TR")} {getSymbol()}
+                </span>
+                <span className="text-[10px] text-slate-400 font-sans">{orderSummary.totalSteelMeters} Metre Sac</span>
+              </div>
+              <div className="p-3 bg-white border rounded-lg shadow-sm">
+                <span className="text-[10px] text-slate-500 font-semibold uppercase block mb-1">Isıcam Maliyeti</span>
+                <span className="text-sm font-bold text-cyan-700 block">
+                  {convertPrice(orderSummary.breakdown?.glassCostTL || 0).toLocaleString("tr-TR")} {getSymbol()}
+                </span>
+                <span className="text-[10px] text-slate-400 font-sans">{orderSummary.totalGlassSqM} m² Cam</span>
+              </div>
+              <div className="p-3 bg-white border rounded-lg shadow-sm">
+                <span className="text-[10px] text-slate-500 font-semibold uppercase block mb-1">Aksesuar & Donanım</span>
+                <span className="text-sm font-bold text-blue-700 block">
+                  {convertPrice(orderSummary.breakdown?.accessoryCostTL || 0).toLocaleString("tr-TR")} {getSymbol()}
+                </span>
+                <span className="text-[10px] text-slate-400 font-sans">{orderSummary.allAccessories.length} Kalem Malzeme</span>
+              </div>
+              <div className="p-3 bg-white border rounded-lg shadow-sm">
+                <span className="text-[10px] text-slate-500 font-semibold uppercase block mb-1">İşçilik & Fabrika Payı</span>
+                <span className="text-sm font-bold text-purple-700 block">
+                  {convertPrice(orderSummary.breakdown?.laborCostTL || 0).toLocaleString("tr-TR")} {getSymbol()}
+                </span>
+                <span className="text-[10px] text-slate-400 font-sans">%15 Fabrika Amortisman</span>
+              </div>
             </div>
-          </div>
+
+            <div className="space-y-3">
+              <h3 className="text-sm font-bold text-slate-900 flex items-center justify-between">
+                <span>📋 Poz Bazlı Detaylı Maliyet & Satış Dağılımı ({orderSummary.itemResults.length} Poz Seçili)</span>
+                <span className="text-xs text-slate-500 font-normal">Para Birimi: {currency}</span>
+              </h3>
+              <div className="rounded-xl border border-slate-200 overflow-hidden">
+                <table className="w-full text-left text-xs text-slate-700">
+                  <thead className="bg-slate-100 text-slate-600 font-mono border-b border-slate-200">
+                    <tr>
+                      <th className="p-3">Çizim</th>
+                      <th className="p-3">#</th>
+                      <th className="p-3">Poz Adı</th>
+                      <th className="p-3">Ölçü (WxH mm)</th>
+                      <th className="p-3">Adet</th>
+                      <th className="p-3">Profil (m)</th>
+                      <th className="p-3">Cam (m²)</th>
+                      <th className="p-3 text-right">Birim Maliyet ({getSymbol()})</th>
+                      <th className="p-3 text-right">Satış Fiyatı ({getSymbol()})</th>
+                      <th className="p-3 text-right">Kâr ({getSymbol()})</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 bg-white">
+                    {orderSummary.itemResults.map(({ item, calc }, idx) => {
+                      const qty = item.quantity || 1;
+                      const itemCost = convertPrice(calc.costPriceTL * qty);
+                      const itemSale = convertPrice(calc.estimatedPriceTL * qty);
+                      const itemProfit = Math.max(0, itemSale - itemCost);
+
+                      return (
+                        <tr key={item.id} className="hover:bg-slate-50">
+                          <td className="p-2.5">
+                            <WindowPreviewSvg item={item} maxW={90} maxH={70} />
+                          </td>
+                          <td className="p-3 font-mono text-slate-400">{idx + 1}</td>
+                          <td className="p-3 font-bold text-slate-900">{item.name}</td>
+                          <td className="p-3 font-mono text-blue-600 font-bold">
+                            {item.width} x {item.height} mm
+                          </td>
+                          <td className="p-3 font-bold">{qty}</td>
+                          <td className="p-3 font-mono">{(calc.totalProfileMeters * qty).toFixed(2)} m</td>
+                          <td className="p-3 font-mono">{(calc.totalGlassSqM * qty).toFixed(2)} m²</td>
+                          <td className="p-3 font-mono text-right text-rose-600 font-semibold">
+                            {itemCost.toLocaleString("tr-TR")} {getSymbol()}
+                          </td>
+                          <td className="p-3 font-mono text-right text-slate-900 font-bold">
+                            {itemSale.toLocaleString("tr-TR")} {getSymbol()}
+                          </td>
+                          <td className="p-3 font-mono text-right text-emerald-600 font-bold">
+                            +{itemProfit.toLocaleString("tr-TR")} {getSymbol()}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                  <tfoot className="bg-slate-100 font-bold border-t border-slate-200 text-slate-900">
+                    <tr>
+                      <td colSpan={5} className="p-3 text-right">GENEL TOPLAM:</td>
+                      <td className="p-3 font-mono">{orderSummary.totalProfileMeters} m</td>
+                      <td className="p-3 font-mono">{orderSummary.totalGlassSqM} m²</td>
+                      <td className="p-3 font-mono text-right text-rose-700">
+                        {costPriceConverted.toLocaleString("tr-TR")} {getSymbol()}
+                      </td>
+                      <td className="p-3 font-mono text-right text-blue-700 text-sm">
+                        {totalPriceConverted.toLocaleString("tr-TR")} {getSymbol()}
+                      </td>
+                      <td className="p-3 font-mono text-right text-emerald-700">
+                        +{profitConverted.toLocaleString("tr-TR")} {getSymbol()}
+                      </td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+            </div>
 
           {/* 📦 AKSESUAR VE SARF MALZEME REÇETESİ (BOM TABLE) */}
+
+
           <div className="space-y-3 pt-2">
             <h3 className="text-sm font-bold text-slate-900 flex items-center justify-between">
               <span>🔩 Aksesuar ve Sarf Malzeme İmalat Reçetesi (BOM Listesi)</span>
@@ -516,9 +794,12 @@ export default function OrderSummaryPage() {
               </table>
             </div>
           </div>
-
         </div>
+      )}
       </main>
     </div>
   );
 }
+
+
+
