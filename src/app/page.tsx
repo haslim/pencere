@@ -906,9 +906,11 @@ export default function SaaSWindowDashboard() {
               </div>
             </div>
           </div>
+        </div>
 
         {/* Sağ Çizim ve Poz Seçim Paneli */}
         <div className="lg:col-span-8 xl:col-span-9 flex flex-col gap-6">
+
 
           <div
             className={`border rounded-2xl p-3 shadow-md backdrop-blur-sm flex flex-wrap items-center justify-between gap-3 transition-colors ${
@@ -1021,8 +1023,8 @@ export default function SaaSWindowDashboard() {
             />
           </div>
         </div>
-      </div>
-    </main>
+      </main>
+
 
       {/* Modal Dialoglar */}
       <CustomerModal
