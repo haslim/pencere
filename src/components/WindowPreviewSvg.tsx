@@ -150,6 +150,44 @@ export const WindowPreviewSvg: React.FC<WindowPreviewSvgProps> = ({
                     />
                   )}
 
+                  {/* Kanat İçi Dikey Kayıtlar */}
+                  {isAcilir && div.sashVerticalMullions && div.sashVerticalMullions > 0 ? (
+                    Array.from({ length: div.sashVerticalMullions }).map((_, svIdx) => {
+                      const stepX = sashW / (div.sashVerticalMullions + 1);
+                      const svPos = sashX + stepX * (svIdx + 1);
+                      return (
+                        <line
+                          key={`sv-${svIdx}`}
+                          x1={svPos}
+                          y1={sashY}
+                          x2={svPos}
+                          y2={sashY + sashH}
+                          stroke={profileColor}
+                          strokeWidth={Math.max(1.5, inset * 0.8)}
+                        />
+                      );
+                    })
+                  ) : null}
+
+                  {/* Kanat İçi Yatay Kayıtlar */}
+                  {isAcilir && div.sashHorizontalMullions && div.sashHorizontalMullions > 0 ? (
+                    Array.from({ length: div.sashHorizontalMullions }).map((_, shIdx) => {
+                      const stepY = sashH / (div.sashHorizontalMullions + 1);
+                      const shPos = sashY + stepY * (shIdx + 1);
+                      return (
+                        <line
+                          key={`sh-${shIdx}`}
+                          x1={sashX}
+                          y1={shPos}
+                          x2={sashX + sashW}
+                          y2={shPos}
+                          stroke={profileColor}
+                          strokeWidth={Math.max(1.5, inset * 0.8)}
+                        />
+                      );
+                    })
+                  ) : null}
+
                   {/* Açılım Kesikli Çizgileri (DIN Sağ / Sol Açılım) */}
                   {(div.type === "tek-acilim" || div.type === "cift-acilim") && (
                     <g stroke="#2563eb" strokeWidth="1" strokeDasharray="3,3" opacity="0.8">

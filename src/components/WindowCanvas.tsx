@@ -12,6 +12,8 @@ export type WindowToolMode =
   | "select"
   | "v_mullion"
   | "h_mullion"
+  | "sash_v_mullion"
+  | "sash_h_mullion"
   | "tek_acilim"
   | "cift_acilim"
   | "kapi_kanadi"
@@ -172,6 +174,14 @@ export const WindowCanvas: React.FC<WindowCanvasProps> = ({
       handleOpenAddMullionModal("v");
     } else if (activeTool === "h_mullion") {
       handleOpenAddMullionModal("h");
+    } else if (activeTool === "sash_v_mullion" && onUpdateSashMullions) {
+      const curDiv = divisions[divIdx] || { sashVerticalMullions: 0, sashHorizontalMullions: 0 };
+      const nextV = (curDiv.sashVerticalMullions || 0) + 1;
+      onUpdateSashMullions(divIdx, nextV, curDiv.sashHorizontalMullions || 0);
+    } else if (activeTool === "sash_h_mullion" && onUpdateSashMullions) {
+      const curDiv = divisions[divIdx] || { sashVerticalMullions: 0, sashHorizontalMullions: 0 };
+      const nextH = (curDiv.sashHorizontalMullions || 0) + 1;
+      onUpdateSashMullions(divIdx, curDiv.sashVerticalMullions || 0, nextH);
     }
   };
 
@@ -231,7 +241,33 @@ export const WindowCanvas: React.FC<WindowCanvasProps> = ({
                 : "bg-slate-50 border-slate-200 hover:bg-slate-100 text-blue-700"
             }`}
           >
-            ➖ +Yatay Kayıt (Tıkla & Konumlandır)
+            ➖ +Yatay Kayıt (Kasa)
+          </button>
+
+          <button
+            onClick={() => setActiveTool(activeTool === "sash_v_mullion" ? "select" : "sash_v_mullion")}
+            className={`px-2.5 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1 whitespace-nowrap border ${
+              activeTool === "sash_v_mullion"
+                ? "bg-amber-600 text-white border-amber-600 shadow"
+                : isDark
+                ? "bg-slate-950 border-slate-800 hover:bg-slate-800 text-amber-400"
+                : "bg-amber-50 border-amber-200 hover:bg-amber-100 text-amber-800"
+            }`}
+          >
+            ╍ +Kanat İçi Dikey Kayıt
+          </button>
+
+          <button
+            onClick={() => setActiveTool(activeTool === "sash_h_mullion" ? "select" : "sash_h_mullion")}
+            className={`px-2.5 py-1 rounded-lg text-xs font-bold transition flex items-center gap-1 whitespace-nowrap border ${
+              activeTool === "sash_h_mullion"
+                ? "bg-amber-600 text-white border-amber-600 shadow"
+                : isDark
+                ? "bg-slate-950 border-slate-800 hover:bg-slate-800 text-amber-400"
+                : "bg-amber-50 border-amber-200 hover:bg-amber-100 text-amber-800"
+            }`}
+          >
+            ➖ +Kanat İçi Yatay Kayıt
           </button>
 
 
@@ -746,6 +782,46 @@ export const WindowCanvas: React.FC<WindowCanvasProps> = ({
                       strokeWidth="1"
                       opacity={isDark ? "0.85" : "0.9"}
                     />
+
+                    {/* 🚪 Kanat İçi Dikey Orta Kayıtlar */}
+                    {divType !== "sabit" && sVert > 0 && (
+                      Array.from({ length: sVert }).map((_, svIdx) => {
+                        const stepX = glassBoxW / (sVert + 1);
+                        const svX = startX + SASH_MARGIN + stepX * (svIdx + 1);
+                        return (
+                          <rect
+                            key={`sash-v-${svIdx}`}
+                            x={svX - 3}
+                            y={startY + SASH_MARGIN}
+                            width={6}
+                            height={glassBoxH}
+                            fill={color.hex}
+                            stroke={isDark ? "#38bdf8" : "#2563eb"}
+                            strokeWidth="1"
+                          />
+                        );
+                      })
+                    )}
+
+                    {/* 🚪 Kanat İçi Yatay Orta Kayıtlar */}
+                    {divType !== "sabit" && sHoriz > 0 && (
+                      Array.from({ length: sHoriz }).map((_, shIdx) => {
+                        const stepY = glassBoxH / (sHoriz + 1);
+                        const shY = startY + SASH_MARGIN + stepY * (shIdx + 1);
+                        return (
+                          <rect
+                            key={`sash-h-${shIdx}`}
+                            x={startX + SASH_MARGIN}
+                            y={shY - 3}
+                            width={glassBoxW}
+                            height={6}
+                            fill={color.hex}
+                            stroke={isDark ? "#38bdf8" : "#2563eb"}
+                            strokeWidth="1"
+                          />
+                        );
+                      })
+                    )}
 
                     {/* Cam Üzerinde Net En x Boy Etiketi (Tıklayarak Ölçü Düzenlenebilir) */}
                     <g
