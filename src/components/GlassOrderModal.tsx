@@ -152,59 +152,36 @@ export const GlassOrderModal: React.FC<GlassOrderModalProps> = ({
             </div>
           </div>
 
-          {/* Cam Tablosu */}
-          <div className="border border-slate-800 rounded-xl overflow-hidden bg-slate-950/50">
-            <table className="w-full text-left text-xs">
-              <thead className="bg-slate-800/80 text-slate-300 font-semibold uppercase tracking-wider border-b border-slate-700">
+          {/* Cam Tablosu (Görsel Fabrika Standartı) */}
+          <div className="border border-slate-800 rounded-xl overflow-hidden bg-white text-slate-900 font-serif">
+            <table className="w-full text-left text-xs border-collapse">
+              <thead className="bg-slate-100 text-slate-900 font-bold border-b border-slate-900">
                 <tr>
-                  <th className="py-3 px-4">#</th>
-                  <th className="py-3 px-4">Pencere / Poz Name</th>
-                  <th className="py-3 px-4 text-center">Genişlik (W)</th>
-                  <th className="py-3 px-4 text-center">Yükseklik (H)</th>
-                  <th className="py-3 px-4 text-center">Adet</th>
-                  <th className="py-3 px-4 text-right">Tekil m²</th>
-                  <th className="py-3 px-4 text-right">Toplam m²</th>
-                  <th className="py-3 px-4">Cam Tipi</th>
+                  <th className="py-2 px-3 text-left">Açıklama</th>
+                  <th className="py-2 px-3 text-center">Adet</th>
+                  <th className="py-2 px-3 text-center">Gen</th>
+                  <th className="py-2 px-3 text-center">Yük</th>
+                  <th className="py-2 px-3 text-right">B m²</th>
+                  <th className="py-2 px-3 text-right">T m²</th>
+                  <th className="py-2 px-3 text-center">Poz No</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800 text-slate-200">
-                {filteredGlasses.length === 0 ? (
-                  <tr>
-                    <td colSpan={8} className="py-8 text-center text-slate-400">
-                      Bu kriterlere uygun cam parçası bulunamadı.
+              <tbody className="divide-y divide-slate-200 text-slate-800">
+                {filteredGlasses.map((g, idx) => (
+                  <tr key={idx} className="hover:bg-slate-50 font-medium">
+                    <td className="py-2 px-3 font-semibold text-slate-900">
+                      {g.type || "4+16+4 Çift Cam Konfor"}
                     </td>
+                    <td className="py-2 px-3 text-center font-bold text-slate-900">{g.quantity}</td>
+                    <td className="py-2 px-3 text-center font-mono">{g.width}</td>
+                    <td className="py-2 px-3 text-center font-mono">{(g.height / 1000).toFixed(3).replace(".", ",")}</td>
+                    <td className="py-2 px-3 text-right font-mono">{g.areaSqM.toFixed(3).replace(".", ",")}</td>
+                    <td className="py-2 px-3 text-right font-mono font-bold text-slate-900">
+                      {(g.areaSqM * g.quantity).toFixed(3).replace(".", ",")}
+                    </td>
+                    <td className="py-2 px-3 text-center font-mono font-bold">{idx + 1}</td>
                   </tr>
-                ) : (
-                  filteredGlasses.map((glass, idx) => (
-                    <tr
-                      key={idx}
-                      className="hover:bg-slate-800/40 transition"
-                    >
-                      <td className="py-3 px-4 font-mono text-slate-400">{idx + 1}</td>
-                      <td className="py-3 px-4 font-medium text-white">
-                        {glass.posName || `Poz #${idx + 1}`}
-                      </td>
-                      <td className="py-3 px-4 text-center font-mono font-semibold text-blue-300">
-                        {glass.width} mm
-                      </td>
-                      <td className="py-3 px-4 text-center font-mono font-semibold text-blue-300">
-                        {glass.height} mm
-                      </td>
-                      <td className="py-3 px-4 text-center">
-                        <span className="px-2 py-0.5 rounded bg-slate-800 text-amber-300 font-bold border border-slate-700">
-                          {glass.quantity}
-                        </span>
-                      </td>
-                      <td className="py-3 px-4 text-right font-mono text-slate-300">
-                        {glass.areaSqM} m²
-                      </td>
-                      <td className="py-3 px-4 text-right font-mono font-bold text-emerald-400">
-                        {(glass.areaSqM * glass.quantity).toFixed(2)} m²
-                      </td>
-                      <td className="py-3 px-4 text-slate-400">{glass.type}</td>
-                    </tr>
-                  ))
-                )}
+                ))}
               </tbody>
             </table>
           </div>

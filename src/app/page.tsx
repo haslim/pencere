@@ -540,6 +540,12 @@ export default function SaaSWindowDashboard() {
             📐 CAD Çizim
           </Link>
           <Link
+            href="/drawings"
+            className="px-3 py-1.5 rounded-lg text-xs font-bold text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition"
+          >
+            🎨 Grafik Kataloğu
+          </Link>
+          <Link
             href="/summary"
             className="px-3 py-1.5 rounded-lg text-xs font-bold text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition"
           >

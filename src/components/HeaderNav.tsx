@@ -148,6 +148,18 @@ export function HeaderNav() {
             📐 CAD Çizim
           </Link>
           <Link
+            href="/drawings"
+            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 ${
+              pathname === "/drawings"
+                ? "bg-blue-600 text-white shadow-sm"
+                : isDark
+                ? "text-slate-400 hover:text-white"
+                : "text-slate-600 hover:text-slate-900"
+            }`}
+          >
+            🎨 Grafik & Çizim Kataloğu
+          </Link>
+          <Link
             href="/summary"
             className={`px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 ${
               pathname === "/summary"

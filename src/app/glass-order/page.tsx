@@ -7,17 +7,17 @@ import {
   WindowItem,
   calculateOrderSummary,
   PROFILE_COLORS,
+  GlassCut,
+  Customer,
 } from "@/lib/pencereEngine";
 import { DEFAULT_SETTINGS, AppSettings } from "@/components/SettingsModal";
 import { DEFAULT_CUSTOMERS } from "@/components/CustomerModal";
-import { Customer } from "@/lib/pencereEngine";
-import { ArrowLeft, Download, Printer, Layers, ShieldCheck, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, Download, Printer } from "lucide-react";
 
 export default function GlassOrderPage() {
   const [items, setItems] = useState<WindowItem[]>([]);
   const [customer, setCustomer] = useState<Customer>(DEFAULT_CUSTOMERS[0]);
   const [settings, setSettings] = useState<AppSettings>(DEFAULT_SETTINGS);
-  const [selectedGlassType, setSelectedGlassType] = useState<string>("TÜMÜ");
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
@@ -81,35 +81,36 @@ export default function GlassOrderPage() {
     );
   }
 
+  // Camları gruplama & hesaplama
   const allGlasses = orderSummary.allGlasses;
-  const filteredGlasses =
-    selectedGlassType === "TÜMÜ"
-      ? allGlasses
-      : allGlasses.filter((g) => g.type.includes(selectedGlassType));
 
-  const totalM2 = filteredGlasses
+  // Toplam m² ve Adet
+  const totalM2 = allGlasses
     .reduce((acc, g) => acc + g.areaSqM * g.quantity, 0)
-    .toFixed(2);
-  const totalPieces = filteredGlasses.reduce((acc, g) => acc + g.quantity, 0);
+    .toFixed(3);
+  const totalPieces = allGlasses.reduce((acc, g) => acc + g.quantity, 0);
+
+  // Cam Tipi Bazlı Gruplama İcmali (Alt Toplamlar)
+  const glassGroups = allGlasses.reduce((acc, g) => {
+    const type = g.type || "4+16+4 Çift Cam Konfor";
+    if (!acc[type]) {
+      acc[type] = { items: [], totalPieces: 0, totalArea: 0 };
+    }
+    acc[type].items.push(g);
+    acc[type].totalPieces += g.quantity;
+    acc[type].totalArea += g.areaSqM * g.quantity;
+    return acc;
+  }, {} as Record<string, { items: GlassCut[]; totalPieces: number; totalArea: number }>);
 
   const handleExportGlassList = () => {
     const textLines = [
-      `==========================================`,
-      `      CAM & ISICAM İMALAT SİPARİŞİ        `,
-      `==========================================`,
-      `Müşteri / Cari: ${customer.name}`,
-      `Tarih: ${new Date().toLocaleDateString("tr-TR")}`,
-      `------------------------------------------`,
-      `POZ / GENİŞLİK(mm) / YÜKSEKLİK(mm) / ADET / m² / CAM TİPİ`,
-      ...filteredGlasses.map(
+      `Açıklama\tAdet\tGen\tYük\tB m²\tT m²\tPoz No`,
+      ...allGlasses.map(
         (g, idx) =>
-          `${idx + 1}. [${g.posName || "Poz"}] ${g.width} x ${g.height} mm - ${
-            g.quantity
-          } Adet (${(g.areaSqM * g.quantity).toFixed(2)} m²) - ${g.type}`
+          `${g.type}\t${g.quantity}\t${g.width}\t${(g.height / 1000).toFixed(3)}\t${g.areaSqM.toFixed(3)}\t${(g.areaSqM * g.quantity).toFixed(3)}\t${idx + 1}`
       ),
       `------------------------------------------`,
-      `TOPLAM CAM ALANI: ${totalM2} m² (${totalPieces} Cam Plaka)`,
-      `==========================================`,
+      `TOPLAM: ${totalPieces} Adet - ${totalM2} m²`,
     ];
 
     const blob = new Blob([textLines.join("\n")], {
@@ -141,13 +142,10 @@ export default function GlassOrderPage() {
             </Link>
             <div>
               <h1 className="text-xl font-black text-white flex items-center gap-2">
-                🪟 Cam Sipariş & Isıcam Metraj Raporu
-                <span className="text-xs px-2.5 py-0.5 rounded-full bg-blue-500/20 text-blue-400 border border-blue-500/30 font-semibold">
-                  Tesis Siparişi
-                </span>
+                🪟 Cam Sipariş Raporu (Resmi Fabrika Formatı)
               </h1>
               <p className="text-xs text-slate-400">
-                Doğrama ölçülerine göre hesaplanan cam imalat metrajları ve cam tesisi sipariş formu
+                Resmi cam fabrikası sipariş föyü ve metraj listesi
               </p>
             </div>
           </div>
@@ -158,91 +156,100 @@ export default function GlassOrderPage() {
               className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-xs font-bold transition border border-slate-700 flex items-center gap-2"
             >
               <Printer className="w-4 h-4" />
-              Yazdır / PDF
+              Yazdır / PDF İndir
             </button>
             <button
               onClick={handleExportGlassList}
               className="px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl text-xs font-bold transition shadow-lg shadow-blue-500/20 flex items-center gap-2"
             >
               <Download className="w-4 h-4" />
-              Sipariş Metni İndir (.TXT)
+              Metin İndir (.TXT)
             </button>
           </div>
         </div>
 
-        {/* Glass Summary Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 no-print">
-          <div className="bg-slate-950 border border-slate-800 p-4 rounded-xl">
-            <span className="text-xs text-slate-400 font-medium">Toplam Cam Alanı</span>
-            <p className="text-xl font-bold text-cyan-400 font-mono mt-1">{totalM2} m²</p>
-          </div>
-          <div className="bg-slate-950 border border-slate-800 p-4 rounded-xl">
-            <span className="text-xs text-slate-400 font-medium">Toplam Cam Adedi</span>
-            <p className="text-xl font-bold text-white font-mono mt-1">{totalPieces} Plaka</p>
-          </div>
-          <div className="bg-slate-950 border border-slate-800 p-4 rounded-xl">
-            <span className="text-xs text-slate-400 font-medium">Cari / Müşteri</span>
-            <p className="text-xl font-bold text-emerald-400 font-mono mt-1 truncate">{customer.name}</p>
-          </div>
-        </div>
-
-        {/* Printable Area */}
-        <div id="glass-print-area" className="bg-white text-slate-900 border border-slate-200 rounded-2xl p-8 shadow-2xl space-y-6">
-          <div className="flex justify-between items-start border-b border-slate-200 pb-6">
+        {/* Printable Area - Factory Order Form Layout matching User Image */}
+        <div id="glass-print-area" className="bg-white text-slate-900 border border-slate-300 rounded-xl p-8 shadow-2xl space-y-6 font-serif">
+          {/* Header Info */}
+          <div className="flex justify-between items-start border-b border-slate-900 pb-4">
             <div>
-              <h2 className="text-2xl font-extrabold text-blue-700 uppercase tracking-tight">
-                CAM & ISICAM İMALAT SİPARİŞİ
+              <h2 className="text-xl font-extrabold tracking-tight text-slate-900 font-sans uppercase">
+                CAM SİPARİŞ RAPORU
               </h2>
-              <p className="text-xs text-slate-500 mt-1">Cari: {customer.name} | Tel: {customer.phone}</p>
+              <p className="text-xs text-slate-700 font-serif mt-1">
+                Firma / Cari: <span className="font-bold">{customer.name}</span> | Tel: {customer.phone}
+              </p>
             </div>
-            <div className="text-right">
-              <span className="bg-blue-50 text-blue-700 text-xs px-3 py-1 rounded-full border border-blue-200 font-mono font-bold">
-                CAM NO: #CAM-{Date.now().toString().slice(-6)}
-              </span>
-              <p className="text-xs text-slate-500 mt-2 font-medium">Tarih: {new Date().toLocaleDateString("tr-TR")}</p>
+            <div className="text-right text-xs font-mono">
+              <p className="font-bold text-slate-900">Tarih: {new Date().toLocaleDateString("tr-TR")}</p>
+              <p className="text-slate-600">Sipariş No: #CAM-{Date.now().toString().slice(-6)}</p>
             </div>
           </div>
 
-          <div className="rounded-xl border border-slate-200 overflow-hidden">
-            <table className="w-full text-left text-xs text-slate-700">
-              <thead className="bg-slate-100 text-slate-600 font-mono border-b border-slate-200">
-                <tr>
-                  <th className="p-3">#</th>
-                  <th className="p-3">Poz İsmi</th>
-                  <th className="p-3">Cam Ölçüsü (En x Boy mm)</th>
-                  <th className="p-3">Adet</th>
-                  <th className="p-3">Birim m²</th>
-                  <th className="p-3">Toplam m²</th>
-                  <th className="p-3">Cam Tipi</th>
+          {/* Table Matching Reference Image (Açıklama | Adet | Gen | Yük | B m² | T m² | Poz No) */}
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs font-serif border-collapse">
+              <thead>
+                <tr className="border-b-2 border-slate-900 text-slate-900 font-bold">
+                  <th className="py-2 px-3 text-left">Açıklama</th>
+                  <th className="py-2 px-3 text-center">Adet</th>
+                  <th className="py-2 px-3 text-center">Gen</th>
+                  <th className="py-2 px-3 text-center">Yük</th>
+                  <th className="py-2 px-3 text-right">B m²</th>
+                  <th className="py-2 px-3 text-right">T m²</th>
+                  <th className="py-2 px-3 text-center">Poz No</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 bg-white">
-                {filteredGlasses.map((g, idx) => (
-                  <tr key={idx} className="hover:bg-slate-50">
-                    <td className="p-3 font-mono text-slate-400">{idx + 1}</td>
-                    <td className="p-3 font-bold text-slate-900">{g.posName || "Poz"}</td>
-                    <td className="p-3 font-mono text-blue-600 font-bold">
-                      {g.width} x {g.height} mm
-                    </td>
-                    <td className="p-3 font-bold">{g.quantity}</td>
-                    <td className="p-3 font-mono">{g.areaSqM.toFixed(2)} m²</td>
-                    <td className="p-3 font-mono font-bold text-slate-900">
-                      {(g.areaSqM * g.quantity).toFixed(2)} m²
-                    </td>
-                    <td className="p-3 font-medium text-slate-700">{g.type}</td>
-                  </tr>
-                ))}
+              <tbody className="divide-y divide-slate-200">
+                {allGlasses.map((g, idx) => {
+                  const bM2 = g.areaSqM.toFixed(3);
+                  const tM2 = (g.areaSqM * g.quantity).toFixed(3);
+                  // Yükseklik metre cinsinden virgüllü (örn: 1,252) veya mm
+                  const yukStr = (g.height / 1000).toFixed(3).replace(".", ",");
+                  const bM2Str = bM2.replace(".", ",");
+                  const tM2Str = tM2.replace(".", ",");
+
+                  return (
+                    <tr key={idx} className="hover:bg-slate-50 font-medium text-slate-800">
+                      <td className="py-2 px-3 font-semibold text-slate-900">
+                        {g.type || "4+16+4 Çift Cam Konfor"}
+                      </td>
+                      <td className="py-2 px-3 text-center font-bold text-slate-900">{g.quantity}</td>
+                      <td className="py-2 px-3 text-center font-mono">{g.width}</td>
+                      <td className="py-2 px-3 text-center font-mono">{yukStr}</td>
+                      <td className="py-2 px-3 text-right font-mono">{bM2Str}</td>
+                      <td className="py-2 px-3 text-right font-mono font-bold text-slate-900">{tM2Str}</td>
+                      <td className="py-2 px-3 text-center font-mono font-bold">{idx + 1}</td>
+                    </tr>
+                  );
+                })}
               </tbody>
-              <tfoot className="bg-slate-100 font-bold border-t border-slate-200 text-slate-900">
-                <tr>
-                  <td colSpan={3} className="p-3 text-right">TOPLAM:</td>
-                  <td className="p-3 font-bold">{totalPieces} Plaka</td>
-                  <td className="p-3"></td>
-                  <td className="p-3 font-mono text-blue-700 text-sm">{totalM2} m²</td>
-                  <td className="p-3"></td>
-                </tr>
-              </tfoot>
             </table>
+          </div>
+
+          {/* Group Summaries & Total Footer Lines matching image style */}
+          <div className="border-t-2 border-slate-900 pt-4 space-y-2">
+            {Object.entries(glassGroups).map(([type, data]) => (
+              <div
+                key={type}
+                className="flex justify-between items-center text-xs font-serif font-bold text-slate-900 border-b border-slate-300 pb-1.5"
+              >
+                <span>{type}</span>
+                <div className="flex gap-12 font-mono">
+                  <span>{data.totalPieces} Adet</span>
+                  <span>{data.totalArea.toFixed(3).replace(".", ",")} m²</span>
+                </div>
+              </div>
+            ))}
+
+            {/* Overall Grand Total */}
+            <div className="flex justify-between items-center text-sm font-serif font-black text-slate-950 pt-2 border-t-2 border-slate-900">
+              <span>GENEL SİPARİŞ TOPLAMI</span>
+              <div className="flex gap-12 font-mono">
+                <span>{totalPieces} Adet</span>
+                <span className="underline decoration-double">{totalM2.replace(".", ",")} m²</span>
+              </div>
+            </div>
           </div>
         </div>
       </main>
