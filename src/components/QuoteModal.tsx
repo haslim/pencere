@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { Customer, OrderCalculationResult, WindowItem } from "@/lib/pencereEngine";
 import { CompanyInfo } from "@/components/SettingsModal";
+import { WindowPreviewSvg } from "@/components/WindowPreviewSvg";
 import { Printer, Globe, DollarSign, Euro, FileText, CheckCircle2 } from "lucide-react";
 
 interface QuoteModalProps {
@@ -163,6 +164,7 @@ export const QuoteModal: React.FC<QuoteModalProps> = ({
               <table className="w-full text-left text-xs text-slate-700">
                 <thead className="bg-slate-100 text-slate-600 font-mono border-b border-slate-200">
                   <tr>
+                    <th className="p-3">Çizim</th>
                     <th className="p-3">Poz Adı</th>
                     <th className="p-3">Dış Ölçü (WxH mm)</th>
                     <th className="p-3">Renk</th>
@@ -174,6 +176,9 @@ export const QuoteModal: React.FC<QuoteModalProps> = ({
                 <tbody className="divide-y divide-slate-100 bg-white">
                   {orderSummary.itemResults.map(({ item, calc }, idx) => (
                     <tr key={item.id} className="hover:bg-slate-50">
+                      <td className="p-2.5">
+                        <WindowPreviewSvg item={item} maxW={100} maxH={80} />
+                      </td>
                       <td className="p-3 font-bold text-slate-900">
                         {idx + 1}. {item.name}
                       </td>

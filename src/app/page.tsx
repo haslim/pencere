@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useMemo, useEffect, useCallback } from "react";
+import Link from "next/link";
 import {
   PROFILE_COLORS,
   EGEPEN_SERIES,
@@ -530,7 +531,35 @@ export default function SaaSWindowDashboard() {
           </div>
         </div>
 
-        {/* Orta & Sağ Aksiyon Butonları */}
+        {/* Orta Navigation Bar */}
+        <nav className="flex items-center gap-1 bg-slate-100 dark:bg-slate-900 p-1 rounded-xl border border-slate-200 dark:border-slate-800">
+          <Link
+            href="/"
+            className="px-3 py-1.5 rounded-lg text-xs font-bold bg-blue-600 text-white shadow-sm"
+          >
+            📐 CAD Çizim
+          </Link>
+          <Link
+            href="/summary"
+            className="px-3 py-1.5 rounded-lg text-xs font-bold text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition"
+          >
+            📊 Maliyet & Satış Özeti
+          </Link>
+          <Link
+            href="/cut-list"
+            className="px-3 py-1.5 rounded-lg text-xs font-bold text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition"
+          >
+            ✂️ 1D Kesim & CNC
+          </Link>
+          <Link
+            href="/glass-order"
+            className="px-3 py-1.5 rounded-lg text-xs font-bold text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition"
+          >
+            🪟 Cam Sipariş
+          </Link>
+        </nav>
+
+        {/* Sağ Aksiyon Butonları */}
         <div className="flex items-center flex-wrap gap-2 sm:gap-3">
           {/* Tema Değiştirici */}
           <div
@@ -610,26 +639,6 @@ export default function SaaSWindowDashboard() {
             }`}
           >
             🗂️ Geçmiş
-          </button>
-          <button
-            onClick={() => setIsCutModalOpen(true)}
-            className={`px-3 py-1.5 border rounded-xl text-xs font-semibold transition shadow-sm flex items-center gap-1.5 ${
-              isDark
-                ? "bg-slate-800 hover:bg-slate-700 text-cyan-300 border-cyan-500/30"
-                : "bg-sky-50 hover:bg-sky-100 text-sky-700 border-sky-200/80"
-            }`}
-          >
-            ✂️ 1D Kesim & CNC ({items.length})
-          </button>
-          <button
-            onClick={() => setIsGlassModalOpen(true)}
-            className={`px-3 py-1.5 border rounded-xl text-xs font-semibold transition shadow-sm flex items-center gap-1.5 ${
-              isDark
-                ? "bg-slate-800 hover:bg-slate-700 text-blue-300 border-blue-500/30"
-                : "bg-blue-50 hover:bg-blue-100 text-blue-800 border-blue-200"
-            }`}
-          >
-            🪟 Cam Sipariş ({orderSummary.totalGlassSqM} m²)
           </button>
           <button
             onClick={() => setIsQuoteModalOpen(true)}
