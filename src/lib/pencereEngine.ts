@@ -741,7 +741,8 @@ export function calculateWindowDimensions(
   }
 
   // 4. Aksesuar ve Donanım Reçetesi (BOM)
-  const accessories = calculateAccessoryList(item, settings);
+  const accessories = calculateAccessoryList(item, settings, cutPieces);
+
   const totalAccessoryCostTL = accessories.reduce((sum, a) => sum + a.totalPriceTL, 0);
 
   // Toplam Metrajlar
@@ -813,8 +814,10 @@ export function calculateWindowDimensions(
 // Tam Aksesuar & Sarf Malzeme Hesaplama Motoru (BOM Engine)
 export function calculateAccessoryList(
   item: WindowItem,
-  settings: AppSettings = DEFAULT_SETTINGS
+  settings: AppSettings = DEFAULT_SETTINGS,
+  cutPieces: CutPiece[] = []
 ): AccessoryItem[] {
+
   const accessories: AccessoryItem[] = [];
   const { width, height, divisions, verticalMullionsCount, horizontalMullionsCount } = item;
 
@@ -1013,8 +1016,33 @@ export function calculateAccessoryList(
     totalPriceTL: (verticalMullionsCount + 1) * 2 * 8,
   });
 
+  // Dinamik Matkap Uçlu Vida Hesabı (300mm Sac Vidalama Sıklığı + Menteşe & Aksesuar Vidaları)
+  let totalScrewCount = 0;
+  cutPieces.forEach((piece) => {
+    if (piece.type !== "CITA" && piece.type !== "ALUMINYUM_ESIK" && piece.type !== "DESTEK_SACI") {
+      const screwsPerPiece = Math.ceil(piece.length / 300) + 1;
+      totalScrewCount += screwsPerPiece * piece.quantity;
+    }
+  });
+
+  totalScrewCount += activeSashes * 24; // Menteşe + İspanyolet montaj vidaları
+
+  totalScrewCount += mullionCount * 2 * 4; // Takoz vidaları
+
+  accessories.push({
+    id: "acc-vida-paket",
+    code: "13190",
+    name: `Matkap Uçlu Galvaniz Vidalama Paketi (300mm Sac Sıklığı) - ${totalScrewCount} Adet`,
+    category: "SARF_MALZEME",
+    unit: "ADET",
+    quantity: totalScrewCount,
+    unitPriceTL: 0.85,
+    totalPriceTL: Math.round(totalScrewCount * 0.85),
+  });
+
   return accessories;
 }
+
 
 // 1D Optimizasyon Algoritması (First Fit Decreasing / FFD) - Çoklu / Özel Stok Boyu Destekli
 
