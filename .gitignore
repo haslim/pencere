@@ -40,8 +40,10 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# ignore üretimstd folder
+# ignore legacy data & üretimstd folders
+e2000/
 üretimstd/
+
 
 
 

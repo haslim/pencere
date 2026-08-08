@@ -161,8 +161,10 @@ export interface WindowItem {
   customHorizontalMullions?: number[];
   verticalMullionsCount: number; // Kasa geneli Dikey Orta Kayıt sayısı
   horizontalMullionsCount: number; // Kasa geneli Yatay Orta Kayıt sayısı
+  glassThickness?: number; // Cam kalınlığı mm (20mm Tek Cam, 28mm Çift Cam, 32mm Üçlü Cam)
   divisions: DivisionItem[];
 }
+
 
 
 export interface CutPiece {
@@ -594,6 +596,10 @@ export function calculateWindowDimensions(
       const rowBottom = r === horizontalMullionsCount ? height - KASA_GENISLIGI : hPositions[r] - ORTA_KAYIT_GENISLIGI / 2;
       const sectionH = rowBottom - rowTop;
 
+      const glassThick = item.glassThickness || 28;
+      const citaCode = glassThick <= 20 ? "12641" : glassThick <= 28 ? "12648" : "12650";
+      const citaLabelName = glassThick <= 20 ? "Dekoratif Tek Cam Çıtası (20mm)" : glassThick <= 28 ? "Çift Cam Çıtası (28mm Isıcam)" : "Üçlü Cam Çıtası (32mm Isıcam)";
+
       if (divType === "sabit") {
         const glassW = sectionW - glassTolerance;
         const glassH = sectionH - glassTolerance;
@@ -604,14 +610,14 @@ export function calculateWindowDimensions(
           height: Math.round(glassH),
           areaSqM: Number(sqM.toFixed(3)),
           quantity: 1,
-          type: "4+16+4 Isıcam Çift Cam (Kasa İçi Sabit)",
+          type: `${glassThick}mm Isıcam Cam (${glassThick <= 20 ? "Tek Cam" : glassThick <= 28 ? "Çift Cam" : "Üçlü Cam"})`,
           posName: item.name,
         });
 
         cutPieces.push({
           id: `cita-en-${divIdx}`,
-          code: "12648",
-          label: `Bölme ${divIdx + 1} Sabit Çıta (En)`,
+          code: citaCode,
+          label: `Bölme ${divIdx + 1} ${citaLabelName} (En)`,
           type: "CITA",
           length: Math.round(glassW + 10),
           quantity: 2,
@@ -622,8 +628,8 @@ export function calculateWindowDimensions(
         });
         cutPieces.push({
           id: `cita-boy-${divIdx}`,
-          code: "12648",
-          label: `Bölme ${divIdx + 1} Sabit Çıta (Boy)`,
+          code: citaCode,
+          label: `Bölme ${divIdx + 1} ${citaLabelName} (Boy)`,
           type: "CITA",
           length: Math.round(glassH + 10),
           quantity: 2,
@@ -727,7 +733,7 @@ export function calculateWindowDimensions(
           height: Math.round(glassH),
           areaSqM: Number(sqM.toFixed(3)),
           quantity: gCols * gRows,
-          type: `4+16+4 Isıcam Çift Cam (${isDoorSash ? "Kapı Kanadı İçi" : isSlidingSash ? "Sürme Kanat İçi" : "Pencere Kanat İçi"})`,
+          type: `${glassThick}mm Isıcam (${isDoorSash ? "Kapı Kanadı İçi" : isSlidingSash ? "Sürme Kanat İçi" : "Pencere Kanat İçi"})`,
           posName: item.name,
         });
       }
@@ -819,118 +825,141 @@ export function calculateAccessoryList(
   const hingeUnitPrice = (settings as any).hingeUnitPrice || 35;
   const gasketPricePerMeter = (settings as any).gasketPricePerMeter || 12;
 
-  let singleTurnCount = 0;
-  let doubleTurnCount = 0;
-  let doorCount = 0;
-  let slidingCount = 0;
-  let vasistasCount = 0;
-  let totalHinges = 0;
-
   divisions.forEach((div) => {
-    if (div.type === "tek-acilim") {
-      singleTurnCount++;
-      totalHinges += height < 1200 ? 2 : 3;
-    } else if (div.type === "cift-acilim") {
-      doubleTurnCount++;
-      totalHinges += height < 1200 ? 2 : 3;
+    if (div.type === "tek-acilim" || div.type === "cift-acilim") {
+      // Kanat Boyuna Göre Dinamik İspanyolet Kodu ve Tanımı
+      let espagCode = "13185-3";
+      let espagName = "Tek Açılım İspanyolet Seti (1000-1400mm)";
+      if (height < 600) {
+        espagCode = "13185-1";
+        espagName = "Tek Açılım Küçük İspanyolet (300-600mm)";
+      } else if (height < 1000) {
+        espagCode = "13185-2";
+        espagName = "Tek Açılım İspanyolet (600-1000mm)";
+      } else if (height < 1400) {
+        espagCode = "13185-3";
+        espagName = "Tek Açılım İspanyolet (1000-1400mm)";
+      } else if (height < 1800) {
+        espagCode = "13185-4";
+        espagName = "Tek Açılım Uzun İspanyolet (1400-1800mm)";
+      } else {
+        espagCode = "13185-5";
+        espagName = "Balkon Kapısı İspanyoleti (1800-2400mm)";
+      }
+
+      if (div.type === "tek-acilim") {
+        accessories.push({
+          id: `acc-tek-${espagCode}`,
+          code: espagCode,
+          name: espagName,
+          category: "DONANIM",
+          unit: "TAKIM",
+          quantity: 1,
+          unitPriceTL: singleTurnPrice,
+          totalPriceTL: singleTurnPrice,
+        });
+      } else {
+        // Çift Açılım Makas Boyutu (Genişliğe Göre)
+        let makasCode = "13186-M";
+        let makasName = "Çift Açılım Makas Seti (Orta 600-1000mm)";
+        if (width < 600) {
+          makasCode = "13186-S";
+          makasName = "Çift Açılım Makas Seti (Küçük 350-600mm)";
+        } else if (width > 1000) {
+          makasCode = "13186-L";
+          makasName = "Çift Açılım Makas Seti (Büyük 1000-1400mm)";
+        }
+
+        accessories.push({
+          id: `acc-cift-${espagCode}`,
+          code: "13186",
+          name: `Çift Açılım İspanyolet & ${makasName}`,
+          category: "DONANIM",
+          unit: "TAKIM",
+          quantity: 1,
+          unitPriceTL: doubleTurnPrice,
+          totalPriceTL: doubleTurnPrice,
+        });
+      }
+
+      // Dinamik Menteşe Sayısı (Kanat Yüksekliğine Göre)
+      const hingeCount = height < 1200 ? 2 : height < 1800 ? 3 : 4;
+      accessories.push({
+        id: `acc-mentese-${div.type}`,
+        code: "12082",
+        name: `Pencere Menteşesi 75mm (${hingeCount} Adet/Kanat)`,
+        category: "MENTESE",
+        unit: "ADET",
+        quantity: hingeCount,
+        unitPriceTL: hingeUnitPrice,
+        totalPriceTL: hingeCount * hingeUnitPrice,
+      });
     } else if (div.type === "vasistas") {
-      vasistasCount++;
-      totalHinges += 2;
+      accessories.push({
+        id: "acc-vasistas",
+        code: "13187",
+        name: "Vasistas Makas & Çarpma Kilit Seti",
+        category: "DONANIM",
+        unit: "TAKIM",
+        quantity: 1,
+        unitPriceTL: singleTurnPrice,
+        totalPriceTL: singleTurnPrice,
+      });
+      accessories.push({
+        id: "acc-vasistas-mentese",
+        code: "12082",
+        name: "Vasistas Alt Menteşe Seti (2 Adet)",
+        category: "MENTESE",
+        unit: "ADET",
+        quantity: 2,
+        unitPriceTL: hingeUnitPrice,
+        totalPriceTL: 2 * hingeUnitPrice,
+      });
     } else if (div.type === "kapi-ic" || div.type === "kapi-dis") {
-      doorCount++;
-      totalHinges += height < 2000 ? 3 : 4;
+      accessories.push({
+        id: "acc-kapi-kilit",
+        code: "13162",
+        name: `Egepen Kilitli Kapı İspanyoleti (${height}mm), Alüminyum Kol & Barel Seti`,
+        category: "DONANIM",
+        unit: "TAKIM",
+        quantity: 1,
+        unitPriceTL: doorLockPrice,
+        totalPriceTL: doorLockPrice,
+      });
+      const doorHingeCount = height < 2000 ? 3 : 4;
+      accessories.push({
+        id: "acc-kapi-mentese",
+        code: "12082",
+        name: `Ağır Seri Kapı Menteşesi 90mm (${doorHingeCount} Adet/Kapı)`,
+        category: "MENTESE",
+        unit: "ADET",
+        quantity: doorHingeCount,
+        unitPriceTL: hingeUnitPrice * 1.5,
+        totalPriceTL: doorHingeCount * hingeUnitPrice * 1.5,
+      });
     } else if (div.type.includes("surme")) {
-      slidingCount++;
+      accessories.push({
+        id: "acc-surme-tekerlek",
+        code: "13163",
+        name: "Sürme Seri Ayarlı Rulman & Tekerlek Takımı (2 Adet/Kanat)",
+        category: "DONANIM",
+        unit: "TAKIM",
+        quantity: 1,
+        unitPriceTL: slidingFittingPrice,
+        totalPriceTL: slidingFittingPrice,
+      });
+      accessories.push({
+        id: "acc-surme-stoper",
+        code: "13110",
+        name: "Sürme Kanat Stoper & Kenet Takozu Seti",
+        category: "DONANIM",
+        unit: "ADET",
+        quantity: 2,
+        unitPriceTL: 45,
+        totalPriceTL: 90,
+      });
     }
   });
-
-  if (singleTurnCount > 0) {
-    accessories.push({
-      id: "acc-tek-acilim",
-      code: "13185",
-      name: "Tek Açılım İspanyolet & Karşılık Seti",
-      category: "DONANIM",
-      unit: "TAKIM",
-      quantity: singleTurnCount,
-      unitPriceTL: singleTurnPrice,
-      totalPriceTL: singleTurnCount * singleTurnPrice,
-    });
-  }
-
-  if (doubleTurnCount > 0) {
-    accessories.push({
-      id: "acc-cift-acilim",
-      code: "13186",
-      name: "Egepen Çift Açılım İspanyolet, Makas & Eğim Seti",
-      category: "DONANIM",
-      unit: "TAKIM",
-      quantity: doubleTurnCount,
-      unitPriceTL: doubleTurnPrice,
-      totalPriceTL: doubleTurnCount * doubleTurnPrice,
-    });
-  }
-
-  if (vasistasCount > 0) {
-    accessories.push({
-      id: "acc-vasistas",
-      code: "13187",
-      name: "Vasistas Makas & Çarpma Kilit Seti",
-      category: "DONANIM",
-      unit: "TAKIM",
-      quantity: vasistasCount,
-      unitPriceTL: singleTurnPrice,
-      totalPriceTL: vasistasCount * singleTurnPrice,
-    });
-  }
-
-  if (doorCount > 0) {
-    accessories.push({
-      id: "acc-kapi-kilit",
-      code: "13162",
-      name: "Egepen Kilitli Kapı İspanyoleti, Alüminyum Kol & Barel Seti",
-      category: "DONANIM",
-      unit: "TAKIM",
-      quantity: doorCount,
-      unitPriceTL: doorLockPrice,
-      totalPriceTL: doorCount * doorLockPrice,
-    });
-  }
-
-  if (slidingCount > 0) {
-    accessories.push({
-      id: "acc-surme-tekerlek",
-      code: "13163",
-      name: "Sürme Seri Ayarlı Rulman & Tekerlek Takımı",
-      category: "DONANIM",
-      unit: "TAKIM",
-      quantity: slidingCount,
-      unitPriceTL: slidingFittingPrice,
-      totalPriceTL: slidingCount * slidingFittingPrice,
-    });
-    accessories.push({
-      id: "acc-surme-stoper",
-      code: "13110",
-      name: "Sürme Kanat Stoper & Kenet Takozu Seti",
-      category: "DONANIM",
-      unit: "ADET",
-      quantity: slidingCount * 2,
-      unitPriceTL: 45,
-      totalPriceTL: slidingCount * 2 * 45,
-    });
-  }
-
-  if (totalHinges > 0) {
-    accessories.push({
-      id: "acc-mentese",
-      code: "12082",
-      name: doorCount > 0 ? "Ağır Seri Kapı / Pencere Menteşesi (75mm-90mm)" : "Pencere Menteşesi (75mm)",
-      category: "MENTESE",
-      unit: "ADET",
-      quantity: totalHinges,
-      unitPriceTL: hingeUnitPrice,
-      totalPriceTL: totalHinges * hingeUnitPrice,
-    });
-  }
 
   const kasaPerimeterMeters = Number((((width + height) * 2) / 1000).toFixed(2));
   const activeSashes = divisions.filter((d) => d.type !== "sabit").length;
@@ -988,6 +1017,7 @@ export function calculateAccessoryList(
 }
 
 // 1D Optimizasyon Algoritması (First Fit Decreasing / FFD) - Çoklu / Özel Stok Boyu Destekli
+
 
 export function optimizeCutList(
   pieces: CutPiece[],
