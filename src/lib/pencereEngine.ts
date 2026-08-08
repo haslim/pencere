@@ -139,12 +139,20 @@ export type DivisionType =
   | "surme-cift"; // Çift Hareketli Sürme Kanatlar
 
 
+export interface AccessorySelectionOptions {
+  hardwareBrand?: "SIEGENIA" | "VORNE" | "ROTO" | "GU" | "STANDART";
+  handleType?: "STANDART" | "RIMINI" | "KILITLI" | "AKUSTIK_SURME";
+  handleColor?: "BEYAZ" | "KAHVERENGI" | "SIYAH" | "TITANYUM";
+  hingeType?: "STANDART_75" | "AGIR_KAPI_90" | "GIZLI";
+}
+
 export interface DivisionItem {
   id: string;
   type: DivisionType;
   sashProfileType?: SashProfileType;
   sashVerticalMullions: number; // Kanat içi dikey kayıt
   sashHorizontalMullions: number; // Kanat içi yatay kayıt
+  accessories?: AccessorySelectionOptions;
 }
 
 export interface WindowItem {
@@ -162,8 +170,10 @@ export interface WindowItem {
   verticalMullionsCount: number; // Kasa geneli Dikey Orta Kayıt sayısı
   horizontalMullionsCount: number; // Kasa geneli Yatay Orta Kayıt sayısı
   glassThickness?: number; // Cam kalınlığı mm (20mm Tek Cam, 28mm Çift Cam, 32mm Üçlü Cam)
+  defaultAccessories?: AccessorySelectionOptions;
   divisions: DivisionItem[];
 }
+
 
 
 
@@ -817,7 +827,6 @@ export function calculateAccessoryList(
   settings: AppSettings = DEFAULT_SETTINGS,
   cutPieces: CutPiece[] = []
 ): AccessoryItem[] {
-
   const accessories: AccessoryItem[] = [];
   const { width, height, divisions, verticalMullionsCount, horizontalMullionsCount } = item;
 
@@ -828,26 +837,33 @@ export function calculateAccessoryList(
   const hingeUnitPrice = (settings as any).hingeUnitPrice || 35;
   const gasketPricePerMeter = (settings as any).gasketPricePerMeter || 12;
 
+
   divisions.forEach((div) => {
+    const brand = div.accessories?.hardwareBrand || item.defaultAccessories?.hardwareBrand || (settings as any).defaultHardwareBrand || "VORNE";
+    const handleType = div.accessories?.handleType || item.defaultAccessories?.handleType || (settings as any).defaultHandleType || "STANDART";
+    const handleColor = div.accessories?.handleColor || item.defaultAccessories?.handleColor || (settings as any).defaultHandleColor || "BEYAZ";
+
+    const brandLabel = brand === "SIEGENIA" ? "Siegenia Titan" : brand === "ROTO" ? "Roto NT" : brand === "GU" ? "G-U" : brand === "VORNE" ? "Vorne" : "Egepen";
+
     if (div.type === "tek-acilim" || div.type === "cift-acilim") {
       // Kanat Boyuna Göre Dinamik İspanyolet Kodu ve Tanımı
       let espagCode = "13185-3";
-      let espagName = "Tek Açılım İspanyolet Seti (1000-1400mm)";
+      let espagName = `${brandLabel} Tek Açılım İspanyolet Seti (1000-1400mm)`;
       if (height < 600) {
         espagCode = "13185-1";
-        espagName = "Tek Açılım Küçük İspanyolet (300-600mm)";
+        espagName = `${brandLabel} Tek Açılım Küçük İspanyolet (300-600mm)`;
       } else if (height < 1000) {
         espagCode = "13185-2";
-        espagName = "Tek Açılım İspanyolet (600-1000mm)";
+        espagName = `${brandLabel} Tek Açılım İspanyolet (600-1000mm)`;
       } else if (height < 1400) {
         espagCode = "13185-3";
-        espagName = "Tek Açılım İspanyolet (1000-1400mm)";
+        espagName = `${brandLabel} Tek Açılım İspanyolet (1000-1400mm)`;
       } else if (height < 1800) {
         espagCode = "13185-4";
-        espagName = "Tek Açılım Uzun İspanyolet (1400-1800mm)";
+        espagName = `${brandLabel} Tek Açılım Uzun İspanyolet (1400-1800mm)`;
       } else {
         espagCode = "13185-5";
-        espagName = "Balkon Kapısı İspanyoleti (1800-2400mm)";
+        espagName = `${brandLabel} Balkon Kapısı İspanyoleti (1800-2400mm)`;
       }
 
       if (div.type === "tek-acilim") {
@@ -864,19 +880,19 @@ export function calculateAccessoryList(
       } else {
         // Çift Açılım Makas Boyutu (Genişliğe Göre)
         let makasCode = "13186-M";
-        let makasName = "Çift Açılım Makas Seti (Orta 600-1000mm)";
+        let makasName = `${brandLabel} Çift Açılım Makas Seti (Orta 600-1000mm)`;
         if (width < 600) {
           makasCode = "13186-S";
-          makasName = "Çift Açılım Makas Seti (Küçük 350-600mm)";
+          makasName = `${brandLabel} Çift Açılım Makas Seti (Küçük 350-600mm)`;
         } else if (width > 1000) {
           makasCode = "13186-L";
-          makasName = "Çift Açılım Makas Seti (Büyük 1000-1400mm)";
+          makasName = `${brandLabel} Çift Açılım Makas Seti (Büyük 1000-1400mm)`;
         }
 
         accessories.push({
           id: `acc-cift-${espagCode}`,
           code: "13186",
-          name: `Çift Açılım İspanyolet & ${makasName}`,
+          name: `${brandLabel} Çift Açılım İspanyolet & ${makasName}`,
           category: "DONANIM",
           unit: "TAKIM",
           quantity: 1,
@@ -885,12 +901,30 @@ export function calculateAccessoryList(
         });
       }
 
+      // Kol Kalemi
+      const handleName = handleType === "RIMINI"
+        ? `Rimini Lüks Pencere Kolu (${handleColor})`
+        : handleType === "KILITLI"
+        ? `Kilitli Emniyetli Pencere Kolu (${handleColor})`
+        : `Standart Alüminyum Pencere Kolu (${handleColor})`;
+
+      accessories.push({
+        id: `acc-kol-${div.id}`,
+        code: handleType === "RIMINI" ? "12864258" : "12864",
+        name: handleName,
+        category: "DONANIM",
+        unit: "ADET",
+        quantity: 1,
+        unitPriceTL: handleType === "RIMINI" ? 129.27 : handleType === "KILITLI" ? 95 : 38.66,
+        totalPriceTL: handleType === "RIMINI" ? 129.27 : handleType === "KILITLI" ? 95 : 38.66,
+      });
+
       // Dinamik Menteşe Sayısı (Kanat Yüksekliğine Göre)
       const hingeCount = height < 1200 ? 2 : height < 1800 ? 3 : 4;
       accessories.push({
         id: `acc-mentese-${div.type}`,
         code: "12082",
-        name: `Pencere Menteşesi 75mm (${hingeCount} Adet/Kanat)`,
+        name: `Pencere Menteşesi 75mm (${hingeCount} Adet/Kanat) (${handleColor})`,
         category: "MENTESE",
         unit: "ADET",
         quantity: hingeCount,
@@ -901,7 +935,7 @@ export function calculateAccessoryList(
       accessories.push({
         id: "acc-vasistas",
         code: "13187",
-        name: "Vasistas Makas & Çarpma Kilit Seti",
+        name: `${brandLabel} Vasistas Makas & Çarpma Kilit Seti`,
         category: "DONANIM",
         unit: "TAKIM",
         quantity: 1,
@@ -911,7 +945,7 @@ export function calculateAccessoryList(
       accessories.push({
         id: "acc-vasistas-mentese",
         code: "12082",
-        name: "Vasistas Alt Menteşe Seti (2 Adet)",
+        name: `Vasistas Alt Menteşe Seti (2 Adet) (${handleColor})`,
         category: "MENTESE",
         unit: "ADET",
         quantity: 2,
@@ -922,7 +956,7 @@ export function calculateAccessoryList(
       accessories.push({
         id: "acc-kapi-kilit",
         code: "13162",
-        name: `Egepen Kilitli Kapı İspanyoleti (${height}mm), Alüminyum Kol & Barel Seti`,
+        name: `${brandLabel} Kilitli Kapı İspanyoleti (${height}mm), Alüminyum Kol & Barel Seti (${handleColor})`,
         category: "DONANIM",
         unit: "TAKIM",
         quantity: 1,
@@ -933,7 +967,7 @@ export function calculateAccessoryList(
       accessories.push({
         id: "acc-kapi-mentese",
         code: "12082",
-        name: `Ağır Seri Kapı Menteşesi 90mm (${doorHingeCount} Adet/Kapı)`,
+        name: `Ağır Seri Kapı Menteşesi 90mm (${doorHingeCount} Adet/Kapı) (${handleColor})`,
         category: "MENTESE",
         unit: "ADET",
         quantity: doorHingeCount,
@@ -978,6 +1012,7 @@ export function calculateAccessoryList(
     unitPriceTL: gasketPricePerMeter,
     totalPriceTL: Math.round(gasketMeters * gasketPricePerMeter),
   });
+
 
   const mullionCount = verticalMullionsCount + horizontalMullionsCount;
   if (mullionCount > 0) {

@@ -31,6 +31,11 @@ export interface AppSettings {
   profitMarginPercent?: number; // Genel Kar Marjı (%)
   stockBarLength: number; // mm (6000mm)
   sawKerf: number; // Testere bıçağı payı (mm)
+  // Varsayılan Aksesuar ve Donanım Tercihleri
+  defaultHardwareBrand?: "SIEGENIA" | "VORNE" | "ROTO" | "GU" | "STANDART";
+  defaultHandleType?: "STANDART" | "RIMINI" | "KILITLI" | "AKUSTIK_SURME";
+  defaultHandleColor?: "BEYAZ" | "KAHVERENGI" | "SIYAH" | "TITANYUM";
+  defaultGlassThickness?: number;
 }
 
 export const DEFAULT_SETTINGS: AppSettings = {
@@ -58,7 +63,12 @@ export const DEFAULT_SETTINGS: AppSettings = {
   profitMarginPercent: 25,
   stockBarLength: 6000,
   sawKerf: 5,
+  defaultHardwareBrand: "VORNE",
+  defaultHandleType: "STANDART",
+  defaultHandleColor: "BEYAZ",
+  defaultGlassThickness: 28,
 };
+
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -157,21 +167,99 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           </button>
           <button
             type="button"
-            onClick={() => setActiveTab("production")}
+            onClick={() => setActiveTab("accessories" as any)}
             className={`px-4 py-2 text-xs font-bold rounded-t-xl transition border-t border-x ${
-              activeTab === "production"
+              activeTab === ("accessories" as any)
                 ? "bg-white text-blue-700 border-slate-200 shadow-sm"
                 : "text-slate-500 border-transparent hover:text-slate-800"
             }`}
           >
-            📐 İmalat Toleransları
+            🔧 Varsayılan Aksesuarlar
           </button>
         </div>
 
         {/* Form Body */}
         <form onSubmit={handleSubmit} className="p-6 space-y-6 max-h-[70vh] overflow-y-auto">
+          {/* TAB 4: 🔧 Varsayılan Aksesuarlar */}
+          {activeTab === ("accessories" as any) && (
+            <div className="space-y-4">
+              <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wider">
+                📌 Fabrika Varsayılan Aksesuar ve Donanım Seçenekleri
+              </h3>
+              <p className="text-xs text-slate-500">
+                Yeni çizim eklerken otomatik olarak seçilecek varsayılan donanım markası, kol ve cam kalınlığı tercihlerini belirleyin.
+              </p>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                <div>
+                  <label className="text-xs font-bold text-slate-700 block mb-1">
+                    Varsayılan İspanyolet / Donanım Markası
+                  </label>
+                  <select
+                    value={formData.defaultHardwareBrand || "VORNE"}
+                    onChange={(e) => setFormData({ ...formData, defaultHardwareBrand: e.target.value as any })}
+                    className="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-900 bg-slate-50 focus:bg-white focus:border-blue-500 focus:outline-none"
+                  >
+                    <option value="VORNE">Vorne Donanım Sistemleri</option>
+                    <option value="SIEGENIA">Siegenia Favorit / Titan</option>
+                    <option value="ROTO">Roto NT / NX Seti</option>
+                    <option value="GU">G-U (Gretsch-Unitas)</option>
+                    <option value="STANDART">Egepen Standart İspanyolet</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="text-xs font-bold text-slate-700 block mb-1">
+                    Varsayılan Kol Tipi
+                  </label>
+                  <select
+                    value={formData.defaultHandleType || "STANDART"}
+                    onChange={(e) => setFormData({ ...formData, defaultHandleType: e.target.value as any })}
+                    className="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-900 bg-slate-50 focus:bg-white focus:border-blue-500 focus:outline-none"
+                  >
+                    <option value="STANDART">Standart Alüminyum Pencere Kolu</option>
+                    <option value="RIMINI">Rimini Lüks Tasarım Kol</option>
+                    <option value="KILITLI">Kilitli Emniyetli Kol</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="text-xs font-bold text-slate-700 block mb-1">
+                    Varsayılan Kol Rengi
+                  </label>
+                  <select
+                    value={formData.defaultHandleColor || "BEYAZ"}
+                    onChange={(e) => setFormData({ ...formData, defaultHandleColor: e.target.value as any })}
+                    className="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-900 bg-slate-50 focus:bg-white focus:border-blue-500 focus:outline-none"
+                  >
+                    <option value="BEYAZ">⚪ Beyaz</option>
+                    <option value="KAHVERENGI">🟤 Kahverengi / Meşe</option>
+                    <option value="SIYAH">⚫ Siyah (Mat / Antrasit)</option>
+                    <option value="TITANYUM">🔘 Titanyum / Metalik</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="text-xs font-bold text-slate-700 block mb-1">
+                    Varsayılan Cam Kalınlığı & Çıta
+                  </label>
+                  <select
+                    value={formData.defaultGlassThickness || 28}
+                    onChange={(e) => setFormData({ ...formData, defaultGlassThickness: Number(e.target.value) })}
+                    className="w-full border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-900 bg-slate-50 focus:bg-white focus:border-blue-500 focus:outline-none"
+                  >
+                    <option value={20}>20 mm Tek Cam (Dekoratif Çıta)</option>
+                    <option value={28}>28 mm Çift Cam (Isıcam Standart Çıta)</option>
+                    <option value={32}>32 mm Üçlü Cam (Triple Glass Çıta)</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* TAB 1: 💰 Satış & Maliyet Fiyatları */}
           {activeTab === "prices" && (
+
             <div className="space-y-6">
               {/* Kar Marjı Ayarı */}
               <div className="bg-blue-50/70 border border-blue-200/80 rounded-2xl p-4 flex items-center justify-between">

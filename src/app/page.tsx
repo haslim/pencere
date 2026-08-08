@@ -904,9 +904,122 @@ export default function SaaSWindowDashboard() {
                   ))}
                 </div>
               </div>
+
+              {/* 🔧 AKSESUAR VE DONANIM TERCİHLERİ */}
+              <div className={`p-4 rounded-xl border space-y-3 ${isDark ? "bg-slate-900 border-slate-800" : "bg-white border-slate-200 shadow-sm"}`}>
+                <h4 className="text-xs font-bold flex items-center justify-between">
+                  <span className="flex items-center gap-1.5">🔧 Aksesuar & Donanım Seçenekleri</span>
+                  <span className="text-[10px] text-blue-500 font-normal">Poz Bazlı Özelleştir</span>
+                </h4>
+
+                <div className="grid grid-cols-1 gap-2.5 text-xs">
+                  <div>
+                    <label className={`text-[11px] font-semibold block mb-1 ${isDark ? "text-slate-400" : "text-slate-600"}`}>
+                      İspanyolet / Donanım Markası
+                    </label>
+                    <select
+                      value={activeItem.defaultAccessories?.hardwareBrand || settings.defaultHardwareBrand || "VORNE"}
+                      onChange={(e) =>
+                        updateActiveItem({
+                          ...activeItem,
+                          defaultAccessories: {
+                            ...activeItem.defaultAccessories,
+                            hardwareBrand: e.target.value as any,
+                          },
+                        })
+                      }
+                      className={`w-full border rounded-lg px-2.5 py-1.5 text-xs font-bold focus:outline-none transition ${
+                        isDark ? "bg-slate-950 border-slate-800 text-white" : "bg-slate-50 border-slate-200 text-slate-900"
+                      }`}
+                    >
+                      <option value="VORNE">Vorne Donanım Sistemleri</option>
+                      <option value="SIEGENIA">Siegenia Favorit / Titan</option>
+                      <option value="ROTO">Roto NT / NX Seti</option>
+                      <option value="GU">G-U (Gretsch-Unitas)</option>
+                      <option value="STANDART">Egepen Standart İspanyolet</option>
+                    </select>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <label className={`text-[11px] font-semibold block mb-1 ${isDark ? "text-slate-400" : "text-slate-600"}`}>
+                        Kol Tipi
+                      </label>
+                      <select
+                        value={activeItem.defaultAccessories?.handleType || settings.defaultHandleType || "STANDART"}
+                        onChange={(e) =>
+                          updateActiveItem({
+                            ...activeItem,
+                            defaultAccessories: {
+                              ...activeItem.defaultAccessories,
+                              handleType: e.target.value as any,
+                            },
+                          })
+                        }
+                        className={`w-full border rounded-lg px-2.5 py-1.5 text-xs font-bold focus:outline-none transition ${
+                          isDark ? "bg-slate-950 border-slate-800 text-white" : "bg-slate-50 border-slate-200 text-slate-900"
+                        }`}
+                      >
+                        <option value="STANDART">Standart Kol</option>
+                        <option value="RIMINI">Rimini Lüks Kol</option>
+                        <option value="KILITLI">Kilitli Emniyet Kolu</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className={`text-[11px] font-semibold block mb-1 ${isDark ? "text-slate-400" : "text-slate-600"}`}>
+                        Kol Rengi
+                      </label>
+                      <select
+                        value={activeItem.defaultAccessories?.handleColor || settings.defaultHandleColor || "BEYAZ"}
+                        onChange={(e) =>
+                          updateActiveItem({
+                            ...activeItem,
+                            defaultAccessories: {
+                              ...activeItem.defaultAccessories,
+                              handleColor: e.target.value as any,
+                            },
+                          })
+                        }
+                        className={`w-full border rounded-lg px-2.5 py-1.5 text-xs font-bold focus:outline-none transition ${
+                          isDark ? "bg-slate-950 border-slate-800 text-white" : "bg-slate-50 border-slate-200 text-slate-900"
+                        }`}
+                      >
+                        <option value="BEYAZ">⚪ Beyaz</option>
+                        <option value="KAHVERENGI">🟤 Kahve</option>
+                        <option value="SIYAH">⚫ Siyah</option>
+                        <option value="TITANYUM">🔘 Titanyum</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className={`text-[11px] font-semibold block mb-1 ${isDark ? "text-slate-400" : "text-slate-600"}`}>
+                      Cam Kalınlığı & Çıta
+                    </label>
+                    <select
+                      value={activeItem.glassThickness || settings.defaultGlassThickness || 28}
+                      onChange={(e) =>
+                        updateActiveItem({
+                          ...activeItem,
+                          glassThickness: Number(e.target.value),
+                        })
+                      }
+                      className={`w-full border rounded-lg px-2.5 py-1.5 text-xs font-bold focus:outline-none transition ${
+                        isDark ? "bg-slate-950 border-slate-800 text-white" : "bg-slate-50 border-slate-200 text-slate-900"
+                      }`}
+                    >
+                      <option value={20}>20 mm Tek Cam (Dekoratif Çıta)</option>
+                      <option value={28}>28 mm Isıcam Çift Cam (Standart Çıta)</option>
+                      <option value={32}>32 mm Üçlü Cam (Triple Glass Çıta)</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
+
 
         {/* Sağ Çizim ve Poz Seçim Paneli */}
         <div className="lg:col-span-8 xl:col-span-9 flex flex-col gap-6">
