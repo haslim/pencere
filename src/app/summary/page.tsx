@@ -1,18 +1,18 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { HeaderNav } from "@/components/HeaderNav";
 import {
-  Customer,
   WindowItem,
   calculateOrderSummary,
   PROFILE_COLORS,
+  Customer,
 } from "@/lib/pencereEngine";
 import { WindowPreviewSvg } from "@/components/WindowPreviewSvg";
 import { DEFAULT_SETTINGS, AppSettings } from "@/components/SettingsModal";
 import { DEFAULT_CUSTOMERS } from "@/components/CustomerModal";
-import { Printer, Download, ArrowLeft, TrendingUp, DollarSign, Euro, FileText, CheckCircle2 } from "lucide-react";
+import { Printer, ArrowLeft, TrendingUp, Filter, CheckSquare, Square } from "lucide-react";
 
 export default function OrderSummaryPage() {
   const [items, setItems] = useState<WindowItem[]>([]);
@@ -21,6 +21,7 @@ export default function OrderSummaryPage() {
   const [currency, setCurrency] = useState<"TRY" | "EUR" | "USD">("TRY");
   const [exchangeRateEUR, setExchangeRateEUR] = useState<number>(38.5);
   const [exchangeRateUSD, setExchangeRateUSD] = useState<number>(35.2);
+  const [selectedPosIds, setSelectedPosIds] = useState<string[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
@@ -29,13 +30,23 @@ export default function OrderSummaryPage() {
       if (savedItems) {
         try {
           const parsed = JSON.parse(savedItems);
-          if (Array.isArray(parsed) && parsed.length > 0) setItems(parsed);
-          else setItems(getDefaultItems());
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            setItems(parsed);
+            setSelectedPosIds(parsed.map((it: WindowItem) => it.id));
+          } else {
+            const def = getDefaultItems();
+            setItems(def);
+            setSelectedPosIds(def.map((it) => it.id));
+          }
         } catch (e) {
-          setItems(getDefaultItems());
+          const def = getDefaultItems();
+          setItems(def);
+          setSelectedPosIds(def.map((it) => it.id));
         }
       } else {
-        setItems(getDefaultItems());
+        const def = getDefaultItems();
+        setItems(def);
+        setSelectedPosIds(def.map((it) => it.id));
       }
 
       const savedCust = localStorage.getItem("app_active_customer");
@@ -74,6 +85,15 @@ export default function OrderSummaryPage() {
     ];
   }
 
+  // Seçilen pozlara göre filtrelenmiş item'lar
+  const activeFilteredItems = useMemo(() => {
+    return items.filter((it) => selectedPosIds.includes(it.id));
+  }, [items, selectedPosIds]);
+
+  const orderSummary = useMemo(() => {
+    return calculateOrderSummary(activeFilteredItems.length > 0 ? activeFilteredItems : items, settings);
+  }, [activeFilteredItems, items, settings]);
+
   if (!isLoaded) {
     return (
       <div className="min-h-screen bg-slate-950 text-white flex items-center justify-center">
@@ -82,7 +102,6 @@ export default function OrderSummaryPage() {
     );
   }
 
-  const orderSummary = calculateOrderSummary(items, settings);
   const companyInfo = settings.company;
   const today = new Date().toLocaleDateString("tr-TR");
 
@@ -100,6 +119,23 @@ export default function OrderSummaryPage() {
     ? ((orderSummary.profitTL / orderSummary.costPriceTL) * 100).toFixed(1)
     : "0";
 
+  const toggleSelectPos = (id: string) => {
+    if (selectedPosIds.includes(id)) {
+      if (selectedPosIds.length <= 1) return; // En az 1 poz seçili kalmalı
+      setSelectedPosIds(selectedPosIds.filter((pId) => pId !== id));
+    } else {
+      setSelectedPosIds([...selectedPosIds, id]);
+    }
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedPosIds.length === items.length) {
+      setSelectedPosIds([items[0].id]);
+    } else {
+      setSelectedPosIds(items.map((it) => it.id));
+    }
+  };
+
   return (
     <div className="min-h-screen bg-slate-900 text-slate-100 flex flex-col">
       <div className="no-print">
@@ -107,7 +143,7 @@ export default function OrderSummaryPage() {
       </div>
 
       <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 space-y-6">
-        {/* Page Top Banner / Controls */}
+        {/* Top Banner / Controls */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-slate-950 border border-slate-800 p-5 rounded-2xl shadow-xl no-print">
           <div className="flex items-center gap-3">
             <Link
@@ -125,13 +161,12 @@ export default function OrderSummaryPage() {
                 </span>
               </h1>
               <p className="text-xs text-slate-400">
-                Siparişteki {items.length} adet poz için detaylı maliyet, kâr marjı ve müşteri satış fiyatlandırması
+                Seçilen {selectedPosIds.length} / {items.length} poz için maliyet ve satış raporu
               </p>
             </div>
           </div>
 
           <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
-            {/* Para Birimi Değiştirici */}
             <div className="flex bg-slate-900 border border-slate-800 rounded-xl p-1 text-xs shadow-inner">
               <button
                 onClick={() => setCurrency("TRY")}
@@ -164,15 +199,50 @@ export default function OrderSummaryPage() {
               className="px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl text-xs font-bold transition shadow-lg shadow-blue-500/20 flex items-center gap-2"
             >
               <Printer className="w-4 h-4" />
-              Yazdır / PDF İndir
+              Seçilen Pozları Yazdır / PDF
             </button>
+          </div>
+        </div>
+
+        {/* Poz Seçim Kontrol Filtresi */}
+        <div className="bg-slate-950 border border-slate-800 p-4 rounded-2xl shadow-lg no-print space-y-3">
+          <div className="flex justify-between items-center border-b border-slate-800/80 pb-2">
+            <span className="text-xs font-bold text-slate-300 flex items-center gap-2">
+              <Filter className="w-4 h-4 text-blue-400" />
+              Çıktı Alınacak Pozları Seçin ({selectedPosIds.length} Poz Seçili)
+            </span>
+            <button
+              onClick={toggleSelectAll}
+              className="text-xs text-cyan-400 hover:underline font-semibold"
+            >
+              {selectedPosIds.length === items.length ? "Seçimi Temizle" : "Tümünü Seç"}
+            </button>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {items.map((item, idx) => {
+              const isSelected = selectedPosIds.includes(item.id);
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => toggleSelectPos(item.id)}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition border flex items-center gap-2 ${
+                    isSelected
+                      ? "bg-blue-600/20 border-blue-500 text-blue-300"
+                      : "bg-slate-900 border-slate-800 text-slate-500 hover:text-slate-300"
+                  }`}
+                >
+                  {isSelected ? <CheckSquare className="w-3.5 h-3.5 text-blue-400" /> : <Square className="w-3.5 h-3.5" />}
+                  <span>{idx + 1}. {item.name}</span>
+                </button>
+              );
+            })}
           </div>
         </div>
 
         {/* Analytics Key Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 no-print">
           <div className="bg-slate-950 border border-slate-800 p-5 rounded-2xl shadow-xl flex flex-col justify-between">
-            <span className="text-xs text-slate-400 font-semibold uppercase tracking-wider">Toplam İmalat Maliyeti</span>
+            <span className="text-xs text-slate-400 font-semibold uppercase tracking-wider">Seçili İmalat Maliyeti</span>
             <div className="mt-2 flex items-baseline justify-between">
               <span className="text-2xl font-black text-rose-400 font-mono">
                 {costPriceConverted.toLocaleString("tr-TR")} {getSymbol()}
@@ -181,11 +251,10 @@ export default function OrderSummaryPage() {
                 Maliyet
               </span>
             </div>
-            <p className="text-[11px] text-slate-500 mt-2">Profil + Sac + Cam + Aksesuar Giderleri</p>
           </div>
 
           <div className="bg-slate-950 border border-slate-800 p-5 rounded-2xl shadow-xl flex flex-col justify-between">
-            <span className="text-xs text-slate-400 font-semibold uppercase tracking-wider">Toplam Müşteri Satış Fiyatı</span>
+            <span className="text-xs text-slate-400 font-semibold uppercase tracking-wider">Seçili Satış Fiyatı</span>
             <div className="mt-2 flex items-baseline justify-between">
               <span className="text-2xl font-black text-emerald-400 font-mono">
                 {totalPriceConverted.toLocaleString("tr-TR")} {getSymbol()}
@@ -194,11 +263,10 @@ export default function OrderSummaryPage() {
                 Satış
               </span>
             </div>
-            <p className="text-[11px] text-slate-500 mt-2">Kâr marjı uygulanmış nihai teklif tutarı</p>
           </div>
 
           <div className="bg-slate-950 border border-slate-800 p-5 rounded-2xl shadow-xl flex flex-col justify-between">
-            <span className="text-xs text-slate-400 font-semibold uppercase tracking-wider">Net Kâr Tutarı & Marjı</span>
+            <span className="text-xs text-slate-400 font-semibold uppercase tracking-wider">Net Kâr Tutarı</span>
             <div className="mt-2 flex items-baseline justify-between">
               <span className="text-2xl font-black text-cyan-400 font-mono">
                 +{profitConverted.toLocaleString("tr-TR")} {getSymbol()}
@@ -207,22 +275,17 @@ export default function OrderSummaryPage() {
                 <TrendingUp className="w-3 h-3" /> %{profitMargin}
               </span>
             </div>
-            <p className="text-[11px] text-slate-500 mt-2">Net kâr oranı ve beklenen gelir</p>
           </div>
 
           <div className="bg-slate-950 border border-slate-800 p-5 rounded-2xl shadow-xl flex flex-col justify-between">
-            <span className="text-xs text-slate-400 font-semibold uppercase tracking-wider">Metraj & Malzeme Özeti</span>
+            <span className="text-xs text-slate-400 font-semibold uppercase tracking-wider">Metraj Özeti</span>
             <div className="mt-2 text-xs space-y-1 font-mono text-slate-300">
               <div className="flex justify-between">
-                <span>Profil Toplamı:</span>
+                <span>Profil:</span>
                 <span className="font-bold text-white">{orderSummary.totalProfileMeters} m</span>
               </div>
               <div className="flex justify-between">
-                <span>Destek Sacı:</span>
-                <span className="font-bold text-white">{orderSummary.totalSteelMeters} m</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Isıcam Alanı:</span>
+                <span>Cam Alanı:</span>
                 <span className="font-bold text-cyan-400">{orderSummary.totalGlassSqM} m²</span>
               </div>
             </div>
@@ -231,7 +294,6 @@ export default function OrderSummaryPage() {
 
         {/* Detaylı Rapor Kartı (Yazdırılabilir Alan) */}
         <div id="summary-print-area" className="bg-white text-slate-900 border border-slate-200 rounded-2xl p-8 shadow-2xl space-y-6">
-          {/* Antet */}
           <div className="flex justify-between items-start border-b border-slate-200 pb-6">
             <div className="flex items-center gap-4">
               {companyInfo?.logoUrl && (
@@ -250,7 +312,6 @@ export default function OrderSummaryPage() {
                 </p>
                 <p className="text-xs text-slate-400 mt-1">
                   Tel: {companyInfo?.phone || "+90 332 812 39 95"} | Web: {companyInfo?.website || "www.aslimlarpencere.com"}
-                  {companyInfo?.email ? ` | E-Posta: ${companyInfo.email}` : ""}
                 </p>
               </div>
             </div>
@@ -262,7 +323,6 @@ export default function OrderSummaryPage() {
             </div>
           </div>
 
-          {/* Müşteri & Cari Bilgileri */}
           <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <span className="text-xs text-slate-500 block font-medium">Cari Unvanı / Müşteri</span>
@@ -280,10 +340,9 @@ export default function OrderSummaryPage() {
             </div>
           </div>
 
-          {/* Poz Bazlı Detaylı Maliyet & Satış Tablosu */}
           <div className="space-y-3">
             <h3 className="text-sm font-bold text-slate-900 flex items-center justify-between">
-              <span>📋 Poz Bazlı Detaylı Maliyet & Satış Dağılımı ({items.length} Poz)</span>
+              <span>📋 Poz Bazlı Detaylı Maliyet & Satış Dağılımı ({orderSummary.itemResults.length} Poz Seçili)</span>
               <span className="text-xs text-slate-500 font-normal">Para Birimi: {currency}</span>
             </h3>
             <div className="rounded-xl border border-slate-200 overflow-hidden">
@@ -352,49 +411,6 @@ export default function OrderSummaryPage() {
                   </tr>
                 </tfoot>
               </table>
-            </div>
-          </div>
-
-          {/* Fabrika İmalat ve Malzeme İcmal Detayları */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
-            <div className="border border-slate-200 rounded-xl p-4 bg-slate-50/50 space-y-2">
-              <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider">📦 Malzeme İcmali & Metrajlar</h4>
-              <div className="text-xs space-y-1.5 font-mono text-slate-700">
-                <div className="flex justify-between border-b border-slate-200/60 pb-1">
-                  <span>Toplam Profil Uzunluğu:</span>
-                  <span className="font-bold text-slate-900">{orderSummary.totalProfileMeters} Metre</span>
-                </div>
-                <div className="flex justify-between border-b border-slate-200/60 pb-1">
-                  <span>Toplam Galvaniz Sac:</span>
-                  <span className="font-bold text-slate-900">{orderSummary.totalSteelMeters} Metre</span>
-                </div>
-                <div className="flex justify-between border-b border-slate-200/60 pb-1">
-                  <span>Toplam Isıcam Alanı:</span>
-                  <span className="font-bold text-blue-700">{orderSummary.totalGlassSqM} m²</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Profil Kesim Adedi:</span>
-                  <span className="font-bold text-slate-900">{orderSummary.allCutPieces.length} Parça</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="border border-slate-200 rounded-xl p-4 bg-blue-50/40 space-y-2">
-              <h4 className="text-xs font-bold text-blue-900 uppercase tracking-wider">💰 Finansal Özet Tablosu</h4>
-              <div className="text-xs space-y-1.5 font-mono">
-                <div className="flex justify-between border-b border-blue-200/60 pb-1 text-slate-700">
-                  <span>İmalat Gideri (Maliyet):</span>
-                  <span className="font-bold text-rose-600">{costPriceConverted.toLocaleString("tr-TR")} {getSymbol()}</span>
-                </div>
-                <div className="flex justify-between border-b border-blue-200/60 pb-1 text-slate-700">
-                  <span>Müşteri Satış Tutar:</span>
-                  <span className="font-bold text-slate-900">{totalPriceConverted.toLocaleString("tr-TR")} {getSymbol()}</span>
-                </div>
-                <div className="flex justify-between text-emerald-700 pt-1 font-bold text-sm">
-                  <span>Tahmini Net Kâr:</span>
-                  <span>+{profitConverted.toLocaleString("tr-TR")} {getSymbol()} (%{profitMargin})</span>
-                </div>
-              </div>
             </div>
           </div>
         </div>

@@ -20,18 +20,52 @@ export const QuoteModal: React.FC<QuoteModalProps> = ({
   onClose,
   customer,
   items,
-  orderSummary,
+  orderSummary: initialOrderSummary,
   companyInfo,
 }) => {
   const [currency, setCurrency] = useState<"TRY" | "EUR" | "USD">("TRY");
   const [exchangeRateEUR, setExchangeRateEUR] = useState<number>(38.5);
   const [exchangeRateUSD, setExchangeRateUSD] = useState<number>(35.2);
+  const [selectedPosIds, setSelectedPosIds] = useState<string[]>(() => items.map((it) => it.id));
+
+  React.useEffect(() => {
+    if (items.length > 0) {
+      setSelectedPosIds(items.map((it) => it.id));
+    }
+  }, [items]);
 
   if (!isOpen) return null;
 
   const today = new Date().toLocaleDateString("tr-TR");
 
-  // Para birimi dönüştürme yardımcısı
+  const activeFilteredItems = items.filter((it) => selectedPosIds.includes(it.id));
+  const activeItemsToUse = activeFilteredItems.length > 0 ? activeFilteredItems : items;
+
+  const orderSummary = initialOrderSummary.itemResults.length === activeItemsToUse.length
+    ? initialOrderSummary
+    : {
+        ...initialOrderSummary,
+        itemResults: initialOrderSummary.itemResults.filter(({ item }) => selectedPosIds.includes(item.id)),
+        totalPriceTL: initialOrderSummary.itemResults
+          .filter(({ item }) => selectedPosIds.includes(item.id))
+          .reduce((acc, curr) => acc + curr.calc.estimatedPriceTL * (curr.item.quantity || 1), 0),
+        costPriceTL: initialOrderSummary.itemResults
+          .filter(({ item }) => selectedPosIds.includes(item.id))
+          .reduce((acc, curr) => acc + curr.calc.costPriceTL * (curr.item.quantity || 1), 0),
+        totalProfileMeters: Number(
+          initialOrderSummary.itemResults
+            .filter(({ item }) => selectedPosIds.includes(item.id))
+            .reduce((acc, curr) => acc + curr.calc.totalProfileMeters * (curr.item.quantity || 1), 0)
+            .toFixed(2)
+        ),
+        totalGlassSqM: Number(
+          initialOrderSummary.itemResults
+            .filter(({ item }) => selectedPosIds.includes(item.id))
+            .reduce((acc, curr) => acc + curr.calc.totalGlassSqM * (curr.item.quantity || 1), 0)
+            .toFixed(2)
+        ),
+      };
+
   const getSymbol = () => (currency === "TRY" ? "₺" : currency === "EUR" ? "€" : "$");
   const convertPrice = (priceTL: number) => {
     if (currency === "EUR") return Math.round(priceTL / exchangeRateEUR);
@@ -42,64 +76,95 @@ export const QuoteModal: React.FC<QuoteModalProps> = ({
   const totalPriceConverted = convertPrice(orderSummary.totalPriceTL);
   const costPriceConverted = convertPrice(orderSummary.costPriceTL);
 
+  const toggleSelectPos = (id: string) => {
+    if (selectedPosIds.includes(id)) {
+      if (selectedPosIds.length <= 1) return;
+      setSelectedPosIds(selectedPosIds.filter((pId) => pId !== id));
+    } else {
+      setSelectedPosIds([...selectedPosIds, id]);
+    }
+  };
+
   return (
     <div id="quote-modal-container" className="fixed inset-0 z-50 bg-slate-950/75 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
       <div id="quote-modal-card" className="bg-white border border-slate-200 rounded-2xl w-full max-w-4xl max-h-[92vh] flex flex-col shadow-2xl overflow-hidden text-slate-800">
         {/* Header (Yazdırırken Gizlenir) */}
-        <div className="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50 no-print">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-blue-600/10 text-blue-600 rounded-lg border border-blue-200">
-              <FileText className="w-5 h-5" />
-            </div>
-            <div>
-              <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
-                Resmi Müşteri Teklif Formu & Maliyet Analizi
-                <span className="text-xs px-2 py-0.5 rounded bg-blue-100 text-blue-700 font-semibold border border-blue-200">
-                  {companyInfo?.name || "Kurumsal Teklif"}
-                </span>
-              </h2>
-              <p className="text-xs text-slate-500">
-                Özelleştirilebilir Kurumsal Teklif ve Çoklu Para Birimi Desteği
-              </p>
+        <div className="p-5 border-b border-slate-100 flex flex-col gap-3 bg-slate-50 no-print">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-blue-600/10 text-blue-600 rounded-lg border border-blue-200">
+                <FileText className="w-5 h-5" />
+              </div>
+              <div>
+                <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+                  Resmi Müşteri Teklif Formu & Maliyet Analizi
+                  <span className="text-xs px-2 py-0.5 rounded bg-blue-100 text-blue-700 font-semibold border border-blue-200">
+                    {companyInfo?.name || "Kurumsal Teklif"}
+                  </span>
+                </h2>
+                <p className="text-xs text-slate-500">
+                  Özelleştirilebilir Kurumsal Teklif ve Çoklu Para Birimi Desteği
+                </p>
+              </div>
             </div>
 
+            {/* Para Birimi & Kur Seçeneği */}
+            <div className="flex items-center gap-2">
+              <div className="flex bg-white border border-slate-200 rounded-xl p-1 text-xs shadow-sm">
+                <button
+                  onClick={() => setCurrency("TRY")}
+                  className={`px-3 py-1 rounded-lg font-bold transition ${
+                    currency === "TRY" ? "bg-blue-600 text-white shadow-sm" : "text-slate-600 hover:bg-slate-100"
+                  }`}
+                >
+                  ₺ TRY
+                </button>
+                <button
+                  onClick={() => setCurrency("EUR")}
+                  className={`px-3 py-1 rounded-lg font-bold transition ${
+                    currency === "EUR" ? "bg-blue-600 text-white shadow-sm" : "text-slate-600 hover:bg-slate-100"
+                  }`}
+                >
+                  € EUR
+                </button>
+                <button
+                  onClick={() => setCurrency("USD")}
+                  className={`px-3 py-1 rounded-lg font-bold transition ${
+                    currency === "USD" ? "bg-blue-600 text-white shadow-sm" : "text-slate-600 hover:bg-slate-100"
+                  }`}
+                >
+                  $ USD
+                </button>
+              </div>
+
+              <button
+                onClick={onClose}
+                className="text-slate-400 hover:text-slate-700 bg-slate-100 hover:bg-slate-200 w-8 h-8 rounded-full flex items-center justify-center transition"
+              >
+                ✕
+              </button>
+            </div>
           </div>
 
-          {/* Para Birimi & Kur Seçeneği */}
-          <div className="flex items-center gap-2 no-print">
-            <div className="flex bg-white border border-slate-200 rounded-xl p-1 text-xs shadow-sm">
-              <button
-                onClick={() => setCurrency("TRY")}
-                className={`px-3 py-1 rounded-lg font-bold transition ${
-                  currency === "TRY" ? "bg-blue-600 text-white shadow-sm" : "text-slate-600 hover:bg-slate-100"
-                }`}
-              >
-                ₺ TRY
-              </button>
-              <button
-                onClick={() => setCurrency("EUR")}
-                className={`px-3 py-1 rounded-lg font-bold transition ${
-                  currency === "EUR" ? "bg-blue-600 text-white shadow-sm" : "text-slate-600 hover:bg-slate-100"
-                }`}
-              >
-                € EUR
-              </button>
-              <button
-                onClick={() => setCurrency("USD")}
-                className={`px-3 py-1 rounded-lg font-bold transition ${
-                  currency === "USD" ? "bg-blue-600 text-white shadow-sm" : "text-slate-600 hover:bg-slate-100"
-                }`}
-              >
-                $ USD
-              </button>
-            </div>
-
-            <button
-              onClick={onClose}
-              className="text-slate-400 hover:text-slate-700 bg-slate-100 hover:bg-slate-200 w-8 h-8 rounded-full flex items-center justify-center transition"
-            >
-              ✕
-            </button>
+          {/* Poz Seçim Barı */}
+          <div className="flex items-center gap-2 flex-wrap border-t border-slate-200/60 pt-2 text-xs">
+            <span className="font-bold text-slate-700">Teklifte Yer Alacak Pozlar:</span>
+            {items.map((it, idx) => {
+              const isSel = selectedPosIds.includes(it.id);
+              return (
+                <button
+                  key={it.id}
+                  onClick={() => toggleSelectPos(it.id)}
+                  className={`px-2.5 py-1 rounded-lg font-semibold transition border ${
+                    isSel
+                      ? "bg-blue-600 text-white border-blue-600"
+                      : "bg-white text-slate-500 border-slate-200 hover:bg-slate-100"
+                  }`}
+                >
+                  {isSel ? "✓ " : ""}{idx + 1}. {it.name}
+                </button>
+              );
+            })}
           </div>
         </div>
 

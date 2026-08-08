@@ -12,12 +12,13 @@ import {
 } from "@/lib/pencereEngine";
 import { DEFAULT_SETTINGS, AppSettings } from "@/components/SettingsModal";
 import { DEFAULT_CUSTOMERS } from "@/components/CustomerModal";
-import { ArrowLeft, Download, Printer } from "lucide-react";
+import { ArrowLeft, Download, Printer, Filter, CheckSquare, Square } from "lucide-react";
 
 export default function GlassOrderPage() {
   const [items, setItems] = useState<WindowItem[]>([]);
   const [customer, setCustomer] = useState<Customer>(DEFAULT_CUSTOMERS[0]);
   const [settings, setSettings] = useState<AppSettings>(DEFAULT_SETTINGS);
+  const [selectedPosIds, setSelectedPosIds] = useState<string[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
@@ -26,13 +27,23 @@ export default function GlassOrderPage() {
       if (savedItems) {
         try {
           const parsed = JSON.parse(savedItems);
-          if (Array.isArray(parsed) && parsed.length > 0) setItems(parsed);
-          else setItems(getDefaultItems());
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            setItems(parsed);
+            setSelectedPosIds(parsed.map((it: WindowItem) => it.id));
+          } else {
+            const def = getDefaultItems();
+            setItems(def);
+            setSelectedPosIds(def.map((it) => it.id));
+          }
         } catch (e) {
-          setItems(getDefaultItems());
+          const def = getDefaultItems();
+          setItems(def);
+          setSelectedPosIds(def.map((it) => it.id));
         }
       } else {
-        setItems(getDefaultItems());
+        const def = getDefaultItems();
+        setItems(def);
+        setSelectedPosIds(def.map((it) => it.id));
       }
 
       const savedCust = localStorage.getItem("app_active_customer");
@@ -71,7 +82,13 @@ export default function GlassOrderPage() {
     ];
   }
 
-  const orderSummary = useMemo(() => calculateOrderSummary(items, settings), [items, settings]);
+  const activeFilteredItems = useMemo(() => {
+    return items.filter((it) => selectedPosIds.includes(it.id));
+  }, [items, selectedPosIds]);
+
+  const orderSummary = useMemo(() => {
+    return calculateOrderSummary(activeFilteredItems.length > 0 ? activeFilteredItems : items, settings);
+  }, [activeFilteredItems, items, settings]);
 
   if (!isLoaded) {
     return (
@@ -81,16 +98,10 @@ export default function GlassOrderPage() {
     );
   }
 
-  // Camları gruplama & hesaplama
   const allGlasses = orderSummary.allGlasses;
-
-  // Toplam m² ve Adet
-  const totalM2 = allGlasses
-    .reduce((acc, g) => acc + g.areaSqM * g.quantity, 0)
-    .toFixed(3);
+  const totalM2 = allGlasses.reduce((acc, g) => acc + g.areaSqM * g.quantity, 0).toFixed(3);
   const totalPieces = allGlasses.reduce((acc, g) => acc + g.quantity, 0);
 
-  // Cam Tipi Bazlı Gruplama İcmali (Alt Toplamlar)
   const glassGroups = allGlasses.reduce((acc, g) => {
     const type = g.type || "4+16+4 Çift Cam Konfor";
     if (!acc[type]) {
@@ -101,6 +112,23 @@ export default function GlassOrderPage() {
     acc[type].totalArea += g.areaSqM * g.quantity;
     return acc;
   }, {} as Record<string, { items: GlassCut[]; totalPieces: number; totalArea: number }>);
+
+  const toggleSelectPos = (id: string) => {
+    if (selectedPosIds.includes(id)) {
+      if (selectedPosIds.length <= 1) return;
+      setSelectedPosIds(selectedPosIds.filter((pId) => pId !== id));
+    } else {
+      setSelectedPosIds([...selectedPosIds, id]);
+    }
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedPosIds.length === items.length) {
+      setSelectedPosIds([items[0].id]);
+    } else {
+      setSelectedPosIds(items.map((it) => it.id));
+    }
+  };
 
   const handleExportGlassList = () => {
     const textLines = [
@@ -145,7 +173,7 @@ export default function GlassOrderPage() {
                 🪟 Cam Sipariş Raporu (Resmi Fabrika Formatı)
               </h1>
               <p className="text-xs text-slate-400">
-                Resmi cam fabrikası sipariş föyü ve metraj listesi
+                Seçilen {selectedPosIds.length} / {items.length} poz için cam imalat listesi
               </p>
             </div>
           </div>
@@ -156,7 +184,7 @@ export default function GlassOrderPage() {
               className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-xs font-bold transition border border-slate-700 flex items-center gap-2"
             >
               <Printer className="w-4 h-4" />
-              Yazdır / PDF İndir
+              Seçilenleri Yazdır / PDF
             </button>
             <button
               onClick={handleExportGlassList}
@@ -168,9 +196,43 @@ export default function GlassOrderPage() {
           </div>
         </div>
 
-        {/* Printable Area - Factory Order Form Layout matching User Image */}
+        {/* Poz Seçim Kontrol Filtresi */}
+        <div className="bg-slate-950 border border-slate-800 p-4 rounded-2xl shadow-lg no-print space-y-3">
+          <div className="flex justify-between items-center border-b border-slate-800/80 pb-2">
+            <span className="text-xs font-bold text-slate-300 flex items-center gap-2">
+              <Filter className="w-4 h-4 text-blue-400" />
+              Cam Raporunda Gösterilecek Pozları Seçin ({selectedPosIds.length} Poz Seçili)
+            </span>
+            <button
+              onClick={toggleSelectAll}
+              className="text-xs text-cyan-400 hover:underline font-semibold"
+            >
+              {selectedPosIds.length === items.length ? "Seçimi Temizle" : "Tümünü Seç"}
+            </button>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {items.map((item, idx) => {
+              const isSelected = selectedPosIds.includes(item.id);
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => toggleSelectPos(item.id)}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition border flex items-center gap-2 ${
+                    isSelected
+                      ? "bg-blue-600/20 border-blue-500 text-blue-300"
+                      : "bg-slate-900 border-slate-800 text-slate-500 hover:text-slate-300"
+                  }`}
+                >
+                  {isSelected ? <CheckSquare className="w-3.5 h-3.5 text-blue-400" /> : <Square className="w-3.5 h-3.5" />}
+                  <span>{idx + 1}. {item.name}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Printable Area */}
         <div id="glass-print-area" className="bg-white text-slate-900 border border-slate-300 rounded-xl p-8 shadow-2xl space-y-6 font-serif">
-          {/* Header Info */}
           <div className="flex justify-between items-start border-b border-slate-900 pb-4">
             <div>
               <h2 className="text-xl font-extrabold tracking-tight text-slate-900 font-sans uppercase">
@@ -186,7 +248,6 @@ export default function GlassOrderPage() {
             </div>
           </div>
 
-          {/* Table Matching Reference Image (Açıklama | Adet | Gen | Yük | B m² | T m² | Poz No) */}
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs font-serif border-collapse">
               <thead>
@@ -202,12 +263,9 @@ export default function GlassOrderPage() {
               </thead>
               <tbody className="divide-y divide-slate-200">
                 {allGlasses.map((g, idx) => {
-                  const bM2 = g.areaSqM.toFixed(3);
-                  const tM2 = (g.areaSqM * g.quantity).toFixed(3);
-                  // Yükseklik metre cinsinden virgüllü (örn: 1,252) veya mm
+                  const bM2Str = g.areaSqM.toFixed(3).replace(".", ",");
+                  const tM2Str = (g.areaSqM * g.quantity).toFixed(3).replace(".", ",");
                   const yukStr = (g.height / 1000).toFixed(3).replace(".", ",");
-                  const bM2Str = bM2.replace(".", ",");
-                  const tM2Str = tM2.replace(".", ",");
 
                   return (
                     <tr key={idx} className="hover:bg-slate-50 font-medium text-slate-800">
@@ -227,7 +285,6 @@ export default function GlassOrderPage() {
             </table>
           </div>
 
-          {/* Group Summaries & Total Footer Lines matching image style */}
           <div className="border-t-2 border-slate-900 pt-4 space-y-2">
             {Object.entries(glassGroups).map(([type, data]) => (
               <div
@@ -242,9 +299,8 @@ export default function GlassOrderPage() {
               </div>
             ))}
 
-            {/* Overall Grand Total */}
             <div className="flex justify-between items-center text-sm font-serif font-black text-slate-950 pt-2 border-t-2 border-slate-900">
-              <span>GENEL SİPARİŞ TOPLAMI</span>
+              <span>GENEL SİPARİŞ TOPLAMI ({selectedPosIds.length} Poz)</span>
               <div className="flex gap-12 font-mono">
                 <span>{totalPieces} Adet</span>
                 <span className="underline decoration-double">{totalM2.replace(".", ",")} m²</span>
