@@ -163,7 +163,7 @@ export const WindowPreviewSvg: React.FC<WindowPreviewSvgProps> = ({
                           x2={svPos}
                           y2={sashY + sashH}
                           stroke={profileColor}
-                          strokeWidth={Math.max(1.5, inset * 0.8)}
+                          strokeWidth={profileThick}
                         />
                       );
                     })
@@ -182,11 +182,12 @@ export const WindowPreviewSvg: React.FC<WindowPreviewSvgProps> = ({
                           x2={sashX + sashW}
                           y2={shPos}
                           stroke={profileColor}
-                          strokeWidth={Math.max(1.5, inset * 0.8)}
+                          strokeWidth={profileThick}
                         />
                       );
                     })
                   ) : null}
+
 
                   {/* Açılım Kesikli Çizgileri (DIN Sağ / Sol Açılım) */}
                   {(div.type === "tek-acilim" || div.type === "cift-acilim") && (

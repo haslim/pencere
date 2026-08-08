@@ -800,23 +800,28 @@ export const WindowCanvas: React.FC<WindowCanvasProps> = ({
                 const isDoor = sashProf === "KAPI_KANADI" || divType.includes("kapi");
                 const isSliding = sashProf === "SURME_KANAD" || divType.includes("surme") || isSurme;
 
-                // Gerçekçi Milimetrik Kanat Genişlikleri:
-                // Pencere Kanadı: 60mm | Kapı & Sürme Kanadı: 90mm
-                const sashWidthMM = (isDoor || isSliding) ? 90 : 60;
-                const SASH_MARGIN = divType === "sabit" ? Math.round(10 * scale) : Math.max(6, Math.round(sashWidthMM * scale * 0.35));
+
+                // Orantılı Gerçekçi Profil Et Kalınlıkları:
+                // Pencere Kanadı Et Genişliği: Kasa & Kayıt ile dengeli
+                const sashProfileWidthMM = (isDoor || isSliding) ? 80 : 60;
+                const SASH_BORDER_THICKNESS = divType === "sabit" 
+                  ? Math.max(6, Math.round(15 * scale)) 
+                  : Math.max(10, Math.round(sashProfileWidthMM * scale * 0.65));
+
+                // Kanat içi kayıt kalınlığı (Ana kasa ortagaydı ile BİREBİR EŞİT)
+                const SASH_MULLION_THICKNESS = PROFILE_THICKNESS;
 
                 const sVert = div.sashVerticalMullions || 0;
                 const sHoriz = div.sashHorizontalMullions || 0;
 
-                const glassBoxW = Math.max(10, sectionW - SASH_MARGIN * 2);
-                const glassBoxH = Math.max(10, sectionH - SASH_MARGIN * 2);
+                const glassBoxW = Math.max(10, sectionW - SASH_BORDER_THICKNESS * 2);
+                const glassBoxH = Math.max(10, sectionH - SASH_BORDER_THICKNESS * 2);
 
                 return (
                   <g
                     key={`div-${divIdx}`}
                     onClick={(e) => {
                       if (activeTool === "v_mullion" || activeTool === "h_mullion") {
-                        // Tıklama olayını üstteki SVG tıklama olayına bırak ki fare X/Y koordinatını hesaplasın
                         return;
                       }
                       handleCellClick(divIdx);
@@ -824,7 +829,7 @@ export const WindowCanvas: React.FC<WindowCanvasProps> = ({
                     className="cursor-pointer"
                   >
 
-                    {/* Kanat Çerçevesi (Gerçekçi Etli Profil Çizimi) */}
+                    {/* Kanat Profil Gövdesi (Dolgu & Orantılı Profil Genişliği) */}
                     {divType !== "sabit" && (
                       <rect
                         x={startX + 2}
@@ -832,18 +837,16 @@ export const WindowCanvas: React.FC<WindowCanvasProps> = ({
                         width={Math.max(10, sectionW - 4)}
                         height={Math.max(10, sectionH - 4)}
                         fill={color.hex}
-                        stroke={isDoor || isSliding ? "#0f172a" : isDark ? "#1e293b" : "#334155"}
-                        strokeWidth={(isDoor || isSliding) ? "4" : "2.5"}
-                        rx="3"
+                        stroke={isDark ? "#38bdf8" : "#2563eb"}
+                        strokeWidth="1.5"
+                        rx="2"
                       />
                     )}
 
-
-
-                    {/* Isıcam Cam Alanı */}
+                    {/* Cam Boşluğu & Isıcam Deseni */}
                     <rect
-                      x={startX + SASH_MARGIN}
-                      y={startY + SASH_MARGIN}
+                      x={startX + SASH_BORDER_THICKNESS}
+                      y={startY + SASH_BORDER_THICKNESS}
                       width={glassBoxW}
                       height={glassBoxH}
                       fill="url(#glassGradient)"
@@ -852,45 +855,46 @@ export const WindowCanvas: React.FC<WindowCanvasProps> = ({
                       opacity={isDark ? "0.85" : "0.9"}
                     />
 
-                    {/* 🚪 Kanat İçi Dikey Orta Kayıtlar */}
+                    {/* 🚪 Kanat İçi Dikey Orta Kayıtlar (Ana Kayıt Kalınlığı İle Birebir Aynı) */}
                     {divType !== "sabit" && sVert > 0 && (
                       Array.from({ length: sVert }).map((_, svIdx) => {
                         const stepX = glassBoxW / (sVert + 1);
-                        const svX = startX + SASH_MARGIN + stepX * (svIdx + 1);
+                        const svX = startX + SASH_BORDER_THICKNESS + stepX * (svIdx + 1);
                         return (
                           <rect
                             key={`sash-v-${svIdx}`}
-                            x={svX - 3}
-                            y={startY + SASH_MARGIN}
-                            width={6}
+                            x={Math.round(svX - SASH_MULLION_THICKNESS / 2)}
+                            y={startY + SASH_BORDER_THICKNESS}
+                            width={SASH_MULLION_THICKNESS}
                             height={glassBoxH}
                             fill={color.hex}
                             stroke={isDark ? "#38bdf8" : "#2563eb"}
-                            strokeWidth="1"
+                            strokeWidth="1.5"
                           />
                         );
                       })
                     )}
 
-                    {/* 🚪 Kanat İçi Yatay Orta Kayıtlar */}
+                    {/* 🚪 Kanat İçi Yatay Orta Kayıtlar (Ana Kayıt Kalınlığı İle Birebir Aynı) */}
                     {divType !== "sabit" && sHoriz > 0 && (
                       Array.from({ length: sHoriz }).map((_, shIdx) => {
                         const stepY = glassBoxH / (sHoriz + 1);
-                        const shY = startY + SASH_MARGIN + stepY * (shIdx + 1);
+                        const shY = startY + SASH_BORDER_THICKNESS + stepY * (shIdx + 1);
                         return (
                           <rect
                             key={`sash-h-${shIdx}`}
-                            x={startX + SASH_MARGIN}
-                            y={shY - 3}
+                            x={startX + SASH_BORDER_THICKNESS}
+                            y={Math.round(shY - SASH_MULLION_THICKNESS / 2)}
                             width={glassBoxW}
-                            height={6}
+                            height={SASH_MULLION_THICKNESS}
                             fill={color.hex}
                             stroke={isDark ? "#38bdf8" : "#2563eb"}
-                            strokeWidth="1"
+                            strokeWidth="1.5"
                           />
                         );
                       })
                     )}
+
 
                     {/* Cam Üzerinde Net En x Boy Etiketi (Tıklayarak Ölçü Düzenlenebilir) */}
                     <g
@@ -952,10 +956,10 @@ export const WindowCanvas: React.FC<WindowCanvasProps> = ({
                     {/* Açılım Yönü Çizgileri */}
                     {(divType === "tek-acilim" || divType === "kapi-ic" || divType === "kapi-dis") && (
                       <path
-                        d={`M ${startX + SASH_MARGIN} ${startY + SASH_MARGIN} L ${
-                          startX + sectionW - SASH_MARGIN
-                        } ${startY + sectionH / 2} L ${startX + SASH_MARGIN} ${
-                          startY + sectionH - SASH_MARGIN
+                        d={`M ${startX + SASH_BORDER_THICKNESS} ${startY + SASH_BORDER_THICKNESS} L ${
+                          startX + sectionW - SASH_BORDER_THICKNESS
+                        } ${startY + sectionH / 2} L ${startX + SASH_BORDER_THICKNESS} ${
+                          startY + sectionH - SASH_BORDER_THICKNESS
                         }`}
                         fill="none"
                         stroke={isDoor ? "#10b981" : "#f59e0b"}
@@ -967,10 +971,10 @@ export const WindowCanvas: React.FC<WindowCanvasProps> = ({
                     {divType === "cift-acilim" && (
                       <>
                         <path
-                          d={`M ${startX + SASH_MARGIN} ${startY + SASH_MARGIN} L ${
-                            startX + sectionW - SASH_MARGIN
-                          } ${startY + sectionH / 2} L ${startX + SASH_MARGIN} ${
-                            startY + sectionH - SASH_MARGIN
+                          d={`M ${startX + SASH_BORDER_THICKNESS} ${startY + SASH_BORDER_THICKNESS} L ${
+                            startX + sectionW - SASH_BORDER_THICKNESS
+                          } ${startY + sectionH / 2} L ${startX + SASH_BORDER_THICKNESS} ${
+                            startY + sectionH - SASH_BORDER_THICKNESS
                           }`}
                           fill="none"
                           stroke="#f59e0b"
@@ -978,11 +982,11 @@ export const WindowCanvas: React.FC<WindowCanvasProps> = ({
                           strokeDasharray="4 3"
                         />
                         <path
-                          d={`M ${startX + SASH_MARGIN} ${startY + sectionH - SASH_MARGIN} L ${
+                          d={`M ${startX + SASH_BORDER_THICKNESS} ${startY + sectionH - SASH_BORDER_THICKNESS} L ${
                             startX + sectionW / 2
-                          } ${startY + SASH_MARGIN} L ${
-                            startX + sectionW - SASH_MARGIN
-                          } ${startY + sectionH - SASH_MARGIN}`}
+                          } ${startY + SASH_BORDER_THICKNESS} L ${
+                            startX + sectionW - SASH_BORDER_THICKNESS
+                          } ${startY + sectionH - SASH_BORDER_THICKNESS}`}
                           fill="none"
                           stroke="#f59e0b"
                           strokeWidth="2"
@@ -990,6 +994,7 @@ export const WindowCanvas: React.FC<WindowCanvasProps> = ({
                         />
                       </>
                     )}
+
 
                     {/* Sürme Görsel Çizgileri & Simgeleri */}
 
