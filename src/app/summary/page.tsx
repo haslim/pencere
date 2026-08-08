@@ -27,27 +27,25 @@ export default function OrderSummaryPage() {
   useEffect(() => {
     if (typeof window !== "undefined") {
       const savedItems = localStorage.getItem("app_order_items");
+      let currentItems: WindowItem[] = [];
       if (savedItems) {
         try {
           const parsed = JSON.parse(savedItems);
           if (Array.isArray(parsed) && parsed.length > 0) {
-            setItems(parsed);
-            setSelectedPosIds(parsed.map((it: WindowItem) => it.id));
+            currentItems = parsed;
           } else {
-            const def = getDefaultItems();
-            setItems(def);
-            setSelectedPosIds(def.map((it) => it.id));
+            currentItems = getDefaultItems();
           }
         } catch (e) {
-          const def = getDefaultItems();
-          setItems(def);
-          setSelectedPosIds(def.map((it) => it.id));
+          currentItems = getDefaultItems();
         }
       } else {
-        const def = getDefaultItems();
-        setItems(def);
-        setSelectedPosIds(def.map((it) => it.id));
+        currentItems = getDefaultItems();
       }
+
+      setItems(currentItems);
+      setSelectedPosIds(currentItems.map((it) => it.id));
+
 
       const savedCust = localStorage.getItem("app_active_customer");
       if (savedCust) {
@@ -91,8 +89,9 @@ export default function OrderSummaryPage() {
   }, [items, selectedPosIds]);
 
   const orderSummary = useMemo(() => {
-    return calculateOrderSummary(activeFilteredItems.length > 0 ? activeFilteredItems : items, settings);
-  }, [activeFilteredItems, items, settings]);
+    return calculateOrderSummary(activeFilteredItems, settings);
+  }, [activeFilteredItems, settings]);
+
 
   if (!isLoaded) {
     return (

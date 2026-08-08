@@ -276,7 +276,9 @@ export default function GlassOrderPage() {
                       <td className="py-2 px-3 text-center font-mono">{yukStr}</td>
                       <td className="py-2 px-3 text-right font-mono">{bM2Str}</td>
                       <td className="py-2 px-3 text-right font-mono font-bold text-slate-900">{tM2Str}</td>
-                      <td className="py-2 px-3 text-center font-mono font-bold">{idx + 1}</td>
+                      <td className="py-2 px-3 text-center font-mono font-bold text-blue-900">
+                        {g.posName ? g.posName.split(":")[0] || g.posName : `Poz ${idx + 1}`}
+                      </td>
                     </tr>
                   );
                 })}
@@ -299,13 +301,14 @@ export default function GlassOrderPage() {
             ))}
 
             <div className="flex justify-between items-center text-sm font-serif font-black text-slate-950 pt-2 border-t-2 border-slate-900">
-              <span>GENEL SİPARİŞ TOPLAMI ({selectedPosIds.length} Poz)</span>
+              <span>GENEL SİPARİŞ TOPLAMI ({activeFilteredItems.length} Poz)</span>
               <div className="flex gap-12 font-mono">
                 <span>{totalPieces} Adet</span>
                 <span className="underline decoration-double">{totalM2.replace(".", ",")} m²</span>
               </div>
             </div>
           </div>
+
         </div>
       </main>
     </div>
