@@ -1228,6 +1228,17 @@ export const WindowCanvas: React.FC<WindowCanvasProps> = ({
               >
                 ✏️ Mesafeyi Düzenle ({contextMenu.posMM}mm)
               </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  onEqualDistributeMullions?.(contextMenu.type === "v_mullion" ? "v" : "h");
+                  setContextMenu(null);
+                }}
+                className="w-full text-left px-3 py-2 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-emerald-600 flex items-center gap-2"
+              >
+                ⚖️ {contextMenu.type === "v_mullion" ? "Dikey Kayıtları Eşit Dağıt" : "Yatay Kayıtları Eşit Dağıt"}
+              </button>
               <button
                 type="button"
                 onClick={() => {
@@ -1245,7 +1256,7 @@ export const WindowCanvas: React.FC<WindowCanvasProps> = ({
           ) : (
             <>
               <div className="px-3 py-1.5 text-[11px] font-mono text-slate-400 border-b border-slate-100 dark:border-slate-800">
-                Hızlı Çizim Menüsü
+                Hızlı Çizim & Hizalama Menüsü
               </div>
               <button
                 type="button"
@@ -1271,13 +1282,34 @@ export const WindowCanvas: React.FC<WindowCanvasProps> = ({
               <button
                 type="button"
                 onClick={() => {
+                  onEqualDistributeMullions?.("v");
+                  setContextMenu(null);
+                }}
+                className="w-full text-left px-3 py-2 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 flex items-center gap-2 text-emerald-600 font-bold"
+              >
+                ⚖️ Dikey Kayıtları Eşit Dağıt
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  onEqualDistributeMullions?.("h");
+                  setContextMenu(null);
+                }}
+                className="w-full text-left px-3 py-2 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 flex items-center gap-2 text-emerald-600 font-bold"
+              >
+                ⚖️ Yatay Kayıtları Eşit Dağıt
+              </button>
+              <button
+                type="button"
+                onClick={() => {
                   onEqualDistributeMullions?.("both");
                   setContextMenu(null);
                 }}
-                className="w-full text-left px-3 py-2 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center gap-2 text-emerald-600"
+                className="w-full text-left px-3 py-2 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 flex items-center gap-2 text-emerald-700 font-bold"
               >
-                ⚖️ Kayıtları Eşit Dağıt
+                ⚖️ Tüm Kayıtları Eşit Dağıt (Dikey & Yatay)
               </button>
+              <div className="my-1 border-t border-slate-100 dark:border-slate-800" />
               <button
                 type="button"
                 onClick={() => {
@@ -1290,6 +1322,7 @@ export const WindowCanvas: React.FC<WindowCanvasProps> = ({
               </button>
             </>
           )}
+
         </div>
       )}
     </div>
