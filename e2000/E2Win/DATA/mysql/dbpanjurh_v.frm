@@ -1,0 +1,15 @@
+TYPE=VIEW
+query=select `mysql`.`dbpanjurh`.`SERIKODU` AS `SERIKODU`,`mysql`.`dbpanjurh`.`MARKA` AS `MARKA`,`mysql`.`dbpanjurh`.`KUTUYUK` AS `KUTUYUK`,`mysql`.`dbpanjurh`.`ISLEM` AS `ISLEM`,`mysql`.`dbpanjurh`.`HESAP` AS `HESAP`,`mysql`.`dbpanjurh`.`ADET` AS `ADET`,`mysql`.`dbpanjurh`.`BALANSD` AS `BALANSD`,`mysql`.`dbpanjurh`.`BALANSY` AS `BALANSY`,`mysql`.`dbpanjurh`.`STOKKODU` AS `STOKKODU`,`mysql`.`dbpanjurh`.`SIRA` AS `SIRA`,`mysql`.`dbpanjurh`.`POZISYON` AS `POZISYON`,`mysql`.`dbpanjurh`.`TOPLAT` AS `TOPLAT`,`mysql`.`dbpanjurh`.`PALETYUK` AS `PALETYUK`,`mysql`.`dbpanjurh`.`ARENK` AS `ARENK`,`mysql`.`dbpanjurh`.`ARENK1` AS `ARENK1`,`mysql`.`dbpanjurh`.`KAPRENK` AS `KAPRENK`,`mysql`.`dbpanjurh`.`KAPRENK1` AS `KAPRENK1`,`mysql`.`dbpanjurh`.`YUZEY` AS `YUZEY`,`mysql`.`dbpanjurh`.`YUZEY1` AS `YUZEY1`,`mysql`.`dbpanjurh`.`sayac` AS `sayac` from `mysql`.`dbpanjurh`
+md5=00c7ff19d566740e624696cdfb19a230
+updatable=1
+algorithm=0
+definer_user=root
+definer_host=localhost
+suid=1
+with_check_option=0
+timestamp=2017-04-04 07:57:56
+create-version=1
+source=select `dbpanjurh`.`SERIKODU` AS `SERIKODU`,`dbpanjurh`.`MARKA` AS `MARKA`,`dbpanjurh`.`KUTUYUK` AS `KUTUYUK`,`dbpanjurh`.`ISLEM` AS `ISLEM`,`dbpanjurh`.`HESAP` AS `HESAP`,`dbpanjurh`.`ADET` AS `ADET`,`dbpanjurh`.`BALANSD` AS `BALANSD`,`dbpanjurh`.`BALANSY` AS `BALANSY`,`dbpanjurh`.`STOKKODU` AS `STOKKODU`,`dbpanjurh`.`SIRA` AS `SIRA`,`dbpanjurh`.`POZISYON` AS `POZISYON`,`dbpanjurh`.`TOPLAT` AS `TOPLAT`,`dbpanjurh`.`PALETYUK` AS `PALETYUK`,`dbpanjurh`.`ARENK` AS `ARENK`,`dbpanjurh`.`ARENK1` AS `ARENK1`,`dbpanjurh`.`KAPRENK` AS `KAPRENK`,`dbpanjurh`.`KAPRENK1` AS `KAPRENK1`,`dbpanjurh`.`YUZEY` AS `YUZEY`,`dbpanjurh`.`YUZEY1` AS `YUZEY1`,`dbpanjurh`.`sayac` AS `sayac` from `dbpanjurh`
+client_cs_name=latin5
+connection_cl_name=latin5_turkish_ci
+view_body_utf8=select `mysql`.`dbpanjurh`.`SERIKODU` AS `SERIKODU`,`mysql`.`dbpanjurh`.`MARKA` AS `MARKA`,`mysql`.`dbpanjurh`.`KUTUYUK` AS `KUTUYUK`,`mysql`.`dbpanjurh`.`ISLEM` AS `ISLEM`,`mysql`.`dbpanjurh`.`HESAP` AS `HESAP`,`mysql`.`dbpanjurh`.`ADET` AS `ADET`,`mysql`.`dbpanjurh`.`BALANSD` AS `BALANSD`,`mysql`.`dbpanjurh`.`BALANSY` AS `BALANSY`,`mysql`.`dbpanjurh`.`STOKKODU` AS `STOKKODU`,`mysql`.`dbpanjurh`.`SIRA` AS `SIRA`,`mysql`.`dbpanjurh`.`POZISYON` AS `POZISYON`,`mysql`.`dbpanjurh`.`TOPLAT` AS `TOPLAT`,`mysql`.`dbpanjurh`.`PALETYUK` AS `PALETYUK`,`mysql`.`dbpanjurh`.`ARENK` AS `ARENK`,`mysql`.`dbpanjurh`.`ARENK1` AS `ARENK1`,`mysql`.`dbpanjurh`.`KAPRENK` AS `KAPRENK`,`mysql`.`dbpanjurh`.`KAPRENK1` AS `KAPRENK1`,`mysql`.`dbpanjurh`.`YUZEY` AS `YUZEY`,`mysql`.`dbpanjurh`.`YUZEY1` AS `YUZEY1`,`mysql`.`dbpanjurh`.`sayac` AS `sayac` from `mysql`.`dbpanjurh`

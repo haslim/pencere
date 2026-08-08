@@ -1,0 +1,15 @@
+TYPE=VIEW
+query=select `egepen23`.`dbispan`.`SERIKODU` AS `SERIKODU`,`egepen23`.`dbispan`.`STOKKODU` AS `STOKKODU`,`egepen23`.`dbispan`.`SISTEM` AS `SISTEM`,`egepen23`.`dbispan`.`ACIKLAMA` AS `ACIKLAMA`,`egepen23`.`dbispan`.`GENMIN` AS `GENMIN`,`egepen23`.`dbispan`.`GENMAX` AS `GENMAX`,`egepen23`.`dbispan`.`YUKMIN` AS `YUKMIN`,`egepen23`.`dbispan`.`YUKMAX` AS `YUKMAX`,`egepen23`.`dbispan`.`GRUP` AS `GRUP`,`egepen23`.`dbispan`.`KOLYERI` AS `KOLYERI`,`egepen23`.`dbispan`.`ADET` AS `ADET`,`egepen23`.`dbispan`.`URETICI` AS `URETICI`,`egepen23`.`dbispan`.`ACILIMYONU` AS `ACILIMYONU`,`egepen23`.`dbispan`.`ERCOM` AS `ERCOM`,`egepen23`.`dbispan`.`SURGUTIP` AS `SURGUTIP`,`egepen23`.`dbispan`.`sayac` AS `sayac`,`egepen23`.`dbispan`.`SIRANO` AS `SIRANO` from `egepen23`.`dbispan`
+md5=7dc45fb6109d64e8f100bac957a7604c
+updatable=1
+algorithm=0
+definer_user=root
+definer_host=localhost
+suid=1
+with_check_option=0
+timestamp=2026-03-26 06:41:12
+create-version=1
+source=select `dbispan`.`SERIKODU` AS `SERIKODU`,`dbispan`.`STOKKODU` AS `STOKKODU`,`dbispan`.`SISTEM` AS `SISTEM`,`dbispan`.`ACIKLAMA` AS `ACIKLAMA`,`dbispan`.`GENMIN` AS `GENMIN`,`dbispan`.`GENMAX` AS `GENMAX`,`dbispan`.`YUKMIN` AS `YUKMIN`,`dbispan`.`YUKMAX` AS `YUKMAX`,`dbispan`.`GRUP` AS `GRUP`,`dbispan`.`KOLYERI` AS `KOLYERI`,`dbispan`.`ADET` AS `ADET`,`dbispan`.`URETICI` AS `URETICI`,`dbispan`.`ACILIMYONU` AS `ACILIMYONU`,`dbispan`.`ERCOM` AS `ERCOM`,`dbispan`.`SURGUTIP` AS `SURGUTIP`,`dbispan`.`sayac` AS `sayac`,`dbispan`.`SIRANO` AS `SIRANO` from `dbispan`
+client_cs_name=latin5
+connection_cl_name=latin5_turkish_ci
+view_body_utf8=select `egepen23`.`dbispan`.`SERIKODU` AS `SERIKODU`,`egepen23`.`dbispan`.`STOKKODU` AS `STOKKODU`,`egepen23`.`dbispan`.`SISTEM` AS `SISTEM`,`egepen23`.`dbispan`.`ACIKLAMA` AS `ACIKLAMA`,`egepen23`.`dbispan`.`GENMIN` AS `GENMIN`,`egepen23`.`dbispan`.`GENMAX` AS `GENMAX`,`egepen23`.`dbispan`.`YUKMIN` AS `YUKMIN`,`egepen23`.`dbispan`.`YUKMAX` AS `YUKMAX`,`egepen23`.`dbispan`.`GRUP` AS `GRUP`,`egepen23`.`dbispan`.`KOLYERI` AS `KOLYERI`,`egepen23`.`dbispan`.`ADET` AS `ADET`,`egepen23`.`dbispan`.`URETICI` AS `URETICI`,`egepen23`.`dbispan`.`ACILIMYONU` AS `ACILIMYONU`,`egepen23`.`dbispan`.`ERCOM` AS `ERCOM`,`egepen23`.`dbispan`.`SURGUTIP` AS `SURGUTIP`,`egepen23`.`dbispan`.`sayac` AS `sayac`,`egepen23`.`dbispan`.`SIRANO` AS `SIRANO` from `egepen23`.`dbispan`

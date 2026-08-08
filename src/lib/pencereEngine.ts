@@ -167,7 +167,8 @@ export interface WindowItem {
 
 export interface CutPiece {
   id: string;
-  code: string; // Egepen / E2000 Stok Kodu (örn. 11400, 11760, 12660, 13060)
+  code: string; // Egepen Stok Kodu (örn. 11400, 11760, 12660, 13060)
+
   label: string;
   type: "KASA" | "KANAT" | "KAPI_KANADI" | "ORTA_KAYIT" | "DESTEK_SACI" | "CITA" | "ALUMINYUM_ESIK";
   length: number; // mm

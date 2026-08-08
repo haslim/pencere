@@ -1,0 +1,15 @@
+TYPE=VIEW
+query=select `egepen16y`.`dbstokh`.`STOKKODU` AS `STOKKODU`,`egepen16y`.`dbstokh`.`CARIKODU` AS `CARIKODU`,`egepen16y`.`dbstokh`.`SIPARISNO` AS `SIPARISNO`,`egepen16y`.`dbstokh`.`TARIH` AS `TARIH`,`egepen16y`.`dbstokh`.`ISLEM` AS `ISLEM`,`egepen16y`.`dbstokh`.`GIREN` AS `GIREN`,`egepen16y`.`dbstokh`.`CIKAN` AS `CIKAN`,`egepen16y`.`dbstokh`.`FATURANO` AS `FATURANO`,`egepen16y`.`dbstokh`.`FTARIHI` AS `FTARIHI`,`egepen16y`.`dbstokh`.`sayac` AS `sayac` from `egepen16y`.`dbstokh`
+md5=191a060df2acaa16573b09290ab08dc1
+updatable=1
+algorithm=0
+definer_user=root
+definer_host=localhost
+suid=2
+with_check_option=0
+timestamp=2022-02-02 12:28:32
+create-version=1
+source=SELECT * FROM DBSTOKH
+client_cs_name=latin5
+connection_cl_name=latin5_turkish_ci
+view_body_utf8=select `egepen16y`.`dbstokh`.`STOKKODU` AS `STOKKODU`,`egepen16y`.`dbstokh`.`CARIKODU` AS `CARIKODU`,`egepen16y`.`dbstokh`.`SIPARISNO` AS `SIPARISNO`,`egepen16y`.`dbstokh`.`TARIH` AS `TARIH`,`egepen16y`.`dbstokh`.`ISLEM` AS `ISLEM`,`egepen16y`.`dbstokh`.`GIREN` AS `GIREN`,`egepen16y`.`dbstokh`.`CIKAN` AS `CIKAN`,`egepen16y`.`dbstokh`.`FATURANO` AS `FATURANO`,`egepen16y`.`dbstokh`.`FTARIHI` AS `FTARIHI`,`egepen16y`.`dbstokh`.`sayac` AS `sayac` from `egepen16y`.`dbstokh`

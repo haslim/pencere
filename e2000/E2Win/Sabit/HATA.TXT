@@ -1,0 +1,1 @@
+ErcomSmart : 06.08.2026 09:14:56:Access violation at address 0131E0D4 in module 'ErcomQWin.exe'. Read of address 00000000

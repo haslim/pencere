@@ -1,0 +1,15 @@
+TYPE=VIEW
+query=select `mysql`.`stokrenk`.`ANASTOKKODU` AS `ANASTOKKODU`,`mysql`.`stokrenk`.`RENKSAYAC` AS `RENKSAYAC`,`mysql`.`stokrenk`.`STOKKODU` AS `STOKKODU`,`mysql`.`stokrenk`.`SAYAC` AS `SAYAC` from `mysql`.`stokrenk`
+md5=444c195e9606b9d542ce35a36bbc2b2f
+updatable=1
+algorithm=0
+definer_user=root
+definer_host=localhost
+suid=1
+with_check_option=0
+timestamp=2017-04-04 07:57:56
+create-version=1
+source=select `stokrenk`.`ANASTOKKODU` AS `ANASTOKKODU`,`stokrenk`.`RENKSAYAC` AS `RENKSAYAC`,`stokrenk`.`STOKKODU` AS `STOKKODU`,`stokrenk`.`SAYAC` AS `SAYAC` from `stokrenk`
+client_cs_name=latin5
+connection_cl_name=latin5_turkish_ci
+view_body_utf8=select `mysql`.`stokrenk`.`ANASTOKKODU` AS `ANASTOKKODU`,`mysql`.`stokrenk`.`RENKSAYAC` AS `RENKSAYAC`,`mysql`.`stokrenk`.`STOKKODU` AS `STOKKODU`,`mysql`.`stokrenk`.`SAYAC` AS `SAYAC` from `mysql`.`stokrenk`

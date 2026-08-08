@@ -1,0 +1,15 @@
+TYPE=VIEW
+query=select `egepen19`.`stokrenk`.`ANASTOKKODU` AS `ANASTOKKODU`,`egepen19`.`stokrenk`.`RENKSAYAC` AS `RENKSAYAC`,`egepen19`.`stokrenk`.`STOKKODU` AS `STOKKODU`,`egepen19`.`stokrenk`.`SAYAC` AS `SAYAC` from `egepen19`.`stokrenk`
+md5=8b379291a3648bf21f2cce55d09b7536
+updatable=1
+algorithm=0
+definer_user=root
+definer_host=localhost
+suid=2
+with_check_option=0
+timestamp=2022-02-02 12:41:45
+create-version=1
+source=SELECT * FROM STOKRENK
+client_cs_name=latin5
+connection_cl_name=latin5_turkish_ci
+view_body_utf8=select `egepen19`.`stokrenk`.`ANASTOKKODU` AS `ANASTOKKODU`,`egepen19`.`stokrenk`.`RENKSAYAC` AS `RENKSAYAC`,`egepen19`.`stokrenk`.`STOKKODU` AS `STOKKODU`,`egepen19`.`stokrenk`.`SAYAC` AS `SAYAC` from `egepen19`.`stokrenk`

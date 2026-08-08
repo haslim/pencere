@@ -1,0 +1,15 @@
+TYPE=VIEW
+query=select `egepen23`.`dbrenk`.`SERIKODU` AS `SERIKODU`,`egepen23`.`dbrenk`.`SIRANO` AS `SIRANO`,`egepen23`.`dbrenk`.`ACIKLAMA` AS `ACIKLAMA`,`egepen23`.`dbrenk`.`YACIKLAMA` AS `YACIKLAMA`,`egepen23`.`dbrenk`.`RENKKODU` AS `RENKKODU`,`egepen23`.`dbrenk`.`RENKNO` AS `RENKNO`,`egepen23`.`dbrenk`.`RESIMINDEX` AS `RESIMINDEX`,`egepen23`.`dbrenk`.`FOLYO` AS `FOLYO`,`egepen23`.`dbrenk`.`ANARENK` AS `ANARENK`,`egepen23`.`dbrenk`.`KAPLAMA` AS `KAPLAMA`,`egepen23`.`dbrenk`.`SAYAC` AS `SAYAC`,`egepen23`.`dbrenk`.`CITA` AS `CITA`,`egepen23`.`dbrenk`.`PERVAZ` AS `PERVAZ`,`egepen23`.`dbrenk`.`BAG` AS `BAG`,`egepen23`.`dbrenk`.`LAMBRI` AS `LAMBRI`,`egepen23`.`dbrenk`.`AKSRENK` AS `AKSRENK`,`egepen23`.`dbrenk`.`RUZGARLIK` AS `RUZGARLIK`,`egepen23`.`dbrenk`.`TAPA` AS `TAPA`,`egepen23`.`dbrenk`.`SILIKON` AS `SILIKON`,`egepen23`.`dbrenk`.`OTMRENK` AS `OTMRENK` from `egepen23`.`dbrenk`
+md5=fe958e34faa11261ec46652dcf37c1eb
+updatable=1
+algorithm=0
+definer_user=root
+definer_host=localhost
+suid=1
+with_check_option=0
+timestamp=2026-03-26 06:41:12
+create-version=1
+source=select `dbrenk`.`SERIKODU` AS `SERIKODU`,`dbrenk`.`SIRANO` AS `SIRANO`,`dbrenk`.`ACIKLAMA` AS `ACIKLAMA`,`dbrenk`.`YACIKLAMA` AS `YACIKLAMA`,`dbrenk`.`RENKKODU` AS `RENKKODU`,`dbrenk`.`RENKNO` AS `RENKNO`,`dbrenk`.`RESIMINDEX` AS `RESIMINDEX`,`dbrenk`.`FOLYO` AS `FOLYO`,`dbrenk`.`ANARENK` AS `ANARENK`,`dbrenk`.`KAPLAMA` AS `KAPLAMA`,`dbrenk`.`SAYAC` AS `SAYAC`,`dbrenk`.`CITA` AS `CITA`,`dbrenk`.`PERVAZ` AS `PERVAZ`,`dbrenk`.`BAG` AS `BAG`,`dbrenk`.`LAMBRI` AS `LAMBRI`,`dbrenk`.`AKSRENK` AS `AKSRENK`,`dbrenk`.`RUZGARLIK` AS `RUZGARLIK`,`dbrenk`.`TAPA` AS `TAPA`,`dbrenk`.`SILIKON` AS `SILIKON`,`dbrenk`.`OTMRENK` AS `OTMRENK` from `dbrenk`
+client_cs_name=latin5
+connection_cl_name=latin5_turkish_ci
+view_body_utf8=select `egepen23`.`dbrenk`.`SERIKODU` AS `SERIKODU`,`egepen23`.`dbrenk`.`SIRANO` AS `SIRANO`,`egepen23`.`dbrenk`.`ACIKLAMA` AS `ACIKLAMA`,`egepen23`.`dbrenk`.`YACIKLAMA` AS `YACIKLAMA`,`egepen23`.`dbrenk`.`RENKKODU` AS `RENKKODU`,`egepen23`.`dbrenk`.`RENKNO` AS `RENKNO`,`egepen23`.`dbrenk`.`RESIMINDEX` AS `RESIMINDEX`,`egepen23`.`dbrenk`.`FOLYO` AS `FOLYO`,`egepen23`.`dbrenk`.`ANARENK` AS `ANARENK`,`egepen23`.`dbrenk`.`KAPLAMA` AS `KAPLAMA`,`egepen23`.`dbrenk`.`SAYAC` AS `SAYAC`,`egepen23`.`dbrenk`.`CITA` AS `CITA`,`egepen23`.`dbrenk`.`PERVAZ` AS `PERVAZ`,`egepen23`.`dbrenk`.`BAG` AS `BAG`,`egepen23`.`dbrenk`.`LAMBRI` AS `LAMBRI`,`egepen23`.`dbrenk`.`AKSRENK` AS `AKSRENK`,`egepen23`.`dbrenk`.`RUZGARLIK` AS `RUZGARLIK`,`egepen23`.`dbrenk`.`TAPA` AS `TAPA`,`egepen23`.`dbrenk`.`SILIKON` AS `SILIKON`,`egepen23`.`dbrenk`.`OTMRENK` AS `OTMRENK` from `egepen23`.`dbrenk`

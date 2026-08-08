@@ -1,0 +1,15 @@
+TYPE=VIEW
+query=select `mysql`.`dbrenk`.`SERIKODU` AS `SERIKODU`,`mysql`.`dbrenk`.`SIRANO` AS `SIRANO`,`mysql`.`dbrenk`.`ACIKLAMA` AS `ACIKLAMA`,`mysql`.`dbrenk`.`YACIKLAMA` AS `YACIKLAMA`,`mysql`.`dbrenk`.`RENKKODU` AS `RENKKODU`,`mysql`.`dbrenk`.`RENKNO` AS `RENKNO`,`mysql`.`dbrenk`.`RESIMINDEX` AS `RESIMINDEX`,`mysql`.`dbrenk`.`FOLYO` AS `FOLYO`,`mysql`.`dbrenk`.`ANARENK` AS `ANARENK`,`mysql`.`dbrenk`.`KAPLAMA` AS `KAPLAMA`,`mysql`.`dbrenk`.`SAYAC` AS `SAYAC`,`mysql`.`dbrenk`.`CITA` AS `CITA`,`mysql`.`dbrenk`.`PERVAZ` AS `PERVAZ`,`mysql`.`dbrenk`.`BAG` AS `BAG`,`mysql`.`dbrenk`.`LAMBRI` AS `LAMBRI`,`mysql`.`dbrenk`.`AKSRENK` AS `AKSRENK`,`mysql`.`dbrenk`.`RUZGARLIK` AS `RUZGARLIK`,`mysql`.`dbrenk`.`TAPA` AS `TAPA`,`mysql`.`dbrenk`.`SILIKON` AS `SILIKON`,`mysql`.`dbrenk`.`OTMRENK` AS `OTMRENK` from `mysql`.`dbrenk`
+md5=32daeec13f7b678a0e3c9f7fb2714afa
+updatable=1
+algorithm=0
+definer_user=root
+definer_host=localhost
+suid=1
+with_check_option=0
+timestamp=2017-04-04 07:57:56
+create-version=1
+source=select `dbrenk`.`SERIKODU` AS `SERIKODU`,`dbrenk`.`SIRANO` AS `SIRANO`,`dbrenk`.`ACIKLAMA` AS `ACIKLAMA`,`dbrenk`.`YACIKLAMA` AS `YACIKLAMA`,`dbrenk`.`RENKKODU` AS `RENKKODU`,`dbrenk`.`RENKNO` AS `RENKNO`,`dbrenk`.`RESIMINDEX` AS `RESIMINDEX`,`dbrenk`.`FOLYO` AS `FOLYO`,`dbrenk`.`ANARENK` AS `ANARENK`,`dbrenk`.`KAPLAMA` AS `KAPLAMA`,`dbrenk`.`SAYAC` AS `SAYAC`,`dbrenk`.`CITA` AS `CITA`,`dbrenk`.`PERVAZ` AS `PERVAZ`,`dbrenk`.`BAG` AS `BAG`,`dbrenk`.`LAMBRI` AS `LAMBRI`,`dbrenk`.`AKSRENK` AS `AKSRENK`,`dbrenk`.`RUZGARLIK` AS `RUZGARLIK`,`dbrenk`.`TAPA` AS `TAPA`,`dbrenk`.`SILIKON` AS `SILIKON`,`dbrenk`.`OTMRENK` AS `OTMRENK` from `dbrenk`
+client_cs_name=latin5
+connection_cl_name=latin5_turkish_ci
+view_body_utf8=select `mysql`.`dbrenk`.`SERIKODU` AS `SERIKODU`,`mysql`.`dbrenk`.`SIRANO` AS `SIRANO`,`mysql`.`dbrenk`.`ACIKLAMA` AS `ACIKLAMA`,`mysql`.`dbrenk`.`YACIKLAMA` AS `YACIKLAMA`,`mysql`.`dbrenk`.`RENKKODU` AS `RENKKODU`,`mysql`.`dbrenk`.`RENKNO` AS `RENKNO`,`mysql`.`dbrenk`.`RESIMINDEX` AS `RESIMINDEX`,`mysql`.`dbrenk`.`FOLYO` AS `FOLYO`,`mysql`.`dbrenk`.`ANARENK` AS `ANARENK`,`mysql`.`dbrenk`.`KAPLAMA` AS `KAPLAMA`,`mysql`.`dbrenk`.`SAYAC` AS `SAYAC`,`mysql`.`dbrenk`.`CITA` AS `CITA`,`mysql`.`dbrenk`.`PERVAZ` AS `PERVAZ`,`mysql`.`dbrenk`.`BAG` AS `BAG`,`mysql`.`dbrenk`.`LAMBRI` AS `LAMBRI`,`mysql`.`dbrenk`.`AKSRENK` AS `AKSRENK`,`mysql`.`dbrenk`.`RUZGARLIK` AS `RUZGARLIK`,`mysql`.`dbrenk`.`TAPA` AS `TAPA`,`mysql`.`dbrenk`.`SILIKON` AS `SILIKON`,`mysql`.`dbrenk`.`OTMRENK` AS `OTMRENK` from `mysql`.`dbrenk`

@@ -1,0 +1,15 @@
+TYPE=VIEW
+query=select `egepen24`.`dbispan`.`SERIKODU` AS `SERIKODU`,`egepen24`.`dbispan`.`STOKKODU` AS `STOKKODU`,`egepen24`.`dbispan`.`SISTEM` AS `SISTEM`,`egepen24`.`dbispan`.`ACIKLAMA` AS `ACIKLAMA`,`egepen24`.`dbispan`.`GENMIN` AS `GENMIN`,`egepen24`.`dbispan`.`GENMAX` AS `GENMAX`,`egepen24`.`dbispan`.`YUKMIN` AS `YUKMIN`,`egepen24`.`dbispan`.`YUKMAX` AS `YUKMAX`,`egepen24`.`dbispan`.`GRUP` AS `GRUP`,`egepen24`.`dbispan`.`KOLYERI` AS `KOLYERI`,`egepen24`.`dbispan`.`ADET` AS `ADET`,`egepen24`.`dbispan`.`URETICI` AS `URETICI`,`egepen24`.`dbispan`.`ACILIMYONU` AS `ACILIMYONU`,`egepen24`.`dbispan`.`ERCOM` AS `ERCOM`,`egepen24`.`dbispan`.`SURGUTIP` AS `SURGUTIP`,`egepen24`.`dbispan`.`sayac` AS `sayac`,`egepen24`.`dbispan`.`SIRANO` AS `SIRANO` from `egepen24`.`dbispan`
+md5=f474bc3da072b3938edb265d7e51c25b
+updatable=1
+algorithm=0
+definer_user=root
+definer_host=localhost
+suid=2
+with_check_option=0
+timestamp=2025-03-05 10:33:53
+create-version=1
+source=SELECT * FROM DBISPAN
+client_cs_name=latin5
+connection_cl_name=latin5_turkish_ci
+view_body_utf8=select `egepen24`.`dbispan`.`SERIKODU` AS `SERIKODU`,`egepen24`.`dbispan`.`STOKKODU` AS `STOKKODU`,`egepen24`.`dbispan`.`SISTEM` AS `SISTEM`,`egepen24`.`dbispan`.`ACIKLAMA` AS `ACIKLAMA`,`egepen24`.`dbispan`.`GENMIN` AS `GENMIN`,`egepen24`.`dbispan`.`GENMAX` AS `GENMAX`,`egepen24`.`dbispan`.`YUKMIN` AS `YUKMIN`,`egepen24`.`dbispan`.`YUKMAX` AS `YUKMAX`,`egepen24`.`dbispan`.`GRUP` AS `GRUP`,`egepen24`.`dbispan`.`KOLYERI` AS `KOLYERI`,`egepen24`.`dbispan`.`ADET` AS `ADET`,`egepen24`.`dbispan`.`URETICI` AS `URETICI`,`egepen24`.`dbispan`.`ACILIMYONU` AS `ACILIMYONU`,`egepen24`.`dbispan`.`ERCOM` AS `ERCOM`,`egepen24`.`dbispan`.`SURGUTIP` AS `SURGUTIP`,`egepen24`.`dbispan`.`sayac` AS `sayac`,`egepen24`.`dbispan`.`SIRANO` AS `SIRANO` from `egepen24`.`dbispan`

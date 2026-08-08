@@ -1,0 +1,15 @@
+TYPE=VIEW
+query=select `egepen16y`.`dbpanjur`.`SERIKODU` AS `SERIKODU`,`egepen16y`.`dbpanjur`.`STOKKODU` AS `STOKKODU`,`egepen16y`.`dbpanjur`.`MARKA` AS `MARKA`,`egepen16y`.`dbpanjur`.`RESIMINDEX` AS `RESIMINDEX`,`egepen16y`.`dbpanjur`.`SIRA` AS `SIRA`,`egepen16y`.`dbpanjur`.`PALETYUK` AS `PALETYUK`,`egepen16y`.`dbpanjur`.`MOTORNO` AS `MOTORNO`,`egepen16y`.`dbpanjur`.`sayac` AS `sayac` from `egepen16y`.`dbpanjur`
+md5=72ac4f6fc1f38506a1270512fd42dd4b
+updatable=1
+algorithm=0
+definer_user=root
+definer_host=localhost
+suid=2
+with_check_option=0
+timestamp=2022-02-02 12:28:32
+create-version=1
+source=SELECT * FROM DBPANJUR
+client_cs_name=latin5
+connection_cl_name=latin5_turkish_ci
+view_body_utf8=select `egepen16y`.`dbpanjur`.`SERIKODU` AS `SERIKODU`,`egepen16y`.`dbpanjur`.`STOKKODU` AS `STOKKODU`,`egepen16y`.`dbpanjur`.`MARKA` AS `MARKA`,`egepen16y`.`dbpanjur`.`RESIMINDEX` AS `RESIMINDEX`,`egepen16y`.`dbpanjur`.`SIRA` AS `SIRA`,`egepen16y`.`dbpanjur`.`PALETYUK` AS `PALETYUK`,`egepen16y`.`dbpanjur`.`MOTORNO` AS `MOTORNO`,`egepen16y`.`dbpanjur`.`sayac` AS `sayac` from `egepen16y`.`dbpanjur`

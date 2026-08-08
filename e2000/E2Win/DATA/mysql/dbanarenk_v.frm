@@ -1,0 +1,15 @@
+TYPE=VIEW
+query=select `mysql`.`dbanarenk`.`ANARENK` AS `ANARENK`,`mysql`.`dbanarenk`.`RENK` AS `RENK`,`mysql`.`dbanarenk`.`RESIMINDEX` AS `RESIMINDEX`,`mysql`.`dbanarenk`.`SERIKODU` AS `SERIKODU`,`mysql`.`dbanarenk`.`RENKNO` AS `RENKNO`,`mysql`.`dbanarenk`.`sayac` AS `sayac` from `mysql`.`dbanarenk`
+md5=8a381ab2308761bc287243c109394dad
+updatable=1
+algorithm=0
+definer_user=root
+definer_host=localhost
+suid=1
+with_check_option=0
+timestamp=2017-04-04 07:57:56
+create-version=1
+source=select `dbanarenk`.`ANARENK` AS `ANARENK`,`dbanarenk`.`RENK` AS `RENK`,`dbanarenk`.`RESIMINDEX` AS `RESIMINDEX`,`dbanarenk`.`SERIKODU` AS `SERIKODU`,`dbanarenk`.`RENKNO` AS `RENKNO`,`dbanarenk`.`sayac` AS `sayac` from `dbanarenk`
+client_cs_name=latin5
+connection_cl_name=latin5_turkish_ci
+view_body_utf8=select `mysql`.`dbanarenk`.`ANARENK` AS `ANARENK`,`mysql`.`dbanarenk`.`RENK` AS `RENK`,`mysql`.`dbanarenk`.`RESIMINDEX` AS `RESIMINDEX`,`mysql`.`dbanarenk`.`SERIKODU` AS `SERIKODU`,`mysql`.`dbanarenk`.`RENKNO` AS `RENKNO`,`mysql`.`dbanarenk`.`sayac` AS `sayac` from `mysql`.`dbanarenk`

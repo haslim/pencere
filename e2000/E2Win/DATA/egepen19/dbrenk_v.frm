@@ -1,0 +1,15 @@
+TYPE=VIEW
+query=select `egepen19`.`dbrenk`.`SERIKODU` AS `SERIKODU`,`egepen19`.`dbrenk`.`SIRANO` AS `SIRANO`,`egepen19`.`dbrenk`.`ACIKLAMA` AS `ACIKLAMA`,`egepen19`.`dbrenk`.`YACIKLAMA` AS `YACIKLAMA`,`egepen19`.`dbrenk`.`RENKKODU` AS `RENKKODU`,`egepen19`.`dbrenk`.`RENKNO` AS `RENKNO`,`egepen19`.`dbrenk`.`RESIMINDEX` AS `RESIMINDEX`,`egepen19`.`dbrenk`.`FOLYO` AS `FOLYO`,`egepen19`.`dbrenk`.`ANARENK` AS `ANARENK`,`egepen19`.`dbrenk`.`KAPLAMA` AS `KAPLAMA`,`egepen19`.`dbrenk`.`SAYAC` AS `SAYAC`,`egepen19`.`dbrenk`.`CITA` AS `CITA`,`egepen19`.`dbrenk`.`PERVAZ` AS `PERVAZ`,`egepen19`.`dbrenk`.`BAG` AS `BAG`,`egepen19`.`dbrenk`.`LAMBRI` AS `LAMBRI`,`egepen19`.`dbrenk`.`AKSRENK` AS `AKSRENK`,`egepen19`.`dbrenk`.`RUZGARLIK` AS `RUZGARLIK`,`egepen19`.`dbrenk`.`TAPA` AS `TAPA`,`egepen19`.`dbrenk`.`SILIKON` AS `SILIKON`,`egepen19`.`dbrenk`.`OTMRENK` AS `OTMRENK` from `egepen19`.`dbrenk`
+md5=7b56b6e343403374dc3dc2d7c6396ddb
+updatable=1
+algorithm=0
+definer_user=root
+definer_host=localhost
+suid=2
+with_check_option=0
+timestamp=2022-02-02 12:41:45
+create-version=1
+source=SELECT * FROM DBRENK
+client_cs_name=latin5
+connection_cl_name=latin5_turkish_ci
+view_body_utf8=select `egepen19`.`dbrenk`.`SERIKODU` AS `SERIKODU`,`egepen19`.`dbrenk`.`SIRANO` AS `SIRANO`,`egepen19`.`dbrenk`.`ACIKLAMA` AS `ACIKLAMA`,`egepen19`.`dbrenk`.`YACIKLAMA` AS `YACIKLAMA`,`egepen19`.`dbrenk`.`RENKKODU` AS `RENKKODU`,`egepen19`.`dbrenk`.`RENKNO` AS `RENKNO`,`egepen19`.`dbrenk`.`RESIMINDEX` AS `RESIMINDEX`,`egepen19`.`dbrenk`.`FOLYO` AS `FOLYO`,`egepen19`.`dbrenk`.`ANARENK` AS `ANARENK`,`egepen19`.`dbrenk`.`KAPLAMA` AS `KAPLAMA`,`egepen19`.`dbrenk`.`SAYAC` AS `SAYAC`,`egepen19`.`dbrenk`.`CITA` AS `CITA`,`egepen19`.`dbrenk`.`PERVAZ` AS `PERVAZ`,`egepen19`.`dbrenk`.`BAG` AS `BAG`,`egepen19`.`dbrenk`.`LAMBRI` AS `LAMBRI`,`egepen19`.`dbrenk`.`AKSRENK` AS `AKSRENK`,`egepen19`.`dbrenk`.`RUZGARLIK` AS `RUZGARLIK`,`egepen19`.`dbrenk`.`TAPA` AS `TAPA`,`egepen19`.`dbrenk`.`SILIKON` AS `SILIKON`,`egepen19`.`dbrenk`.`OTMRENK` AS `OTMRENK` from `egepen19`.`dbrenk`

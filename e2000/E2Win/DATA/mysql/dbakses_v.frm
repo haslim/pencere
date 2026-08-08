@@ -1,0 +1,15 @@
+TYPE=VIEW
+query=select `mysql`.`dbakses`.`SIRA` AS `SIRA`,`mysql`.`dbakses`.`STOKKODU` AS `STOKKODU`,`mysql`.`dbakses`.`ACIKLAMA` AS `ACIKLAMA`,`mysql`.`dbakses`.`SERIKODU` AS `SERIKODU`,`mysql`.`dbakses`.`SISTEM` AS `SISTEM`,`mysql`.`dbakses`.`KOLTIPI` AS `KOLTIPI`,`mysql`.`dbakses`.`KILITTIPI` AS `KILITTIPI`,`mysql`.`dbakses`.`KOLRESMI` AS `KOLRESMI`,`mysql`.`dbakses`.`ACILIMTIPI` AS `ACILIMTIPI`,`mysql`.`dbakses`.`GRUP` AS `GRUP`,`mysql`.`dbakses`.`RESIMINDEX` AS `RESIMINDEX`,`mysql`.`dbakses`.`URETICI` AS `URETICI`,`mysql`.`dbakses`.`GMIN` AS `GMIN`,`mysql`.`dbakses`.`GMAX` AS `GMAX`,`mysql`.`dbakses`.`YMIN` AS `YMIN`,`mysql`.`dbakses`.`YMAX` AS `YMAX`,`mysql`.`dbakses`.`CKDUSME` AS `CKDUSME`,`mysql`.`dbakses`.`sayac` AS `sayac` from `mysql`.`dbakses`
+md5=85d54007d9c64f812e13e3f63210f4c5
+updatable=1
+algorithm=0
+definer_user=root
+definer_host=localhost
+suid=1
+with_check_option=0
+timestamp=2017-04-04 07:57:56
+create-version=1
+source=select `dbakses`.`SIRA` AS `SIRA`,`dbakses`.`STOKKODU` AS `STOKKODU`,`dbakses`.`ACIKLAMA` AS `ACIKLAMA`,`dbakses`.`SERIKODU` AS `SERIKODU`,`dbakses`.`SISTEM` AS `SISTEM`,`dbakses`.`KOLTIPI` AS `KOLTIPI`,`dbakses`.`KILITTIPI` AS `KILITTIPI`,`dbakses`.`KOLRESMI` AS `KOLRESMI`,`dbakses`.`ACILIMTIPI` AS `ACILIMTIPI`,`dbakses`.`GRUP` AS `GRUP`,`dbakses`.`RESIMINDEX` AS `RESIMINDEX`,`dbakses`.`URETICI` AS `URETICI`,`dbakses`.`GMIN` AS `GMIN`,`dbakses`.`GMAX` AS `GMAX`,`dbakses`.`YMIN` AS `YMIN`,`dbakses`.`YMAX` AS `YMAX`,`dbakses`.`CKDUSME` AS `CKDUSME`,`dbakses`.`sayac` AS `sayac` from `dbakses`
+client_cs_name=latin5
+connection_cl_name=latin5_turkish_ci
+view_body_utf8=select `mysql`.`dbakses`.`SIRA` AS `SIRA`,`mysql`.`dbakses`.`STOKKODU` AS `STOKKODU`,`mysql`.`dbakses`.`ACIKLAMA` AS `ACIKLAMA`,`mysql`.`dbakses`.`SERIKODU` AS `SERIKODU`,`mysql`.`dbakses`.`SISTEM` AS `SISTEM`,`mysql`.`dbakses`.`KOLTIPI` AS `KOLTIPI`,`mysql`.`dbakses`.`KILITTIPI` AS `KILITTIPI`,`mysql`.`dbakses`.`KOLRESMI` AS `KOLRESMI`,`mysql`.`dbakses`.`ACILIMTIPI` AS `ACILIMTIPI`,`mysql`.`dbakses`.`GRUP` AS `GRUP`,`mysql`.`dbakses`.`RESIMINDEX` AS `RESIMINDEX`,`mysql`.`dbakses`.`URETICI` AS `URETICI`,`mysql`.`dbakses`.`GMIN` AS `GMIN`,`mysql`.`dbakses`.`GMAX` AS `GMAX`,`mysql`.`dbakses`.`YMIN` AS `YMIN`,`mysql`.`dbakses`.`YMAX` AS `YMAX`,`mysql`.`dbakses`.`CKDUSME` AS `CKDUSME`,`mysql`.`dbakses`.`sayac` AS `sayac` from `mysql`.`dbakses`

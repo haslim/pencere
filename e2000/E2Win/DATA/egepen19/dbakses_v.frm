@@ -1,0 +1,15 @@
+TYPE=VIEW
+query=select `egepen19`.`dbakses`.`SIRA` AS `SIRA`,`egepen19`.`dbakses`.`STOKKODU` AS `STOKKODU`,`egepen19`.`dbakses`.`ACIKLAMA` AS `ACIKLAMA`,`egepen19`.`dbakses`.`SERIKODU` AS `SERIKODU`,`egepen19`.`dbakses`.`SISTEM` AS `SISTEM`,`egepen19`.`dbakses`.`KOLTIPI` AS `KOLTIPI`,`egepen19`.`dbakses`.`KILITTIPI` AS `KILITTIPI`,`egepen19`.`dbakses`.`KOLRESMI` AS `KOLRESMI`,`egepen19`.`dbakses`.`ACILIMTIPI` AS `ACILIMTIPI`,`egepen19`.`dbakses`.`GRUP` AS `GRUP`,`egepen19`.`dbakses`.`RESIMINDEX` AS `RESIMINDEX`,`egepen19`.`dbakses`.`URETICI` AS `URETICI`,`egepen19`.`dbakses`.`GMIN` AS `GMIN`,`egepen19`.`dbakses`.`GMAX` AS `GMAX`,`egepen19`.`dbakses`.`YMIN` AS `YMIN`,`egepen19`.`dbakses`.`YMAX` AS `YMAX`,`egepen19`.`dbakses`.`CKDUSME` AS `CKDUSME`,`egepen19`.`dbakses`.`BALANSY` AS `BALANSY`,`egepen19`.`dbakses`.`BALANSD` AS `BALANSD`,`egepen19`.`dbakses`.`sayac` AS `sayac` from `egepen19`.`dbakses`
+md5=bdb1514f01115c7ae455c472ef85bbca
+updatable=1
+algorithm=0
+definer_user=root
+definer_host=localhost
+suid=2
+with_check_option=0
+timestamp=2022-02-02 12:41:45
+create-version=1
+source=SELECT * FROM DBAKSES
+client_cs_name=latin5
+connection_cl_name=latin5_turkish_ci
+view_body_utf8=select `egepen19`.`dbakses`.`SIRA` AS `SIRA`,`egepen19`.`dbakses`.`STOKKODU` AS `STOKKODU`,`egepen19`.`dbakses`.`ACIKLAMA` AS `ACIKLAMA`,`egepen19`.`dbakses`.`SERIKODU` AS `SERIKODU`,`egepen19`.`dbakses`.`SISTEM` AS `SISTEM`,`egepen19`.`dbakses`.`KOLTIPI` AS `KOLTIPI`,`egepen19`.`dbakses`.`KILITTIPI` AS `KILITTIPI`,`egepen19`.`dbakses`.`KOLRESMI` AS `KOLRESMI`,`egepen19`.`dbakses`.`ACILIMTIPI` AS `ACILIMTIPI`,`egepen19`.`dbakses`.`GRUP` AS `GRUP`,`egepen19`.`dbakses`.`RESIMINDEX` AS `RESIMINDEX`,`egepen19`.`dbakses`.`URETICI` AS `URETICI`,`egepen19`.`dbakses`.`GMIN` AS `GMIN`,`egepen19`.`dbakses`.`GMAX` AS `GMAX`,`egepen19`.`dbakses`.`YMIN` AS `YMIN`,`egepen19`.`dbakses`.`YMAX` AS `YMAX`,`egepen19`.`dbakses`.`CKDUSME` AS `CKDUSME`,`egepen19`.`dbakses`.`BALANSY` AS `BALANSY`,`egepen19`.`dbakses`.`BALANSD` AS `BALANSD`,`egepen19`.`dbakses`.`sayac` AS `sayac` from `egepen19`.`dbakses`

@@ -1,0 +1,15 @@
+TYPE=VIEW
+query=select `egepen19`.`dbpanjurh`.`SERIKODU` AS `SERIKODU`,`egepen19`.`dbpanjurh`.`MARKA` AS `MARKA`,`egepen19`.`dbpanjurh`.`KUTUYUK` AS `KUTUYUK`,`egepen19`.`dbpanjurh`.`ISLEM` AS `ISLEM`,`egepen19`.`dbpanjurh`.`HESAP` AS `HESAP`,`egepen19`.`dbpanjurh`.`ADET` AS `ADET`,`egepen19`.`dbpanjurh`.`BALANSD` AS `BALANSD`,`egepen19`.`dbpanjurh`.`BALANSY` AS `BALANSY`,`egepen19`.`dbpanjurh`.`STOKKODU` AS `STOKKODU`,`egepen19`.`dbpanjurh`.`SIRA` AS `SIRA`,`egepen19`.`dbpanjurh`.`POZISYON` AS `POZISYON`,`egepen19`.`dbpanjurh`.`TOPLAT` AS `TOPLAT`,`egepen19`.`dbpanjurh`.`PALETYUK` AS `PALETYUK`,`egepen19`.`dbpanjurh`.`ARENK` AS `ARENK`,`egepen19`.`dbpanjurh`.`ARENK1` AS `ARENK1`,`egepen19`.`dbpanjurh`.`KAPRENK` AS `KAPRENK`,`egepen19`.`dbpanjurh`.`KAPRENK1` AS `KAPRENK1`,`egepen19`.`dbpanjurh`.`YUZEY` AS `YUZEY`,`egepen19`.`dbpanjurh`.`YUZEY1` AS `YUZEY1`,`egepen19`.`dbpanjurh`.`sayac` AS `sayac`,`egepen19`.`dbpanjurh`.`OTM` AS `OTM` from `egepen19`.`dbpanjurh`
+md5=54720cc753039a052f6ba6f737b9d9e5
+updatable=1
+algorithm=0
+definer_user=root
+definer_host=localhost
+suid=2
+with_check_option=0
+timestamp=2022-06-17 08:38:22
+create-version=1
+source=SELECT * FROM DBPANJURH
+client_cs_name=latin5
+connection_cl_name=latin5_turkish_ci
+view_body_utf8=select `egepen19`.`dbpanjurh`.`SERIKODU` AS `SERIKODU`,`egepen19`.`dbpanjurh`.`MARKA` AS `MARKA`,`egepen19`.`dbpanjurh`.`KUTUYUK` AS `KUTUYUK`,`egepen19`.`dbpanjurh`.`ISLEM` AS `ISLEM`,`egepen19`.`dbpanjurh`.`HESAP` AS `HESAP`,`egepen19`.`dbpanjurh`.`ADET` AS `ADET`,`egepen19`.`dbpanjurh`.`BALANSD` AS `BALANSD`,`egepen19`.`dbpanjurh`.`BALANSY` AS `BALANSY`,`egepen19`.`dbpanjurh`.`STOKKODU` AS `STOKKODU`,`egepen19`.`dbpanjurh`.`SIRA` AS `SIRA`,`egepen19`.`dbpanjurh`.`POZISYON` AS `POZISYON`,`egepen19`.`dbpanjurh`.`TOPLAT` AS `TOPLAT`,`egepen19`.`dbpanjurh`.`PALETYUK` AS `PALETYUK`,`egepen19`.`dbpanjurh`.`ARENK` AS `ARENK`,`egepen19`.`dbpanjurh`.`ARENK1` AS `ARENK1`,`egepen19`.`dbpanjurh`.`KAPRENK` AS `KAPRENK`,`egepen19`.`dbpanjurh`.`KAPRENK1` AS `KAPRENK1`,`egepen19`.`dbpanjurh`.`YUZEY` AS `YUZEY`,`egepen19`.`dbpanjurh`.`YUZEY1` AS `YUZEY1`,`egepen19`.`dbpanjurh`.`sayac` AS `sayac`,`egepen19`.`dbpanjurh`.`OTM` AS `OTM` from `egepen19`.`dbpanjurh`

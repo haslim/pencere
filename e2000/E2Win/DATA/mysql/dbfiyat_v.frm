@@ -1,0 +1,15 @@
+TYPE=VIEW
+query=select `mysql`.`dbfiyat`.`LISTENO` AS `LISTENO`,`mysql`.`dbfiyat`.`STOKKODU` AS `STOKKODU`,`mysql`.`dbfiyat`.`FIYAT1` AS `FIYAT1`,`mysql`.`dbfiyat`.`FIYAT2` AS `FIYAT2`,`mysql`.`dbfiyat`.`FIYAT3` AS `FIYAT3`,`mysql`.`dbfiyat`.`FIYAT4` AS `FIYAT4`,`mysql`.`dbfiyat`.`FIYAT5` AS `FIYAT5`,`mysql`.`dbfiyat`.`FIYAT6` AS `FIYAT6`,`mysql`.`dbfiyat`.`FIYAT7` AS `FIYAT7`,`mysql`.`dbfiyat`.`FIYAT8` AS `FIYAT8`,`mysql`.`dbfiyat`.`FIYAT9` AS `FIYAT9`,`mysql`.`dbfiyat`.`FIYAT10` AS `FIYAT10`,`mysql`.`dbfiyat`.`sayac` AS `sayac` from `mysql`.`dbfiyat`
+md5=2d9ff281480dacc8821c79f2574dff50
+updatable=1
+algorithm=0
+definer_user=root
+definer_host=localhost
+suid=1
+with_check_option=0
+timestamp=2017-04-04 07:57:56
+create-version=1
+source=select `dbfiyat`.`LISTENO` AS `LISTENO`,`dbfiyat`.`STOKKODU` AS `STOKKODU`,`dbfiyat`.`FIYAT1` AS `FIYAT1`,`dbfiyat`.`FIYAT2` AS `FIYAT2`,`dbfiyat`.`FIYAT3` AS `FIYAT3`,`dbfiyat`.`FIYAT4` AS `FIYAT4`,`dbfiyat`.`FIYAT5` AS `FIYAT5`,`dbfiyat`.`FIYAT6` AS `FIYAT6`,`dbfiyat`.`FIYAT7` AS `FIYAT7`,`dbfiyat`.`FIYAT8` AS `FIYAT8`,`dbfiyat`.`FIYAT9` AS `FIYAT9`,`dbfiyat`.`FIYAT10` AS `FIYAT10`,`dbfiyat`.`sayac` AS `sayac` from `dbfiyat`
+client_cs_name=latin5
+connection_cl_name=latin5_turkish_ci
+view_body_utf8=select `mysql`.`dbfiyat`.`LISTENO` AS `LISTENO`,`mysql`.`dbfiyat`.`STOKKODU` AS `STOKKODU`,`mysql`.`dbfiyat`.`FIYAT1` AS `FIYAT1`,`mysql`.`dbfiyat`.`FIYAT2` AS `FIYAT2`,`mysql`.`dbfiyat`.`FIYAT3` AS `FIYAT3`,`mysql`.`dbfiyat`.`FIYAT4` AS `FIYAT4`,`mysql`.`dbfiyat`.`FIYAT5` AS `FIYAT5`,`mysql`.`dbfiyat`.`FIYAT6` AS `FIYAT6`,`mysql`.`dbfiyat`.`FIYAT7` AS `FIYAT7`,`mysql`.`dbfiyat`.`FIYAT8` AS `FIYAT8`,`mysql`.`dbfiyat`.`FIYAT9` AS `FIYAT9`,`mysql`.`dbfiyat`.`FIYAT10` AS `FIYAT10`,`mysql`.`dbfiyat`.`sayac` AS `sayac` from `mysql`.`dbfiyat`

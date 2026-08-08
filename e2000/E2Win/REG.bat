@@ -1,0 +1,1 @@
+REGSVR32 C:\ERCOM\E2WIN\ercom1dopt.dll

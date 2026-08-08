@@ -1,0 +1,15 @@
+TYPE=VIEW
+query=select `egepen23`.`dbpanjurh`.`SERIKODU` AS `SERIKODU`,`egepen23`.`dbpanjurh`.`MARKA` AS `MARKA`,`egepen23`.`dbpanjurh`.`KUTUYUK` AS `KUTUYUK`,`egepen23`.`dbpanjurh`.`ISLEM` AS `ISLEM`,`egepen23`.`dbpanjurh`.`HESAP` AS `HESAP`,`egepen23`.`dbpanjurh`.`ADET` AS `ADET`,`egepen23`.`dbpanjurh`.`BALANSD` AS `BALANSD`,`egepen23`.`dbpanjurh`.`BALANSY` AS `BALANSY`,`egepen23`.`dbpanjurh`.`STOKKODU` AS `STOKKODU`,`egepen23`.`dbpanjurh`.`SIRA` AS `SIRA`,`egepen23`.`dbpanjurh`.`POZISYON` AS `POZISYON`,`egepen23`.`dbpanjurh`.`TOPLAT` AS `TOPLAT`,`egepen23`.`dbpanjurh`.`PALETYUK` AS `PALETYUK`,`egepen23`.`dbpanjurh`.`ARENK` AS `ARENK`,`egepen23`.`dbpanjurh`.`ARENK1` AS `ARENK1`,`egepen23`.`dbpanjurh`.`KAPRENK` AS `KAPRENK`,`egepen23`.`dbpanjurh`.`KAPRENK1` AS `KAPRENK1`,`egepen23`.`dbpanjurh`.`YUZEY` AS `YUZEY`,`egepen23`.`dbpanjurh`.`YUZEY1` AS `YUZEY1`,`egepen23`.`dbpanjurh`.`sayac` AS `sayac`,`egepen23`.`dbpanjurh`.`OTM` AS `OTM` from `egepen23`.`dbpanjurh`
+md5=0135e5e1370e23a39e93ac1babdc83cd
+updatable=1
+algorithm=0
+definer_user=root
+definer_host=localhost
+suid=1
+with_check_option=0
+timestamp=2026-03-26 06:41:12
+create-version=1
+source=select `dbpanjurh`.`SERIKODU` AS `SERIKODU`,`dbpanjurh`.`MARKA` AS `MARKA`,`dbpanjurh`.`KUTUYUK` AS `KUTUYUK`,`dbpanjurh`.`ISLEM` AS `ISLEM`,`dbpanjurh`.`HESAP` AS `HESAP`,`dbpanjurh`.`ADET` AS `ADET`,`dbpanjurh`.`BALANSD` AS `BALANSD`,`dbpanjurh`.`BALANSY` AS `BALANSY`,`dbpanjurh`.`STOKKODU` AS `STOKKODU`,`dbpanjurh`.`SIRA` AS `SIRA`,`dbpanjurh`.`POZISYON` AS `POZISYON`,`dbpanjurh`.`TOPLAT` AS `TOPLAT`,`dbpanjurh`.`PALETYUK` AS `PALETYUK`,`dbpanjurh`.`ARENK` AS `ARENK`,`dbpanjurh`.`ARENK1` AS `ARENK1`,`dbpanjurh`.`KAPRENK` AS `KAPRENK`,`dbpanjurh`.`KAPRENK1` AS `KAPRENK1`,`dbpanjurh`.`YUZEY` AS `YUZEY`,`dbpanjurh`.`YUZEY1` AS `YUZEY1`,`dbpanjurh`.`sayac` AS `sayac`,`dbpanjurh`.`OTM` AS `OTM` from `dbpanjurh`
+client_cs_name=latin5
+connection_cl_name=latin5_turkish_ci
+view_body_utf8=select `egepen23`.`dbpanjurh`.`SERIKODU` AS `SERIKODU`,`egepen23`.`dbpanjurh`.`MARKA` AS `MARKA`,`egepen23`.`dbpanjurh`.`KUTUYUK` AS `KUTUYUK`,`egepen23`.`dbpanjurh`.`ISLEM` AS `ISLEM`,`egepen23`.`dbpanjurh`.`HESAP` AS `HESAP`,`egepen23`.`dbpanjurh`.`ADET` AS `ADET`,`egepen23`.`dbpanjurh`.`BALANSD` AS `BALANSD`,`egepen23`.`dbpanjurh`.`BALANSY` AS `BALANSY`,`egepen23`.`dbpanjurh`.`STOKKODU` AS `STOKKODU`,`egepen23`.`dbpanjurh`.`SIRA` AS `SIRA`,`egepen23`.`dbpanjurh`.`POZISYON` AS `POZISYON`,`egepen23`.`dbpanjurh`.`TOPLAT` AS `TOPLAT`,`egepen23`.`dbpanjurh`.`PALETYUK` AS `PALETYUK`,`egepen23`.`dbpanjurh`.`ARENK` AS `ARENK`,`egepen23`.`dbpanjurh`.`ARENK1` AS `ARENK1`,`egepen23`.`dbpanjurh`.`KAPRENK` AS `KAPRENK`,`egepen23`.`dbpanjurh`.`KAPRENK1` AS `KAPRENK1`,`egepen23`.`dbpanjurh`.`YUZEY` AS `YUZEY`,`egepen23`.`dbpanjurh`.`YUZEY1` AS `YUZEY1`,`egepen23`.`dbpanjurh`.`sayac` AS `sayac`,`egepen23`.`dbpanjurh`.`OTM` AS `OTM` from `egepen23`.`dbpanjurh`

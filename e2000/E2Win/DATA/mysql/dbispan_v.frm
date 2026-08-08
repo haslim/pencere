@@ -1,0 +1,15 @@
+TYPE=VIEW
+query=select `mysql`.`dbispan`.`SERIKODU` AS `SERIKODU`,`mysql`.`dbispan`.`STOKKODU` AS `STOKKODU`,`mysql`.`dbispan`.`SISTEM` AS `SISTEM`,`mysql`.`dbispan`.`ACIKLAMA` AS `ACIKLAMA`,`mysql`.`dbispan`.`GENMIN` AS `GENMIN`,`mysql`.`dbispan`.`GENMAX` AS `GENMAX`,`mysql`.`dbispan`.`YUKMIN` AS `YUKMIN`,`mysql`.`dbispan`.`YUKMAX` AS `YUKMAX`,`mysql`.`dbispan`.`GRUP` AS `GRUP`,`mysql`.`dbispan`.`KOLYERI` AS `KOLYERI`,`mysql`.`dbispan`.`ADET` AS `ADET`,`mysql`.`dbispan`.`URETICI` AS `URETICI`,`mysql`.`dbispan`.`ACILIMYONU` AS `ACILIMYONU`,`mysql`.`dbispan`.`ERCOM` AS `ERCOM`,`mysql`.`dbispan`.`SURGUTIP` AS `SURGUTIP`,`mysql`.`dbispan`.`sayac` AS `sayac`,`mysql`.`dbispan`.`SIRANO` AS `SIRANO` from `mysql`.`dbispan`
+md5=d01060fea722a05b960665a532395768
+updatable=1
+algorithm=0
+definer_user=root
+definer_host=localhost
+suid=1
+with_check_option=0
+timestamp=2017-04-04 07:57:56
+create-version=1
+source=select `dbispan`.`SERIKODU` AS `SERIKODU`,`dbispan`.`STOKKODU` AS `STOKKODU`,`dbispan`.`SISTEM` AS `SISTEM`,`dbispan`.`ACIKLAMA` AS `ACIKLAMA`,`dbispan`.`GENMIN` AS `GENMIN`,`dbispan`.`GENMAX` AS `GENMAX`,`dbispan`.`YUKMIN` AS `YUKMIN`,`dbispan`.`YUKMAX` AS `YUKMAX`,`dbispan`.`GRUP` AS `GRUP`,`dbispan`.`KOLYERI` AS `KOLYERI`,`dbispan`.`ADET` AS `ADET`,`dbispan`.`URETICI` AS `URETICI`,`dbispan`.`ACILIMYONU` AS `ACILIMYONU`,`dbispan`.`ERCOM` AS `ERCOM`,`dbispan`.`SURGUTIP` AS `SURGUTIP`,`dbispan`.`sayac` AS `sayac`,`dbispan`.`SIRANO` AS `SIRANO` from `dbispan`
+client_cs_name=latin5
+connection_cl_name=latin5_turkish_ci
+view_body_utf8=select `mysql`.`dbispan`.`SERIKODU` AS `SERIKODU`,`mysql`.`dbispan`.`STOKKODU` AS `STOKKODU`,`mysql`.`dbispan`.`SISTEM` AS `SISTEM`,`mysql`.`dbispan`.`ACIKLAMA` AS `ACIKLAMA`,`mysql`.`dbispan`.`GENMIN` AS `GENMIN`,`mysql`.`dbispan`.`GENMAX` AS `GENMAX`,`mysql`.`dbispan`.`YUKMIN` AS `YUKMIN`,`mysql`.`dbispan`.`YUKMAX` AS `YUKMAX`,`mysql`.`dbispan`.`GRUP` AS `GRUP`,`mysql`.`dbispan`.`KOLYERI` AS `KOLYERI`,`mysql`.`dbispan`.`ADET` AS `ADET`,`mysql`.`dbispan`.`URETICI` AS `URETICI`,`mysql`.`dbispan`.`ACILIMYONU` AS `ACILIMYONU`,`mysql`.`dbispan`.`ERCOM` AS `ERCOM`,`mysql`.`dbispan`.`SURGUTIP` AS `SURGUTIP`,`mysql`.`dbispan`.`sayac` AS `sayac`,`mysql`.`dbispan`.`SIRANO` AS `SIRANO` from `mysql`.`dbispan`

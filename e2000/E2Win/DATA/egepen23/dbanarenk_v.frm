@@ -1,0 +1,15 @@
+TYPE=VIEW
+query=select `egepen23`.`dbanarenk`.`ANARENK` AS `ANARENK`,`egepen23`.`dbanarenk`.`RENK` AS `RENK`,`egepen23`.`dbanarenk`.`RESIMINDEX` AS `RESIMINDEX`,`egepen23`.`dbanarenk`.`SERIKODU` AS `SERIKODU`,`egepen23`.`dbanarenk`.`RENKNO` AS `RENKNO`,`egepen23`.`dbanarenk`.`sayac` AS `sayac`,`egepen23`.`dbanarenk`.`SIRANO` AS `SIRANO` from `egepen23`.`dbanarenk`
+md5=aa324a1d7b6dd29b3c046330a280b44b
+updatable=1
+algorithm=0
+definer_user=root
+definer_host=localhost
+suid=1
+with_check_option=0
+timestamp=2026-03-26 06:41:12
+create-version=1
+source=select `dbanarenk`.`ANARENK` AS `ANARENK`,`dbanarenk`.`RENK` AS `RENK`,`dbanarenk`.`RESIMINDEX` AS `RESIMINDEX`,`dbanarenk`.`SERIKODU` AS `SERIKODU`,`dbanarenk`.`RENKNO` AS `RENKNO`,`dbanarenk`.`sayac` AS `sayac`,`dbanarenk`.`SIRANO` AS `SIRANO` from `dbanarenk`
+client_cs_name=latin5
+connection_cl_name=latin5_turkish_ci
+view_body_utf8=select `egepen23`.`dbanarenk`.`ANARENK` AS `ANARENK`,`egepen23`.`dbanarenk`.`RENK` AS `RENK`,`egepen23`.`dbanarenk`.`RESIMINDEX` AS `RESIMINDEX`,`egepen23`.`dbanarenk`.`SERIKODU` AS `SERIKODU`,`egepen23`.`dbanarenk`.`RENKNO` AS `RENKNO`,`egepen23`.`dbanarenk`.`sayac` AS `sayac`,`egepen23`.`dbanarenk`.`SIRANO` AS `SIRANO` from `egepen23`.`dbanarenk`

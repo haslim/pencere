@@ -1,0 +1,15 @@
+TYPE=VIEW
+query=select `mysql`.`dbpanjur`.`SERIKODU` AS `SERIKODU`,`mysql`.`dbpanjur`.`STOKKODU` AS `STOKKODU`,`mysql`.`dbpanjur`.`MARKA` AS `MARKA`,`mysql`.`dbpanjur`.`RESIMINDEX` AS `RESIMINDEX`,`mysql`.`dbpanjur`.`SIRA` AS `SIRA`,`mysql`.`dbpanjur`.`PALETYUK` AS `PALETYUK`,`mysql`.`dbpanjur`.`sayac` AS `sayac` from `mysql`.`dbpanjur`
+md5=9e9c57a4cd7445a98ada997f67f60952
+updatable=1
+algorithm=0
+definer_user=root
+definer_host=localhost
+suid=1
+with_check_option=0
+timestamp=2017-04-04 07:57:56
+create-version=1
+source=select `dbpanjur`.`SERIKODU` AS `SERIKODU`,`dbpanjur`.`STOKKODU` AS `STOKKODU`,`dbpanjur`.`MARKA` AS `MARKA`,`dbpanjur`.`RESIMINDEX` AS `RESIMINDEX`,`dbpanjur`.`SIRA` AS `SIRA`,`dbpanjur`.`PALETYUK` AS `PALETYUK`,`dbpanjur`.`sayac` AS `sayac` from `dbpanjur`
+client_cs_name=latin5
+connection_cl_name=latin5_turkish_ci
+view_body_utf8=select `mysql`.`dbpanjur`.`SERIKODU` AS `SERIKODU`,`mysql`.`dbpanjur`.`STOKKODU` AS `STOKKODU`,`mysql`.`dbpanjur`.`MARKA` AS `MARKA`,`mysql`.`dbpanjur`.`RESIMINDEX` AS `RESIMINDEX`,`mysql`.`dbpanjur`.`SIRA` AS `SIRA`,`mysql`.`dbpanjur`.`PALETYUK` AS `PALETYUK`,`mysql`.`dbpanjur`.`sayac` AS `sayac` from `mysql`.`dbpanjur`

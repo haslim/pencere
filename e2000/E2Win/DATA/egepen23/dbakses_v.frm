@@ -1,0 +1,15 @@
+TYPE=VIEW
+query=select `egepen23`.`dbakses`.`SIRA` AS `SIRA`,`egepen23`.`dbakses`.`STOKKODU` AS `STOKKODU`,`egepen23`.`dbakses`.`ACIKLAMA` AS `ACIKLAMA`,`egepen23`.`dbakses`.`SERIKODU` AS `SERIKODU`,`egepen23`.`dbakses`.`SISTEM` AS `SISTEM`,`egepen23`.`dbakses`.`KOLTIPI` AS `KOLTIPI`,`egepen23`.`dbakses`.`KILITTIPI` AS `KILITTIPI`,`egepen23`.`dbakses`.`KOLRESMI` AS `KOLRESMI`,`egepen23`.`dbakses`.`ACILIMTIPI` AS `ACILIMTIPI`,`egepen23`.`dbakses`.`GRUP` AS `GRUP`,`egepen23`.`dbakses`.`RESIMINDEX` AS `RESIMINDEX`,`egepen23`.`dbakses`.`URETICI` AS `URETICI`,`egepen23`.`dbakses`.`GMIN` AS `GMIN`,`egepen23`.`dbakses`.`GMAX` AS `GMAX`,`egepen23`.`dbakses`.`YMIN` AS `YMIN`,`egepen23`.`dbakses`.`YMAX` AS `YMAX`,`egepen23`.`dbakses`.`CKDUSME` AS `CKDUSME`,`egepen23`.`dbakses`.`BALANSY` AS `BALANSY`,`egepen23`.`dbakses`.`BALANSD` AS `BALANSD`,`egepen23`.`dbakses`.`sayac` AS `sayac` from `egepen23`.`dbakses`
+md5=bff1d5cb91c5735b839da9a3c4a63f1b
+updatable=1
+algorithm=0
+definer_user=root
+definer_host=localhost
+suid=1
+with_check_option=0
+timestamp=2026-03-26 06:41:12
+create-version=1
+source=select `dbakses`.`SIRA` AS `SIRA`,`dbakses`.`STOKKODU` AS `STOKKODU`,`dbakses`.`ACIKLAMA` AS `ACIKLAMA`,`dbakses`.`SERIKODU` AS `SERIKODU`,`dbakses`.`SISTEM` AS `SISTEM`,`dbakses`.`KOLTIPI` AS `KOLTIPI`,`dbakses`.`KILITTIPI` AS `KILITTIPI`,`dbakses`.`KOLRESMI` AS `KOLRESMI`,`dbakses`.`ACILIMTIPI` AS `ACILIMTIPI`,`dbakses`.`GRUP` AS `GRUP`,`dbakses`.`RESIMINDEX` AS `RESIMINDEX`,`dbakses`.`URETICI` AS `URETICI`,`dbakses`.`GMIN` AS `GMIN`,`dbakses`.`GMAX` AS `GMAX`,`dbakses`.`YMIN` AS `YMIN`,`dbakses`.`YMAX` AS `YMAX`,`dbakses`.`CKDUSME` AS `CKDUSME`,`dbakses`.`BALANSY` AS `BALANSY`,`dbakses`.`BALANSD` AS `BALANSD`,`dbakses`.`sayac` AS `sayac` from `dbakses`
+client_cs_name=latin5
+connection_cl_name=latin5_turkish_ci
+view_body_utf8=select `egepen23`.`dbakses`.`SIRA` AS `SIRA`,`egepen23`.`dbakses`.`STOKKODU` AS `STOKKODU`,`egepen23`.`dbakses`.`ACIKLAMA` AS `ACIKLAMA`,`egepen23`.`dbakses`.`SERIKODU` AS `SERIKODU`,`egepen23`.`dbakses`.`SISTEM` AS `SISTEM`,`egepen23`.`dbakses`.`KOLTIPI` AS `KOLTIPI`,`egepen23`.`dbakses`.`KILITTIPI` AS `KILITTIPI`,`egepen23`.`dbakses`.`KOLRESMI` AS `KOLRESMI`,`egepen23`.`dbakses`.`ACILIMTIPI` AS `ACILIMTIPI`,`egepen23`.`dbakses`.`GRUP` AS `GRUP`,`egepen23`.`dbakses`.`RESIMINDEX` AS `RESIMINDEX`,`egepen23`.`dbakses`.`URETICI` AS `URETICI`,`egepen23`.`dbakses`.`GMIN` AS `GMIN`,`egepen23`.`dbakses`.`GMAX` AS `GMAX`,`egepen23`.`dbakses`.`YMIN` AS `YMIN`,`egepen23`.`dbakses`.`YMAX` AS `YMAX`,`egepen23`.`dbakses`.`CKDUSME` AS `CKDUSME`,`egepen23`.`dbakses`.`BALANSY` AS `BALANSY`,`egepen23`.`dbakses`.`BALANSD` AS `BALANSD`,`egepen23`.`dbakses`.`sayac` AS `sayac` from `egepen23`.`dbakses`

@@ -1,0 +1,15 @@
+TYPE=VIEW
+query=select `egepen16y`.`dbanarenk`.`ANARENK` AS `ANARENK`,`egepen16y`.`dbanarenk`.`RENK` AS `RENK`,`egepen16y`.`dbanarenk`.`RESIMINDEX` AS `RESIMINDEX`,`egepen16y`.`dbanarenk`.`SERIKODU` AS `SERIKODU`,`egepen16y`.`dbanarenk`.`RENKNO` AS `RENKNO`,`egepen16y`.`dbanarenk`.`sayac` AS `sayac` from `egepen16y`.`dbanarenk`
+md5=254aa6ee50b8a413199ff8308abfb437
+updatable=1
+algorithm=0
+definer_user=root
+definer_host=localhost
+suid=2
+with_check_option=0
+timestamp=2018-09-06 08:31:24
+create-version=1
+source=SELECT * FROM DBANARENK
+client_cs_name=latin5
+connection_cl_name=latin5_turkish_ci
+view_body_utf8=select `egepen16y`.`dbanarenk`.`ANARENK` AS `ANARENK`,`egepen16y`.`dbanarenk`.`RENK` AS `RENK`,`egepen16y`.`dbanarenk`.`RESIMINDEX` AS `RESIMINDEX`,`egepen16y`.`dbanarenk`.`SERIKODU` AS `SERIKODU`,`egepen16y`.`dbanarenk`.`RENKNO` AS `RENKNO`,`egepen16y`.`dbanarenk`.`sayac` AS `sayac` from `egepen16y`.`dbanarenk`

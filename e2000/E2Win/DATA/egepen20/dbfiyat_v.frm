@@ -1,0 +1,15 @@
+TYPE=VIEW
+query=select `egepen20`.`dbfiyat`.`LISTENO` AS `LISTENO`,`egepen20`.`dbfiyat`.`STOKKODU` AS `STOKKODU`,`egepen20`.`dbfiyat`.`FIYAT1` AS `FIYAT1`,`egepen20`.`dbfiyat`.`FIYAT2` AS `FIYAT2`,`egepen20`.`dbfiyat`.`FIYAT3` AS `FIYAT3`,`egepen20`.`dbfiyat`.`FIYAT4` AS `FIYAT4`,`egepen20`.`dbfiyat`.`FIYAT5` AS `FIYAT5`,`egepen20`.`dbfiyat`.`FIYAT6` AS `FIYAT6`,`egepen20`.`dbfiyat`.`FIYAT7` AS `FIYAT7`,`egepen20`.`dbfiyat`.`FIYAT8` AS `FIYAT8`,`egepen20`.`dbfiyat`.`FIYAT9` AS `FIYAT9`,`egepen20`.`dbfiyat`.`FIYAT10` AS `FIYAT10`,`egepen20`.`dbfiyat`.`DOVIZ` AS `DOVIZ`,`egepen20`.`dbfiyat`.`sayac` AS `sayac` from `egepen20`.`dbfiyat`
+md5=6f9b2eed8bd7cf01f481739a48e5e4ef
+updatable=1
+algorithm=0
+definer_user=root
+definer_host=localhost
+suid=2
+with_check_option=0
+timestamp=2022-02-02 12:41:17
+create-version=1
+source=SELECT * FROM DBFIYAT
+client_cs_name=latin5
+connection_cl_name=latin5_turkish_ci
+view_body_utf8=select `egepen20`.`dbfiyat`.`LISTENO` AS `LISTENO`,`egepen20`.`dbfiyat`.`STOKKODU` AS `STOKKODU`,`egepen20`.`dbfiyat`.`FIYAT1` AS `FIYAT1`,`egepen20`.`dbfiyat`.`FIYAT2` AS `FIYAT2`,`egepen20`.`dbfiyat`.`FIYAT3` AS `FIYAT3`,`egepen20`.`dbfiyat`.`FIYAT4` AS `FIYAT4`,`egepen20`.`dbfiyat`.`FIYAT5` AS `FIYAT5`,`egepen20`.`dbfiyat`.`FIYAT6` AS `FIYAT6`,`egepen20`.`dbfiyat`.`FIYAT7` AS `FIYAT7`,`egepen20`.`dbfiyat`.`FIYAT8` AS `FIYAT8`,`egepen20`.`dbfiyat`.`FIYAT9` AS `FIYAT9`,`egepen20`.`dbfiyat`.`FIYAT10` AS `FIYAT10`,`egepen20`.`dbfiyat`.`DOVIZ` AS `DOVIZ`,`egepen20`.`dbfiyat`.`sayac` AS `sayac` from `egepen20`.`dbfiyat`
