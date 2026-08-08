@@ -465,6 +465,7 @@ export default function OrderSummaryPage() {
                 <thead className="bg-slate-100 text-slate-600 font-mono border-b border-slate-200">
                   <tr>
                     <th className="p-2.5">#</th>
+                    <th className="p-2.5">Stok Kodu</th>
                     <th className="p-2.5">Kategori</th>
                     <th className="p-2.5">Malzeme & Aksesuar Tanımı</th>
                     <th className="p-2.5 text-center">Birim</th>
@@ -480,6 +481,9 @@ export default function OrderSummaryPage() {
                     return (
                       <tr key={acc.id + aIdx} className="hover:bg-slate-50">
                         <td className="p-2.5 text-slate-400 font-mono">{aIdx + 1}</td>
+                        <td className="p-2.5 font-bold text-blue-700 font-mono">
+                          [{acc.code || "10000"}]
+                        </td>
                         <td className="p-2.5">
                           <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200">
                             {acc.category}
@@ -502,12 +506,13 @@ export default function OrderSummaryPage() {
                 </tbody>
                 <tfoot className="bg-slate-100 font-bold border-t border-slate-200 text-slate-900 font-mono">
                   <tr>
-                    <td colSpan={6} className="p-2.5 text-right font-sans">TOPLAM AKSESUAR TUTARI:</td>
+                    <td colSpan={7} className="p-2.5 text-right font-sans">TOPLAM AKSESUAR TUTARI:</td>
                     <td className="p-2.5 text-right text-blue-700 text-sm">
                       {convertPrice(orderSummary.totalAccessoryCostTL).toLocaleString("tr-TR")} {getSymbol()}
                     </td>
                   </tr>
                 </tfoot>
+
               </table>
             </div>
           </div>

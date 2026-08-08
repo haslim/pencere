@@ -307,8 +307,11 @@ export default function CutListPage() {
             {groupedCutPieces.map((piece, idx) => (
               <div key={idx} className="bg-slate-950 border border-slate-800 rounded-xl p-4 space-y-2 font-mono text-xs text-slate-300">
                 <div className="flex justify-between border-b border-slate-800 pb-2">
-                  <span className="font-bold text-white">{piece.label}</span>
-                  <span className="text-cyan-400 font-bold">{piece.length} mm</span>
+                  <div>
+                    <span className="text-[10px] text-blue-400 font-bold block">[{piece.code || "10000"}]</span>
+                    <span className="font-bold text-white">{piece.label}</span>
+                  </div>
+                  <span className="text-cyan-400 font-bold text-sm">{piece.length} mm</span>
                 </div>
                 <div className="flex justify-between text-[11px]">
                   <span>Tip: {piece.type}</span>
@@ -322,6 +325,7 @@ export default function CutListPage() {
             ))}
           </div>
         )}
+
       </main>
     </div>
   );

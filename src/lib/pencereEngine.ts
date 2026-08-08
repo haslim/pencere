@@ -167,6 +167,7 @@ export interface WindowItem {
 
 export interface CutPiece {
   id: string;
+  code: string; // Egepen / E2000 Stok Kodu (örn. 11400, 11760, 12660, 13060)
   label: string;
   type: "KASA" | "KANAT" | "KAPI_KANADI" | "ORTA_KAYIT" | "DESTEK_SACI" | "CITA" | "ALUMINYUM_ESIK";
   length: number; // mm
@@ -207,6 +208,7 @@ export interface Order {
 
 export interface AccessoryItem {
   id: string;
+  code: string; // Egepen / Donanım Stok Kodu (örn. 13185, 13186, 10578, 12082)
   name: string;
   category: "DONANIM" | "MENTESE" | "CONTA_FITIL" | "TAKAZ_BAGLANTI" | "SARF_MALZEME";
   unit: "ADET" | "TAKIM" | "METRE";
@@ -214,6 +216,62 @@ export interface AccessoryItem {
   unitPriceTL: number;
   totalPriceTL: number;
 }
+
+export interface ItemCatalogEntry {
+  code: string;
+  name: string;
+  category: "PROFIL" | "DESTEK_SACI" | "CITA" | "DONANIM" | "MENTESE" | "CONTA_FITIL" | "AKSESUAR";
+  unit: "METRE" | "ADET" | "TAKIM" | "KG";
+  unitPriceTL: number;
+}
+
+export const DEFAULT_ITEM_PRICE_CATALOG: Record<string, ItemCatalogEntry> = {
+  // --- ZENDOW 70mm PROFİLLER ---
+  "11400": { code: "11400", name: "Zendow 70mm L Kasa Profili", category: "PROFIL", unit: "METRE", unitPriceTL: 308.65 },
+  "11402": { code: "11402", name: "Zendow 70mm Z Kasa Profili", category: "PROFIL", unit: "METRE", unitPriceTL: 327.84 },
+  "11405": { code: "11405", name: "Zendow 70mm Pencere Kanadı Profili", category: "PROFIL", unit: "METRE", unitPriceTL: 318.50 },
+  "11412": { code: "11412", name: "Zendow 70mm Kapı Kanadı Profili", category: "PROFIL", unit: "METRE", unitPriceTL: 420.00 },
+  "11409": { code: "11409", name: "Zendow 70mm T Orta Kayıt Profili", category: "PROFIL", unit: "METRE", unitPriceTL: 312.00 },
+
+  // --- LEGEND 80mm & LEGEND ART PROFİLLER ---
+  "11760": { code: "11760", name: "Legend 80mm L Kasa Profili", category: "PROFIL", unit: "METRE", unitPriceTL: 322.51 },
+  "11762": { code: "11762", name: "Legend Art 80mm L Kasa Profili", category: "PROFIL", unit: "METRE", unitPriceTL: 265.66 },
+  "11765": { code: "11765", name: "Legend 80mm Pencere Kanadı Profili", category: "PROFIL", unit: "METRE", unitPriceTL: 335.00 },
+  "11770": { code: "11770", name: "Legend 80mm Kapı Kanadı Profili", category: "PROFIL", unit: "METRE", unitPriceTL: 445.00 },
+  "11768": { code: "11768", name: "Legend 80mm T Orta Kayıt Profili", category: "PROFIL", unit: "METRE", unitPriceTL: 330.00 },
+
+  // --- SÜRME PROFİLLERİ ---
+  "12660": { code: "12660", name: "Sürme 2 Raylı Kasa Profili", category: "PROFIL", unit: "METRE", unitPriceTL: 268.37 },
+  "12662": { code: "12662", name: "Sürme 3 Raylı Kasa Profili", category: "PROFIL", unit: "METRE", unitPriceTL: 310.00 },
+  "12661": { code: "12661", name: "Sürme Seri Kanat Profili", category: "PROFIL", unit: "METRE", unitPriceTL: 285.00 },
+  "12663": { code: "12663", name: "Sürme Seri Orta Kayıt Profili", category: "PROFIL", unit: "METRE", unitPriceTL: 275.00 },
+  "11460": { code: "11460", name: "Legend Plus / Slide Sürme Kasa Profili", category: "PROFIL", unit: "METRE", unitPriceTL: 466.59 },
+
+  // --- CAM ÇITALARI ---
+  "12641": { code: "12641", name: "Dekoratif Cam Çıtası 20mm", category: "CITA", unit: "METRE", unitPriceTL: 45.00 },
+  "12648": { code: "12648", name: "Çift Cam Çıtası 28mm", category: "CITA", unit: "METRE", unitPriceTL: 48.00 },
+  "12650": { code: "12650", name: "Üçlü Cam Çıtası 32mm", category: "CITA", unit: "METRE", unitPriceTL: 52.00 },
+
+  // --- DESTEK SACLARI ---
+  "13060": { code: "13060", name: "Kasa Galvaniz Destek Sacı (1.2mm)", category: "DESTEK_SACI", unit: "METRE", unitPriceTL: 65.00 },
+  "13061": { code: "13061", name: "Kanat Galvaniz Destek Sacı (1.5mm)", category: "DESTEK_SACI", unit: "METRE", unitPriceTL: 78.00 },
+  "13066": { code: "13066", name: "Orta Kayıt Galvaniz Destek Sacı (1.5mm)", category: "DESTEK_SACI", unit: "METRE", unitPriceTL: 78.00 },
+  "13064": { code: "13064", name: "Ağır Kapı Galvaniz Sacı (2.0mm)", category: "DESTEK_SACI", unit: "METRE", unitPriceTL: 105.00 },
+
+  // --- DONANIM & AKSESUARLAR ---
+  "13185": { code: "13185", name: "Tek Açılım İspanyolet & Karşılık Seti", category: "DONANIM", unit: "TAKIM", unitPriceTL: 280.00 },
+  "13186": { code: "13186", name: "Egepen Çift Açılım İspanyolet, Makas Seti", category: "DONANIM", unit: "TAKIM", unitPriceTL: 550.00 },
+  "13187": { code: "13187", name: "Vasistas Makas & Çarpma Kilit Seti", category: "DONANIM", unit: "TAKIM", unitPriceTL: 280.00 },
+  "13162": { code: "13162", name: "Egepen Kilitli Kapı İspanyoleti & Kol Seti", category: "DONANIM", unit: "TAKIM", unitPriceTL: 850.00 },
+  "13163": { code: "13163", name: "Sürme Seri Ayarlı Rulman Takımı", category: "DONANIM", unit: "TAKIM", unitPriceTL: 420.00 },
+  "13110": { code: "13110", name: "Sürme Kanat Stoper & Kenet Takozu", category: "DONANIM", unit: "ADET", unitPriceTL: 45.00 },
+  "12082": { code: "12082", name: "Pencere / Kapı Menteşesi (75-90mm)", category: "MENTESE", unit: "ADET", unitPriceTL: 35.00 },
+  "10578": { code: "10578", name: "EPDM Kauçuk Kasa/Kanat Contası / Kıl Fitil", category: "CONTA_FITIL", unit: "METRE", unitPriceTL: 12.00 },
+  "13135": { code: "13135", name: "Orta Kayıt Bağlantı Takozu & Vidası", category: "AKSESUAR", unit: "ADET", unitPriceTL: 18.00 },
+  "13165": { code: "13165", name: "Cam Ayar Takozu Seti", category: "AKSESUAR", unit: "ADET", unitPriceTL: 6.00 },
+  "13514": { code: "13514", name: "Dış Kasa Su Tahliye Slot Kapağı", category: "AKSESUAR", unit: "ADET", unitPriceTL: 8.00 },
+};
+
 
 export interface CostBreakdown {
   profileCostTL: number;
@@ -329,10 +387,16 @@ export function calculateWindowDimensions(
   const glasses: GlassCut[] = [];
 
 
-  if (isEsikli) {
+  const kasaCode = isSurme ? "12660" : systemType === "EGEPEN_ZENDOW" ? "11400" : "11760";
+  const mullionCode = isSurme ? "12663" : systemType === "EGEPEN_ZENDOW" ? "11409" : "11768";
+  const windowSashCode = systemType === "EGEPEN_ZENDOW" ? "11405" : "11765";
+  const doorSashCode = systemType === "EGEPEN_ZENDOW" ? "11412" : "11770";
+  const slidingSashCode = "12661";
 
+  if (isEsikli) {
     cutPieces.push({
       id: "kasa-ust",
+      code: kasaCode,
       label: "Kasa Üst Profili (L Kasa)",
       type: "KASA",
       length: Math.round(kasaEnLength),
@@ -345,6 +409,7 @@ export function calculateWindowDimensions(
     });
     cutPieces.push({
       id: "kasa-yan",
+      code: kasaCode,
       label: "Kasa Yan Profilleri (L Kasa)",
       type: "KASA",
       length: Math.round(kasaBoyLength),
@@ -357,6 +422,7 @@ export function calculateWindowDimensions(
     });
     cutPieces.push({
       id: "kasa-alt-esik",
+      code: "13514",
       label: "Alt Alüminyum Kapı Eşiği",
       type: "ALUMINYUM_ESIK",
       length: Math.round(width - 12),
@@ -370,6 +436,7 @@ export function calculateWindowDimensions(
   } else {
     cutPieces.push({
       id: "kasa-en",
+      code: kasaCode,
       label: `${kasaLabel} (En)`,
       type: "KASA",
       length: Math.round(kasaEnLength),
@@ -382,6 +449,7 @@ export function calculateWindowDimensions(
     });
     cutPieces.push({
       id: "kasa-boy",
+      code: kasaCode,
       label: `${kasaLabel} (Boy)`,
       type: "KASA",
       length: Math.round(kasaBoyLength),
@@ -397,6 +465,7 @@ export function calculateWindowDimensions(
   // Kasa Destek Sacları
   cutPieces.push({
     id: "kasa-en-sac",
+    code: "13060",
     label: "Kasa En Destek Sacı",
     type: "DESTEK_SACI",
     length: Math.round(width - steelShortage),
@@ -408,6 +477,7 @@ export function calculateWindowDimensions(
   });
   cutPieces.push({
     id: "kasa-boy-sac",
+    code: "13060",
     label: "Kasa Boy Destek Sacı",
     type: "DESTEK_SACI",
     length: Math.round(height - steelShortage),
@@ -434,6 +504,7 @@ export function calculateWindowDimensions(
     const dikeyBoy = netInternalH + 4;
     cutPieces.push({
       id: "dikey-orta-kayit",
+      code: mullionCode,
       label: "Kasa Dikey Orta Kayıt",
       type: "ORTA_KAYIT",
       length: Math.round(dikeyBoy),
@@ -446,6 +517,7 @@ export function calculateWindowDimensions(
     });
     cutPieces.push({
       id: "dikey-orta-kayit-sac",
+      code: "13066",
       label: "Dikey Kayıt Destek Sacı",
       type: "DESTEK_SACI",
       length: Math.round(dikeyBoy - steelShortage),
@@ -468,6 +540,7 @@ export function calculateWindowDimensions(
 
       cutPieces.push({
         id: `yatay-orta-kayit-col-${c}`,
+        code: mullionCode,
         label: `Kasa Yatay Orta Kayıt (Bölüm ${c + 1})`,
         type: "ORTA_KAYIT",
         length: Math.round(colW + 4),
@@ -481,6 +554,7 @@ export function calculateWindowDimensions(
 
       cutPieces.push({
         id: `yatay-orta-kayit-sac-col-${c}`,
+        code: "13066",
         label: `Yatay Kayıt Destek Sacı (Bölüm ${c + 1})`,
         type: "DESTEK_SACI",
         length: Math.round(colW + 4 - steelShortage),
@@ -507,11 +581,9 @@ export function calculateWindowDimensions(
         sashHorizontalMullions: 0,
       };
       const divType = div.type;
-      // Sürme sistem seçildiyse kanat profili otomatik tek tip Sürme Kanadı (SURME_KANAD) olur
       const sashProf = isSurme
         ? "SURME_KANAD"
         : div.sashProfileType || (divType.includes("kapi") ? "KAPI_KANADI" : divType.includes("surme") ? "SURME_KANAD" : "PENCERE_KANADI");
-
 
       const colLeft = c === 0 ? KASA_GENISLIGI : vPositions[c - 1] + ORTA_KAYIT_GENISLIGI / 2;
       const colRight = c === verticalMullionsCount ? width - KASA_GENISLIGI : vPositions[c] - ORTA_KAYIT_GENISLIGI / 2;
@@ -537,6 +609,7 @@ export function calculateWindowDimensions(
 
         cutPieces.push({
           id: `cita-en-${divIdx}`,
+          code: "12648",
           label: `Bölme ${divIdx + 1} Sabit Çıta (En)`,
           type: "CITA",
           length: Math.round(glassW + 10),
@@ -548,6 +621,7 @@ export function calculateWindowDimensions(
         });
         cutPieces.push({
           id: `cita-boy-${divIdx}`,
+          code: "12648",
           label: `Bölme ${divIdx + 1} Sabit Çıta (Boy)`,
           type: "CITA",
           length: Math.round(glassH + 10),
@@ -561,6 +635,8 @@ export function calculateWindowDimensions(
         const isDoorSash = sashProf === "KAPI_KANADI" || divType.includes("kapi");
         const isSlidingSash = sashProf === "SURME_KANAD" || divType.includes("surme");
 
+        const targetSashCode = isDoorSash ? doorSashCode : isSlidingSash ? slidingSashCode : windowSashCode;
+
         const kanatOverlap = isDoorSash ? sashOverlap + 6 : sashOverlap;
         const kanatEn = sectionW + kanatOverlap + weldAllowance * 2;
         const kanatBoy = sectionH + kanatOverlap + weldAllowance * 2;
@@ -573,6 +649,7 @@ export function calculateWindowDimensions(
 
         cutPieces.push({
           id: `kanat-en-${divIdx}`,
+          code: targetSashCode,
           label: `Bölme ${divIdx + 1} ${kanatLabel} (En)`,
           type: isDoorSash ? "KAPI_KANADI" : "KANAT",
           length: Math.round(kanatEn),
@@ -586,6 +663,7 @@ export function calculateWindowDimensions(
 
         cutPieces.push({
           id: `kanat-boy-${divIdx}`,
+          code: targetSashCode,
           label: `Bölme ${divIdx + 1} ${kanatLabel} (Boy)`,
           type: isDoorSash ? "KAPI_KANADI" : "KANAT",
           length: Math.round(kanatBoy),
@@ -606,6 +684,7 @@ export function calculateWindowDimensions(
         if (sVert > 0) {
           cutPieces.push({
             id: `kanat-ici-dikey-${divIdx}`,
+            code: mullionCode,
             label: `Bölme ${divIdx + 1} Kanat İçi Dikey Kayıt`,
             type: "ORTA_KAYIT",
             length: Math.round(sashInnerH + 4),
@@ -622,6 +701,7 @@ export function calculateWindowDimensions(
             (sashInnerW - sVert * ORTA_KAYIT_GENISLIGI) / (sVert + 1) + 4;
           cutPieces.push({
             id: `kanat-ici-yatay-${divIdx}`,
+            code: mullionCode,
             label: `Bölme ${divIdx + 1} Kanat İçi Yatay Kayıt`,
             type: "ORTA_KAYIT",
             length: Math.round(kanatYatayBoy),
@@ -766,6 +846,7 @@ export function calculateAccessoryList(
   if (singleTurnCount > 0) {
     accessories.push({
       id: "acc-tek-acilim",
+      code: "13185",
       name: "Tek Açılım İspanyolet & Karşılık Seti",
       category: "DONANIM",
       unit: "TAKIM",
@@ -778,6 +859,7 @@ export function calculateAccessoryList(
   if (doubleTurnCount > 0) {
     accessories.push({
       id: "acc-cift-acilim",
+      code: "13186",
       name: "Egepen Çift Açılım İspanyolet, Makas & Eğim Seti",
       category: "DONANIM",
       unit: "TAKIM",
@@ -790,6 +872,7 @@ export function calculateAccessoryList(
   if (vasistasCount > 0) {
     accessories.push({
       id: "acc-vasistas",
+      code: "13187",
       name: "Vasistas Makas & Çarpma Kilit Seti",
       category: "DONANIM",
       unit: "TAKIM",
@@ -802,6 +885,7 @@ export function calculateAccessoryList(
   if (doorCount > 0) {
     accessories.push({
       id: "acc-kapi-kilit",
+      code: "13162",
       name: "Egepen Kilitli Kapı İspanyoleti, Alüminyum Kol & Barel Seti",
       category: "DONANIM",
       unit: "TAKIM",
@@ -814,6 +898,7 @@ export function calculateAccessoryList(
   if (slidingCount > 0) {
     accessories.push({
       id: "acc-surme-tekerlek",
+      code: "13163",
       name: "Sürme Seri Ayarlı Rulman & Tekerlek Takımı",
       category: "DONANIM",
       unit: "TAKIM",
@@ -823,6 +908,7 @@ export function calculateAccessoryList(
     });
     accessories.push({
       id: "acc-surme-stoper",
+      code: "13110",
       name: "Sürme Kanat Stoper & Kenet Takozu Seti",
       category: "DONANIM",
       unit: "ADET",
@@ -835,6 +921,7 @@ export function calculateAccessoryList(
   if (totalHinges > 0) {
     accessories.push({
       id: "acc-mentese",
+      code: "12082",
       name: doorCount > 0 ? "Ağır Seri Kapı / Pencere Menteşesi (75mm-90mm)" : "Pencere Menteşesi (75mm)",
       category: "MENTESE",
       unit: "ADET",
@@ -850,6 +937,7 @@ export function calculateAccessoryList(
 
   accessories.push({
     id: "acc-epdm-gasket",
+    code: "10578",
     name: item.systemType?.includes("SURME") ? "Sürme Kıl Fitili & Cam Contası" : "EPDM Kauçuk Kasa & Kanat Contası (Siyah/Gri)",
     category: "CONTA_FITIL",
     unit: "METRE",
@@ -862,6 +950,7 @@ export function calculateAccessoryList(
   if (mullionCount > 0) {
     accessories.push({
       id: "acc-kayit-takozu",
+      code: "13135",
       name: "Orta Kayıt Bağlantı Takozu & Vidası",
       category: "TAKAZ_BAGLANTI",
       unit: "ADET",
@@ -874,6 +963,7 @@ export function calculateAccessoryList(
   const totalGlassCount = divisions.length;
   accessories.push({
     id: "acc-cam-takozu",
+    code: "13165",
     name: "Ağır Yük Cam Ayar Takozu Seti",
     category: "TAKAZ_BAGLANTI",
     unit: "ADET",
@@ -884,6 +974,7 @@ export function calculateAccessoryList(
 
   accessories.push({
     id: "acc-su-kapak",
+    code: "13514",
     name: "Dış Kasa Alt Su Tahliye Slot Kapağı",
     category: "SARF_MALZEME",
     unit: "ADET",
