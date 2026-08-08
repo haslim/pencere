@@ -126,7 +126,10 @@ export const WindowCanvas: React.FC<WindowCanvasProps> = ({
   const canvasW = Math.round(width * scale);
   const canvasH = Math.round(height * scale);
 
-  const PROFILE_THICKNESS = Math.max(14, Math.round(18 * scale * 4));
+  // Gerçekçi Milimetrik Profil Kalınlığı (60mm Kasa / Kayıt)
+  const KASA_MM = 60;
+  const PROFILE_THICKNESS = Math.max(8, Math.round(KASA_MM * scale));
+
 
   const colCount = verticalMullionsCount + 1;
   const rowCount = horizontalMullionsCount + 1;
@@ -797,9 +800,10 @@ export const WindowCanvas: React.FC<WindowCanvasProps> = ({
                 const isDoor = sashProf === "KAPI_KANADI" || divType.includes("kapi");
                 const isSliding = sashProf === "SURME_KANAD" || divType.includes("surme") || isSurme;
 
-                // Kanat Profil Kalınlığı (Görsel Et Kalınlığı Payı):
-                // Sabit cam: 4px, Pencere Kanadı: 16px, Kapı & Sürme Kanadı: 26px (Çok belirgin et kalınlığı)
-                const SASH_MARGIN = divType === "sabit" ? 5 : (isDoor || isSliding) ? 26 : 16;
+                // Gerçekçi Milimetrik Kanat Genişlikleri:
+                // Pencere Kanadı: 60mm | Kapı & Sürme Kanadı: 90mm
+                const sashWidthMM = (isDoor || isSliding) ? 90 : 60;
+                const SASH_MARGIN = divType === "sabit" ? Math.round(10 * scale) : Math.max(6, Math.round(sashWidthMM * scale * 0.35));
 
                 const sVert = div.sashVerticalMullions || 0;
                 const sHoriz = div.sashHorizontalMullions || 0;
@@ -820,7 +824,7 @@ export const WindowCanvas: React.FC<WindowCanvasProps> = ({
                     className="cursor-pointer"
                   >
 
-                    {/* Kanat Çerçevesi (Etli Profil Görünümü) */}
+                    {/* Kanat Çerçevesi (Gerçekçi Etli Profil Çizimi) */}
                     {divType !== "sabit" && (
                       <rect
                         x={startX + 2}
@@ -829,10 +833,11 @@ export const WindowCanvas: React.FC<WindowCanvasProps> = ({
                         height={Math.max(10, sectionH - 4)}
                         fill={color.hex}
                         stroke={isDoor || isSliding ? "#0f172a" : isDark ? "#1e293b" : "#334155"}
-                        strokeWidth={(isDoor || isSliding) ? "4.5" : "3"}
+                        strokeWidth={(isDoor || isSliding) ? "4" : "2.5"}
                         rx="3"
                       />
                     )}
+
 
 
                     {/* Isıcam Cam Alanı */}
