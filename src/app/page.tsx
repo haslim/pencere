@@ -656,15 +656,16 @@ export default function SaaSWindowDashboard() {
       </header>
 
       {/* Main Workspace Layout */}
-      <main className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6 p-4 sm:p-6 max-w-[1600px] w-full mx-auto">
+      <main className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6 p-4 sm:p-6 max-w-[1800px] w-full mx-auto">
         {/* Sol Kontrol Paneli */}
         <div
-          className={`lg:col-span-4 border rounded-2xl p-5 sm:p-6 flex flex-col gap-6 shadow-xl backdrop-blur-sm transition-colors ${
+          className={`lg:col-span-4 xl:col-span-3 border rounded-2xl p-5 sm:p-6 flex flex-col gap-6 shadow-xl backdrop-blur-sm transition-colors h-fit ${
             isDark
               ? "bg-slate-900/80 border-slate-800 text-slate-100 shadow-slate-950/50"
               : "bg-white/90 border-slate-200/80 text-slate-900 shadow-slate-200/50"
           }`}
         >
+
           <div>
             <h2
               className={`text-md font-bold flex items-center gap-2 pb-3 border-b ${
@@ -915,7 +916,8 @@ export default function SaaSWindowDashboard() {
           </div>
 
         {/* Sağ Çizim ve Poz Seçim Paneli */}
-        <div className="lg:col-span-8 flex flex-col gap-6">
+        <div className="lg:col-span-8 xl:col-span-9 flex flex-col gap-6">
+
           <div
             className={`border rounded-2xl p-3 shadow-md backdrop-blur-sm flex flex-wrap items-center justify-between gap-3 transition-colors ${
               isDark

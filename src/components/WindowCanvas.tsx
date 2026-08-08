@@ -97,8 +97,8 @@ export const WindowCanvas: React.FC<WindowCanvasProps> = ({
   const [mullionDirection, setMullionDirection] = useState<"v" | "h">("v");
   const [mullionOffsetInput, setMullionOffsetInput] = useState<string>("750");
 
-  const [maxCanvasW, setMaxCanvasW] = useState<number>(540);
-  const [maxCanvasH, setMaxCanvasH] = useState<number>(400);
+  const [maxCanvasW, setMaxCanvasW] = useState<number>(760);
+  const [maxCanvasH, setMaxCanvasH] = useState<number>(520);
 
   React.useEffect(() => {
     const handleResize = () => {
@@ -106,13 +106,17 @@ export const WindowCanvas: React.FC<WindowCanvasProps> = ({
         setMaxCanvasW(Math.min(330, window.innerWidth - 64));
         setMaxCanvasH(300);
       } else if (window.innerWidth < 1024) {
-        setMaxCanvasW(440);
-        setMaxCanvasH(360);
+        setMaxCanvasW(500);
+        setMaxCanvasH(380);
+      } else if (window.innerWidth < 1440) {
+        setMaxCanvasW(620);
+        setMaxCanvasH(440);
       } else {
-        setMaxCanvasW(540);
-        setMaxCanvasH(400);
+        setMaxCanvasW(760);
+        setMaxCanvasH(520);
       }
     };
+
     handleResize();
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
