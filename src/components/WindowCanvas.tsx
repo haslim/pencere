@@ -83,6 +83,15 @@ export const WindowCanvas: React.FC<WindowCanvasProps> = ({
   const [selectedCellIndex, setSelectedCellIndex] = useState<number | null>(null);
 
 
+  // Context Menu State
+  const [contextMenu, setContextMenu] = useState<{
+    x: number;
+    y: number;
+    type: "v_mullion" | "h_mullion";
+    index: number;
+    posMM: number;
+  } | null>(null);
+
   // Kayıt Ekleme Modal State
   const [isAddMullionModalOpen, setIsAddMullionModalOpen] = useState<boolean>(false);
   const [mullionDirection, setMullionDirection] = useState<"v" | "h">("v");

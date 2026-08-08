@@ -912,56 +912,7 @@ export default function SaaSWindowDashboard() {
                 </div>
               </div>
             </div>
-
           </div>
-
-          <div className="mt-auto bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-950 p-4 rounded-xl border border-slate-800 space-y-3 text-white shadow-lg">
-            <div className="flex items-center justify-between border-b border-slate-700/80 pb-2">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-300">
-                📊 Toplam Sipariş Maliyet & Satış Özeti
-              </h3>
-              <span className="text-[10px] bg-blue-500/20 text-blue-300 px-2 py-0.5 rounded font-mono font-bold">
-                {items.length} Poz Kalemi
-              </span>
-            </div>
-
-            <div className="grid grid-cols-2 gap-3 text-xs">
-              <div>
-                <span className="text-slate-400 block">Toplam Profil</span>
-                <span className="font-bold text-white text-sm">{orderSummary.totalProfileMeters} m</span>
-              </div>
-              <div>
-                <span className="text-slate-400 block">Destek Sacı</span>
-                <span className="font-bold text-white text-sm">{orderSummary.totalSteelMeters} m</span>
-              </div>
-              <div>
-                <span className="text-slate-400 block">Toplam Cam Alanı</span>
-                <span className="font-bold text-white text-sm">{orderSummary.totalGlassSqM} m²</span>
-              </div>
-              <div>
-                <span className="text-slate-400 block">Fabrika Maliyeti</span>
-                <span className="font-bold text-amber-300 text-sm">
-                  {orderSummary.costPriceTL.toLocaleString("tr-TR")} ₺
-                </span>
-              </div>
-            </div>
-
-            <div className="pt-2 border-t border-slate-700/80 flex items-center justify-between text-xs">
-              <div>
-                <span className="text-slate-400 text-[11px] block">Tahmini Net Kar</span>
-                <span className="font-extrabold text-emerald-400 text-sm font-mono">
-                  +{orderSummary.profitTL.toLocaleString("tr-TR")} ₺
-                </span>
-              </div>
-              <div className="text-right">
-                <span className="text-slate-400 text-[11px] block">Müşteri Satış Toplamı</span>
-                <span className="font-extrabold text-cyan-300 text-base font-mono">
-                  {orderSummary.totalPriceTL.toLocaleString("tr-TR")} ₺
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
 
         {/* Sağ Çizim ve Poz Seçim Paneli */}
         <div className="lg:col-span-8 flex flex-col gap-6">
@@ -1074,120 +1025,10 @@ export default function SaaSWindowDashboard() {
               onRemoveMullion={handleRemoveMullion}
               isDark={isDark}
             />
-
-
-          </div>
-
-          <div
-            className={`border rounded-2xl p-6 shadow-xl backdrop-blur-sm transition-colors ${
-              isDark
-                ? "bg-slate-900/80 border-slate-800 text-slate-100 shadow-slate-950/50"
-                : "bg-white/90 border-slate-200/80 text-slate-900 shadow-slate-200/50"
-            }`}
-          >
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <h3
-                  className={`text-sm font-bold flex items-center gap-2 ${
-                    isDark ? "text-white" : "text-slate-900"
-                  }`}
-                >
-                  📋 Aktif Poz Kesim Ölçüleri ({calcResult.cutPieces.length} Parça)
-                </h3>
-                <p
-                  className={`text-xs mt-0.5 ${isDark ? "text-slate-400" : "text-slate-500"}`}
-                >
-                  Düşümler ve 45°/90° köşe açıları otomatik hesaplanmıştır.
-                </p>
-              </div>
-              <button
-                onClick={() => setIsCutModalOpen(true)}
-                className={`text-xs font-semibold underline flex items-center gap-1 ${
-                  isDark ? "text-cyan-400 hover:text-cyan-300" : "text-blue-600 hover:text-blue-700"
-                }`}
-              >
-                Tüm Pozların 1D Optimizasyon Raporunu Göster →
-              </button>
-            </div>
-
-            <div
-              className={`overflow-x-auto rounded-xl border ${
-                isDark ? "border-slate-800" : "border-slate-200"
-              }`}
-            >
-              <table
-                className={`w-full text-left text-xs ${
-                  isDark ? "text-slate-300" : "text-slate-700"
-                }`}
-              >
-                <thead
-                  className={`font-mono border-b ${
-                    isDark
-                      ? "bg-slate-950 text-slate-400 border-slate-800"
-                      : "bg-slate-100 text-slate-600 border-slate-200"
-                  }`}
-                >
-                  <tr>
-                    <th className="px-3 py-2.5">Eleman Adı</th>
-                    <th className="px-3 py-2.5">Tip</th>
-                    <th className="px-3 py-2.5">Kesim Ölçüsü</th>
-                    <th className="px-3 py-2.5">Adet</th>
-                    <th className="px-3 py-2.5">Açı</th>
-                  </tr>
-                </thead>
-                <tbody
-                  className={`divide-y ${
-                    isDark
-                      ? "divide-slate-800 bg-slate-950/40"
-                      : "divide-slate-100 bg-white"
-                  }`}
-                >
-                  {calcResult.cutPieces.map((p) => (
-                    <tr
-                      key={p.id}
-                      className={isDark ? "hover:bg-slate-800/50 transition" : "hover:bg-slate-50/80 transition"}
-                    >
-                      <td
-                        className={`px-3 py-2 font-medium ${
-                          isDark ? "text-white" : "text-slate-900"
-                        }`}
-                      >
-                        {p.label}
-                      </td>
-                      <td className="px-3 py-2">
-                        <span
-                          className={`px-1.5 py-0.5 rounded text-[10px] font-semibold border ${
-                            isDark
-                              ? "bg-slate-800 text-slate-300 border-slate-700"
-                              : "bg-slate-100 text-slate-600 border-slate-200"
-                          }`}
-                        >
-                          {p.type}
-                        </span>
-                      </td>
-                      <td
-                        className={`px-3 py-2 font-mono font-bold ${
-                          isDark ? "text-cyan-400" : "text-blue-600"
-                        }`}
-                      >
-                        {p.length} mm
-                      </td>
-                      <td className="px-3 py-2 font-bold">{p.quantity}</td>
-                      <td
-                        className={`px-3 py-2 font-mono ${
-                          isDark ? "text-slate-400" : "text-slate-500"
-                        }`}
-                      >
-                        {p.angle}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
           </div>
         </div>
-      </main>
+      </div>
+    </main>
 
       {/* Modal Dialoglar */}
       <CustomerModal
