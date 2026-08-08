@@ -26,89 +26,36 @@ import { OrderHistoryModal } from "@/components/OrderHistoryModal";
 export type ThemeMode = "light" | "dark" | "system";
 
 export default function SaaSWindowDashboard() {
-  // Müşteri / Cari Kartlar State (En üstte olmalı - Hoisting engelleme)
-  const [customers, setCustomers] = useState<Customer[]>(() => {
-    if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("app_customers");
-      if (saved) {
-        try {
-          const parsed = JSON.parse(saved);
-          if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-        } catch (e) {}
-      }
-    }
-    return DEFAULT_CUSTOMERS;
-  });
+  const [mounted, setMounted] = useState(false);
 
-  const [activeCustomer, setActiveCustomer] = useState<Customer>(() => {
-    if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("app_active_customer");
-      if (saved) {
-        try {
-          return JSON.parse(saved);
-        } catch (e) {}
-      }
-    }
-    return DEFAULT_CUSTOMERS[0];
-  });
-
+  // Müşteri / Cari Kartlar State
+  const [customers, setCustomers] = useState<Customer[]>(DEFAULT_CUSTOMERS);
+  const [activeCustomer, setActiveCustomer] = useState<Customer>(DEFAULT_CUSTOMERS[0]);
   const [isCustomerModalOpen, setIsCustomerModalOpen] = useState(false);
 
   // Siparişteki Doğrama Pozları (Çoklu Poz Mimarisi)
-  const [items, setItems] = useState<WindowItem[]>(() => {
-    if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("app_order_items");
-      if (saved) {
-        try {
-          const parsed = JSON.parse(saved);
-          if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-        } catch (e) {}
-      }
-    }
-    return [
-      {
-        id: "pencere-1",
-        name: "Poz 1: Salon Çift Açılım Pencere",
-        width: 1500,
-        height: 1400,
-        color: PROFILE_COLORS[0], // Standart Beyaz
-        verticalMullionsCount: 1,
-        horizontalMullionsCount: 0,
-        divisions: [
-          { id: "div-1", type: "sabit", sashVerticalMullions: 0, sashHorizontalMullions: 0 },
-          { id: "div-2", type: "cift-acilim", sashVerticalMullions: 0, sashHorizontalMullions: 0 },
-        ],
-      },
-    ];
-  });
+  const [items, setItems] = useState<WindowItem[]>([
+    {
+      id: "pencere-1",
+      name: "Poz 1: Salon Çift Açılım Pencere",
+      width: 1500,
+      height: 1400,
+      color: PROFILE_COLORS[0], // Standart Beyaz
+      verticalMullionsCount: 1,
+      horizontalMullionsCount: 0,
+      divisions: [
+        { id: "div-1", type: "sabit", sashVerticalMullions: 0, sashHorizontalMullions: 0 },
+        { id: "div-2", type: "cift-acilim", sashVerticalMullions: 0, sashHorizontalMullions: 0 },
+      ],
+    },
+  ]);
 
   // Tema Modu State ("light" | "dark" | "system")
-  const [themeMode, setThemeMode] = useState<ThemeMode>(() => {
-    if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("app_theme");
-      if (saved) return saved as ThemeMode;
-    }
-    return "light";
-  });
-  const [systemIsDark, setSystemIsDark] = useState<boolean>(() => {
-    if (typeof window !== "undefined") {
-      return window.matchMedia("(prefers-color-scheme: dark)").matches;
-    }
-    return false;
-  });
+  const [themeMode, setThemeMode] = useState<ThemeMode>("light");
+  const [systemIsDark, setSystemIsDark] = useState<boolean>(false);
 
-  // Fabrika Parametre Ayarları State (Kalıcı LocalStorage)
-  const [settings, setSettings] = useState<AppSettings>(() => {
-    if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("app_factory_settings");
-      if (saved) {
-        try {
-          return JSON.parse(saved);
-        } catch (e) {}
-      }
-    }
-    return DEFAULT_SETTINGS;
-  });
+  // Fabrika Parametre Ayarları State
+  const [settings, setSettings] = useState<AppSettings>(DEFAULT_SETTINGS);
 
   // Şu An Aktif Düzenlenen Poz İndeksi
   const [activeItemIndex, setActiveItemIndex] = useState<number>(0);
@@ -123,11 +70,44 @@ export default function SaaSWindowDashboard() {
   const [isQuoteModalOpen, setIsQuoteModalOpen] = useState(false);
   const [isOrderHistoryOpen, setIsOrderHistoryOpen] = useState(false);
 
+  // İstemci tarafında LocalStorage verilerini yükle (Hydration Mismatch Önleyici)
+  useEffect(() => {
+    setMounted(true);
+    if (typeof window !== "undefined") {
+      try {
+        const savedCustomers = localStorage.getItem("app_customers");
+        if (savedCustomers) {
+          const parsed = JSON.parse(savedCustomers);
+          if (Array.isArray(parsed) && parsed.length > 0) setCustomers(parsed);
+        }
+        const savedActiveCustomer = localStorage.getItem("app_active_customer");
+        if (savedActiveCustomer) {
+          setActiveCustomer(JSON.parse(savedActiveCustomer));
+        }
+        const savedItems = localStorage.getItem("app_order_items");
+        if (savedItems) {
+          const parsed = JSON.parse(savedItems);
+          if (Array.isArray(parsed) && parsed.length > 0) setItems(parsed);
+        }
+        const savedTheme = localStorage.getItem("app_theme");
+        if (savedTheme) setThemeMode(savedTheme as ThemeMode);
+
+        const savedSettings = localStorage.getItem("app_factory_settings");
+        if (savedSettings) setSettings(JSON.parse(savedSettings));
+
+        setSystemIsDark(window.matchMedia("(prefers-color-scheme: dark)").matches);
+      } catch (e) {
+        console.error("LocalStorage load error:", e);
+      }
+    }
+  }, []);
+
   // Kayıtlı siparişten pozları geri yükleme
   const handleLoadOrder = useCallback((loadedItems: WindowItem[]) => {
     updateItems(loadedItems);
     setActiveItemIndex(0);
   }, []);
+
 
   // Sayfa yüklendiğinde ayarları ve temayı yükle
   useEffect(() => {
@@ -483,6 +463,17 @@ export default function SaaSWindowDashboard() {
     }
   };
 
+  if (!mounted) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-950 text-slate-300 font-sans text-sm">
+        <div className="flex items-center gap-3">
+          <div className="w-5 h-5 rounded-full border-2 border-cyan-500 border-t-transparent animate-spin" />
+          <span>Sistem Yapı Elemanları Yükleniyor...</span>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div
       className={`min-h-screen flex flex-col font-sans transition-colors duration-300 ${
@@ -493,6 +484,7 @@ export default function SaaSWindowDashboard() {
     >
       {/* SaaS Header / Navbar */}
       <header
+
         className={`border-b sticky top-0 z-40 px-6 py-3 flex flex-wrap items-center justify-between gap-3 backdrop-blur-md transition-colors ${
           isDark
             ? "border-slate-800 bg-slate-900/80 text-white"
