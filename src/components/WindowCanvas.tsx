@@ -487,7 +487,24 @@ export const WindowCanvas: React.FC<WindowCanvasProps> = ({
             width={canvasW}
             height={canvasH}
             className="w-full h-full"
+            onContextMenu={(e) => {
+              e.preventDefault();
+              const rect = e.currentTarget.getBoundingClientRect();
+              const clickX = e.clientX - rect.left;
+              const clickY = e.clientY - rect.top;
+              const clickedXMM = Math.round(clickX / scale);
+              const clickedYMM = Math.round(clickY / scale);
+
+              setContextMenu({
+                x: e.clientX,
+                y: e.clientY,
+                type: activeTool === "h_mullion" ? "h_mullion" : "v_mullion",
+                index: -1,
+                posMM: activeTool === "h_mullion" ? clickedYMM : clickedXMM,
+              });
+            }}
             onClick={(e) => {
+              if (contextMenu) setContextMenu(null);
               if (activeTool === "v_mullion" || activeTool === "h_mullion") {
                 const rect = e.currentTarget.getBoundingClientRect();
                 const clickX = e.clientX - rect.left;
@@ -507,6 +524,7 @@ export const WindowCanvas: React.FC<WindowCanvasProps> = ({
               }
             }}
           >
+
 
 
             {/* Dış Kasa Çerçevesi */}
@@ -546,7 +564,21 @@ export const WindowCanvas: React.FC<WindowCanvasProps> = ({
             {vPositions.map((vPosMM, vIdx) => {
               const xPosCanvas = Math.round(vPosMM * scale) - PROFILE_THICKNESS / 2;
               return (
-                <g key={`v-mullion-${vIdx}`}>
+                <g
+                  key={`v-mullion-${vIdx}`}
+                  className="cursor-pointer"
+                  onContextMenu={(e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    setContextMenu({
+                      x: e.clientX,
+                      y: e.clientY,
+                      type: "v_mullion",
+                      index: vIdx,
+                      posMM: vPosMM,
+                    });
+                  }}
+                >
                   <rect
                     x={xPosCanvas}
                     y={PROFILE_THICKNESS}
@@ -593,6 +625,7 @@ export const WindowCanvas: React.FC<WindowCanvasProps> = ({
                     </text>
                   </g>
                 </g>
+
               );
             })}
 
@@ -600,7 +633,21 @@ export const WindowCanvas: React.FC<WindowCanvasProps> = ({
             {hPositions.map((hPosMM, hIdx) => {
               const yPosCanvas = Math.round(hPosMM * scale) - PROFILE_THICKNESS / 2;
               return (
-                <g key={`h-mullion-${hIdx}`}>
+                <g
+                  key={`h-mullion-${hIdx}`}
+                  className="cursor-pointer"
+                  onContextMenu={(e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    setContextMenu({
+                      x: e.clientX,
+                      y: e.clientY,
+                      type: "h_mullion",
+                      index: hIdx,
+                      posMM: hPosMM,
+                    });
+                  }}
+                >
                   <rect
                     x={PROFILE_THICKNESS}
                     y={yPosCanvas}
@@ -647,6 +694,7 @@ export const WindowCanvas: React.FC<WindowCanvasProps> = ({
                     </text>
                   </g>
                 </g>
+
               );
             })}
 
@@ -747,9 +795,11 @@ export const WindowCanvas: React.FC<WindowCanvasProps> = ({
                 const sectionH = Math.round(secHMM * scale);
 
                 const isDoor = sashProf === "KAPI_KANADI" || divType.includes("kapi");
-                const isSliding = sashProf === "SURME_KANAD" || divType.includes("surme");
+                const isSliding = sashProf === "SURME_KANAD" || divType.includes("surme") || isSurme;
 
-                const SASH_MARGIN = divType === "sabit" ? 4 : isDoor ? 12 : 8;
+                // Kanat Profil Kalınlığı (Görsel Et Kalınlığı Payı):
+                // Sabit cam: 4px, Pencere Kanadı: 16px, Kapı & Sürme Kanadı: 26px (Çok belirgin et kalınlığı)
+                const SASH_MARGIN = divType === "sabit" ? 5 : (isDoor || isSliding) ? 26 : 16;
 
                 const sVert = div.sashVerticalMullions || 0;
                 const sHoriz = div.sashHorizontalMullions || 0;
@@ -770,19 +820,20 @@ export const WindowCanvas: React.FC<WindowCanvasProps> = ({
                     className="cursor-pointer"
                   >
 
-                    {/* Kanat Çerçevesi */}
+                    {/* Kanat Çerçevesi (Etli Profil Görünümü) */}
                     {divType !== "sabit" && (
                       <rect
-                        x={startX + 3}
-                        y={startY + 3}
-                        width={Math.max(10, sectionW - 6)}
-                        height={Math.max(10, sectionH - 6)}
+                        x={startX + 2}
+                        y={startY + 2}
+                        width={Math.max(10, sectionW - 4)}
+                        height={Math.max(10, sectionH - 4)}
                         fill={color.hex}
-                        stroke={isDoor ? "#0f172a" : isDark ? "#0f172a" : "#334155"}
-                        strokeWidth={isDoor ? "3" : "1.5"}
-                        rx="2"
+                        stroke={isDoor || isSliding ? "#0f172a" : isDark ? "#1e293b" : "#334155"}
+                        strokeWidth={(isDoor || isSliding) ? "4.5" : "3"}
+                        rx="3"
                       />
                     )}
+
 
                     {/* Isıcam Cam Alanı */}
                     <rect
@@ -1142,6 +1193,106 @@ export const WindowCanvas: React.FC<WindowCanvasProps> = ({
           </div>
         </div>
       )}
+      {/* 🖱️ SAĞ TIK ÖZEL KAYIT MENÜSÜ (CONTEXT MENU) */}
+      {contextMenu && (
+        <div
+          className="fixed z-50 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-2xl py-1.5 min-w-[200px] text-xs font-semibold"
+          style={{ left: `${contextMenu.x}px`, top: `${contextMenu.y}px` }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          {contextMenu.index >= 0 ? (
+            <>
+              <div className="px-3 py-1.5 text-[11px] font-mono text-slate-400 border-b border-slate-100 dark:border-slate-800">
+                {contextMenu.type === "v_mullion" ? "Dikey Kayıt" : "Yatay Kayıt"} #{contextMenu.index + 1} ({contextMenu.posMM}mm)
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  const val = prompt(
+                    `Kayıt Mesafesini Girin (MM):`,
+                    String(contextMenu.posMM)
+                  );
+                  if (val) {
+                    const num = Number(val);
+                    if (!isNaN(num)) {
+                      onUpdateMullionPosition?.(
+                        contextMenu.type === "v_mullion" ? "v" : "h",
+                        contextMenu.index,
+                        num
+                      );
+                    }
+                  }
+                  setContextMenu(null);
+                }}
+                className="w-full text-left px-3 py-2 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center gap-2 text-slate-700 dark:text-slate-200"
+              >
+                ✏️ Mesafeyi Düzenle ({contextMenu.posMM}mm)
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  onRemoveMullion?.(
+                    contextMenu.type === "v_mullion" ? "v" : "h",
+                    contextMenu.index
+                  );
+                  setContextMenu(null);
+                }}
+                className="w-full text-left px-3 py-2 hover:bg-rose-50 dark:hover:bg-rose-950/40 text-rose-600 flex items-center gap-2"
+              >
+                🗑️ Bu Kaydı Sil
+              </button>
+            </>
+          ) : (
+            <>
+              <div className="px-3 py-1.5 text-[11px] font-mono text-slate-400 border-b border-slate-100 dark:border-slate-800">
+                Hızlı Çizim Menüsü
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  onAddCustomMullion?.("v", contextMenu.posMM);
+                  setContextMenu(null);
+                }}
+                className="w-full text-left px-3 py-2 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center gap-2 text-blue-600 dark:text-cyan-400"
+              >
+                ╍ Soldan {contextMenu.posMM}mm'ye Dikey Kayıt Ekle
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  onAddCustomMullion?.("h", contextMenu.posMM);
+                  setContextMenu(null);
+                }}
+                className="w-full text-left px-3 py-2 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center gap-2 text-blue-600 dark:text-cyan-400"
+              >
+                ➖ Üstten {contextMenu.posMM}mm'ye Yatay Kayıt Ekle
+              </button>
+              <div className="my-1 border-t border-slate-100 dark:border-slate-800" />
+              <button
+                type="button"
+                onClick={() => {
+                  onEqualDistributeMullions?.("both");
+                  setContextMenu(null);
+                }}
+                className="w-full text-left px-3 py-2 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center gap-2 text-emerald-600"
+              >
+                ⚖️ Kayıtları Eşit Dağıt
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  onClearAllMullions?.();
+                  setContextMenu(null);
+                }}
+                className="w-full text-left px-3 py-2 hover:bg-rose-50 dark:hover:bg-rose-950/40 text-rose-600 flex items-center gap-2"
+              >
+                🧹 Doğramayı Sıfırla (İçini Boşalt)
+              </button>
+            </>
+          )}
+        </div>
+      )}
     </div>
   );
 };
+

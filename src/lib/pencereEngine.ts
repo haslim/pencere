@@ -480,7 +480,11 @@ export function calculateWindowDimensions(
         sashHorizontalMullions: 0,
       };
       const divType = div.type;
-      const sashProf = div.sashProfileType || (divType.includes("kapi") ? "KAPI_KANADI" : divType.includes("surme") ? "SURME_KANAD" : "PENCERE_KANADI");
+      // Sürme sistem seçildiyse kanat profili otomatik tek tip Sürme Kanadı (SURME_KANAD) olur
+      const sashProf = isSurme
+        ? "SURME_KANAD"
+        : div.sashProfileType || (divType.includes("kapi") ? "KAPI_KANADI" : divType.includes("surme") ? "SURME_KANAD" : "PENCERE_KANADI");
+
 
       const colLeft = c === 0 ? KASA_GENISLIGI : vPositions[c - 1] + ORTA_KAYIT_GENISLIGI / 2;
       const colRight = c === verticalMullionsCount ? width - KASA_GENISLIGI : vPositions[c] - ORTA_KAYIT_GENISLIGI / 2;
